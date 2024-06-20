@@ -1,161 +1,129 @@
-import javafx.scene.layout.*;
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-//GUI
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javafx.scene.layout.BackgroundFill;
+public class Main extends Application {
+    private int n_balls = 0;
+    private List<Particle> particles = new ArrayList<>();
+    private Canvas canvas;
+    private Label fpsLabel;
+    private long lastUpdateTime;
+    private int frameCount;
+    private double fps;
 
-//Ditey yung main gui bale
-public class Main extends Application{
-	
     public static void main(String[] args) {
-    	//call new gui
-//    	new Main().setVisible(true); //old jframe ver
-    	launch(args);
+        launch(args);
     }
 
-    private int n_balls = 0;  
-	    
-	//when launch, call here
-	public void start(Stage primaryStage) throws Exception{
-	//		JFrame root = new JFrame();
-	//		root.setSize(1530,720); //in px-> 1280+250
-	//		root.setDefaultCloseOperation(EXIT_ON_CLOSE);
-	//		root.setLocationRelativeTo(null);
-			
-			//panelContainer looks like this BallPanel(1280,720) | ControlPanel(100,720)
-			Pane paneContainer = new Pane();
-	//		panelContainer.setLayout(new BoxLayout(panelContainer, BoxLayout.X_AXIS));
-			
-			Pane paneBall = new Pane();
-	//		panelBall.setBackground(Color.red);
-	//		panelBall.setPreferredSize(new Dimension(1280, 720));
-	
-			Pane paneControl = new Pane();
-	//		panelControl.setPreferredSize(new Dimension(250, 720));
-	//		panelBall.setBackground(Color.white);
-			
-			//add to container
-	//		panelContainer.add(panelBall);
-	//		panelContainer.add(panelControl);		
-			
-			/////CONTROL PANEL
-			Label labelX = new Label("Pos X:");
-	        TextField inputX = new TextField();
-	        Label labelY = new Label("Pos Y:");
-	        TextField inputY = new TextField();
-	
-	        //set stage?
-	        GridPane gridPane = new GridPane();
-	        GridPane gpControl = new GridPane();
-	        gpControl.setAlignment(Pos.BASELINE_CENTER);
-	        
-	//        VBox vboxControl = new VBox();
-	//        TextArea txtSolution = new TextArea("");
-	
-	        Label labelDeg = new Label("Degrees:");
-	        TextField inputDeg = new TextField();
-	
-	        Label labelVel = new Label("Velocity (px/s):");
-	        TextField inputVel = new TextField();
-	
-	        //TODO: add thread on button
-	        Button btnSubmit = new Button("ADD BALL");
-	        
-	        
-	        gridPane.setAlignment(Pos.BASELINE_CENTER);
-	        gridPane.addRow(0,labelX,inputX);
-	        gridPane.addRow(1,labelY,inputY);
-	        gridPane.addRow(2,labelDeg, inputDeg);
-	        gridPane.addRow(3,labelVel, inputVel);
-	//        gridPane.addRow(3,cbPrint, btnSubmit);
-	//        gridPane.addRow(4,l3, answer);
-	//        gridPane.addRow(3,btnSubmit);
-	//        paneBall.prefWidthProperty();
-	        
-	//        GridPane gridBallContainer = new GridPane();
-	//        gridBallContainer.setPrefWidth(1280);
-	//        gridBallContainer.setPrefWidth(1280);
-	        paneBall.setMinWidth(1280);
-	        paneControl.setMaxWidth(100);
-	        TextArea tester = new TextArea("(Test) Balls rn:\n");
-	        tester.setMaxSize(250, 720);
-	        
-	        gpControl.addRow(0,gridPane);
-	        gpControl.addRow(1,btnSubmit);
-	        gpControl.addRow(2,tester);
-	        
-	//        vboxControl.getChildren().add(tester);
-	//        vboxControl.getChildren().add(gridPane);
-	//        vboxControl.getChildren().add(btnSubmit);
-	        paneControl.getChildren().add(gpControl);
-	        
-	        
-	//        vboxControl.gethChildren
-	//        vboxControl.getChildren().add(labelX);
-	//        vboxControl.getChildren().add(inputX);
-	//        vboxControl.getChildren().add(labelY);
-	//        vboxControl.getChildren().add(inputY);
-	//        vboxControl.getChildren().add(labelDeg);
-	//        vboxControl.getChildren().add(inputDeg);
-	        
-	//        panelControl.add(labelX);
-	//        panelControl.add(inputX);
-	//        panelControl.add(labelVel);
-	//        panelControl.add(inputVel);
-	//        panelControl.add(btnSubmit);
-	//        panelControl.add(vboxControl);
-	        
-	        
-	//        paneControl.getChildren().add(tester);
-	//        Paint bgColor = new Paint(valueOf('#ffffff'));
-	//        BackgroundFill bgc = new BackgroundFill(valueOf(Color.red), null, null);
-	//        paneBall.setBackground(Color.getColor("#FFFFFF"));
-	        
-	        
-	        paneContainer.getChildren().addAll(paneControl,paneBall);
-	        Scene scene = new Scene(paneContainer);
-	        
-	        primaryStage.setTitle("BOUNCING BALLS - grp i forgot num");
-	        primaryStage.setScene(scene);
-	        primaryStage.show();
-	        primaryStage.setHeight(720);
-	        primaryStage.setWidth(1530);
-	             
-	        
-	        btnSubmit.setOnAction(new EventHandler<ActionEvent>() {
-	            @Override
-	            public void handle(ActionEvent event) {
-	                //clear first
-	                String temp = "";
-	                String velocity=inputVel.getText();
-	                String x=inputX.getText();
-	                String y=inputY.getText();
-	                String degrees=inputDeg.getText();
-	
-	                //TODO: add the thread thing here
-	                
-	                tester.appendText(n_balls+" at pos ("+x+","+y+") "+velocity+"deg + "+velocity+"px/s  \n");
-	                n_balls++;
-	
-	            }});
-		}
+    public void start(Stage primaryStage) {
+        Pane paneContainer = new Pane();
+        canvas = new Canvas(1280, 720);
+        fpsLabel = new Label("FPS: 0");
+        fpsLabel.setLayoutX(1300);
+        fpsLabel.setLayoutY(10);
+
+        Pane paneControl = new Pane();
+        paneControl.setMaxWidth(250);
+
+        GridPane gridPane = new GridPane();
+        gridPane.setAlignment(Pos.BASELINE_CENTER);
+
+        Label labelX = new Label("Pos X:");
+        TextField inputX = new TextField();
+        Label labelY = new Label("Pos Y:");
+        TextField inputY = new TextField();
+        Label labelDeg = new Label("Degrees:");
+        TextField inputDeg = new TextField();
+        Label labelVel = new Label("Velocity (px/s):");
+        TextField inputVel = new TextField();
+
+        Button btnSubmit = new Button("ADD BALL");
+
+        gridPane.setAlignment(Pos.BASELINE_CENTER);
+        gridPane.addRow(0, labelX, inputX);
+        gridPane.addRow(1, labelY, inputY);
+        gridPane.addRow(2, labelDeg, inputDeg);
+        gridPane.addRow(3, labelVel, inputVel);
+
+        TextArea tester = new TextArea("(Test) Balls rn:\n");
+        tester.setMaxSize(250, 720);
+
+        GridPane gpControl = new GridPane();
+        gpControl.addRow(0, gridPane);
+        gpControl.addRow(1, btnSubmit);
+        gpControl.addRow(2, tester);
+
+        paneControl.getChildren().add(gpControl);
+        paneContainer.getChildren().addAll(paneControl, canvas, fpsLabel);
+        Scene scene = new Scene(paneContainer, 1530, 720);
+
+        primaryStage.setTitle("BOUNCING BALLS - grp i forgot num");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        btnSubmit.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    double x = Double.parseDouble(inputX.getText());
+                    double y = Double.parseDouble(inputY.getText());
+                    double velocity = Double.parseDouble(inputVel.getText());
+                    double degrees = Double.parseDouble(inputDeg.getText());
+                    addParticle(x, y, velocity, degrees);
+                    tester.appendText(n_balls + " at pos (" + x + "," + y + ") " + degrees + "deg + " + velocity + "px/s\n");
+                    n_balls++;
+                } catch (NumberFormatException e) {
+                    tester.appendText("Invalid input\n");
+                }
+            }
+        });
+
+        lastUpdateTime = System.nanoTime();
+        frameCount = 0;
+        new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                update(now);
+                draw();
+            }
+        }.start();
+    }
+
+    private void addParticle(double x, double y, double velocity, double angle) {
+        particles.add(new Particle(x, y, velocity, Math.toRadians(angle)));
+    }
+
+    private void update(long now) {
+        double deltaTime = (now - lastUpdateTime) / 1_000_000_000.0;
+        lastUpdateTime = now;
+        for (Particle particle : particles) {
+            particle.update(deltaTime, canvas.getWidth(), canvas.getHeight());
+        }
+
+        frameCount++;
+        if (frameCount % 30 == 0) { // Update FPS every 30 frames
+            fps = 30.0 / deltaTime;
+            fpsLabel.setText(String.format("FPS: %.2f", fps));
+        }
+    }
+
+    private void draw() {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        for (Particle particle : particles) {
+            particle.draw(gc);
+        }
+    }
 }

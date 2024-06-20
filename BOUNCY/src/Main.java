@@ -20,6 +20,7 @@ public class Main extends Application {
     private Canvas canvas;
     private Label fpsLabel;
     private long lastUpdateTime;
+    private long lastFPSTime;
     private int frameCount;
     private double fps;
 
@@ -91,6 +92,7 @@ public class Main extends Application {
         });
 
         lastUpdateTime = System.nanoTime();
+        lastFPSTime = System.nanoTime();
         frameCount = 0;
         new AnimationTimer() {
             @Override
@@ -113,9 +115,12 @@ public class Main extends Application {
         }
 
         frameCount++;
-        if (frameCount % 30 == 0) { // Update FPS every 30 frames
-            fps = 30.0 / deltaTime;
+        // Update FPS display every 0.5 seconds
+        if (now - lastFPSTime >= 500_000_000) {
+            fps = frameCount / ((now - lastFPSTime) / 1_000_000_000.0);
             fpsLabel.setText(String.format("FPS: %.2f", fps));
+            frameCount = 0;
+            lastFPSTime = now;
         }
     }
 

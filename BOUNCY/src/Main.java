@@ -32,12 +32,15 @@ import java.util.concurrent.Executors;
 
 //Ditey yung main gui bale
 public class Main extends Application{
-	private static Particle[] modeS(){
-		int n = 0;
+	private static Particle[] modeS(int n, float start, float end, float x, float y, float t){
 		Particle[] particles = new Particle[n];
 		//TODO:: @Alex make the inputs from gui
-		float start = 0,end =0,x = 0,y = 0,t = 0,d = (end-start)/n;
+		
+		float d = (end-start)/n;
+		
 		for(int i = 0; i<n; i++){
+			//CONSTRUCTOR:
+			//Particle(float x,float  y, float theta, float v)
 			particles[i] = new Particle(x,y,t,start+d*i);
 		}
 		return particles;
@@ -163,6 +166,7 @@ public class Main extends Application{
 			
 			TextField inputNParticles= new TextField();
 			
+			
 			//Type 1 Particles are added with a uniform distance between the given start and end points, if provided inputs
 			TextField inputStartX= new TextField();
 			inputStartX.setMaxWidth(100);
@@ -278,32 +282,48 @@ public class Main extends Application{
 	                float y1= Float.parseFloat(inputStartY.getText()); 
 	                float y2= Float.parseFloat(inputEndY.getText());
 	                
-	                double v1 = Double.parseDouble(inputStartVelocity.getText());
-	                double v2 =Double.parseDouble(inputEndVelocity.getText());
+	                float v1 = Float.parseFloat(inputStartVelocity.getText());
+	                float v2 =Float.parseFloat(inputEndVelocity.getText());
 	                
-	                double a1 = Double.parseDouble(inputStartAngle.getText());
-	                double a2 =  Double.parseDouble(inputEndAngle.getText());
+	                float a1 = Float.parseFloat(inputStartAngle.getText());
+	                float a2 =  Float.parseFloat(inputEndAngle.getText());
 	                
 	                int formType = 0; //pag 0 invalid
 	                int n_particles = Integer.parseInt(inputNParticles.getText());
 	                
 	                //TEST PARTICLE SPAWNING
 	                
-	                Particle tempParticle;
-                	tempParticle = new Particle(x1, y1, 32.f, 3.1f);
-                 	testBalls.add(tempParticle);
+//	                modeS(n_particles, float start, float end, float x, float y, float t);
+	                Particle[] pTemp = modeS(n_particles+1, x1, y1, x2, y2, a1);
 
-	                for(int i=0;i<n_particles;i++)
-	                {
-		    	        paneBall.getChildren().add(tempParticle.getBall());
-		    	        try {
-							testBalls.get(i).call();	//idk errors when I try to spawn multiple
+                 	for (int i=0; i<n_particles; i++)
+                 	{
+                 		tester.appendText(i+": ball's x is: "+pTemp[i].getBall().getCenterX()+"\n");
+    	                testBalls.add(pTemp[i]);
+    	                paneBall.getChildren().add(pTemp[i].getBall());
+    	                try {
+							testBalls.get(i).call(); //<- error when calling
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-	                 	System.out.println("Test: "+testBalls.size());
-	                }
+                 	}
+
+//	                Particle tempParticle;
+//                	tempParticle = new Particle(x1, y1, 32.f, 3.1f);
+//                 	testBalls.add(tempParticle);
+//
+//	                for(int i=0;i<n_particles;i++)
+//	                {
+//		    	        paneBall.getChildren().add(tempParticle.getBall());
+//		    	        try {
+//							testBalls.get(i).call();	//idk errors when I try to spawn multiple
+//						} catch (Exception e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//	                 	System.out.println("Test: "+testBalls.size());
+//	                }
 	                
 	                
 	                //HHIDE KO MUNA TO PARA MADALI  MAG TEST

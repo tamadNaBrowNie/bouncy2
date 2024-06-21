@@ -253,19 +253,28 @@ public class Main extends Application {
             lastFPSTime = now;
         }
     }
-    
+    class p implements Runnable{
+    	Particle ball;
+    	GraphicsContext gc;
+		p(Particle ball,GraphicsContext gc){
+			this.ball=ball;
+			this.gc =gc;
+		}
+		public void run(){ 
+			gc.setFill(particle.getBall().getFill());
+        gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
+                    particle.getBall().getCenterY() - particle.getBall().getRadius(),
+                    particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);}
+}
+	
     private void draw() {
     	CountDownLatch latch = new CountDownLatch(particles.size());
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        
         for (Particle particle : particles) {
-        	es.execute(new Runnable{
-        		public void run(){
-            gc.setFill(particle.getBall().getFill());
-            gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
-                        particle.getBall().getCenterY() - particle.getBall().getRadius(),
-                        particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);}
-        		})
+        	
+        	es.execute(new p(particle,gc));
         }
         try {
         	  latch.await();

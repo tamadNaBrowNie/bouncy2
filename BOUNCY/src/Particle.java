@@ -7,9 +7,6 @@ import javax.swing.JPanel; //gui
 
 
 
-//eto ung threaded ball
-//bale there will be many instances of this ball and calculations ng bounces
-//paramihan ng balls na masspawn (in the thousands) without sacrificing FPS
 public class Particle implements Callable {
 	
 	Thread th;
@@ -29,15 +26,9 @@ public class Particle implements Callable {
 				this.circle.setCenterX ( this.x);
 				this.circle.setCenterY ( this.y);
 	}
-//	
-//	public void draw(Graphics g)
-//	{
-//		g.setColor(Color.red);
-//		g.fillOval(x1, y1, 50, 50);
-//		
-//	}
-//}
-
+public Circle getBall(){
+	return this.circle;
+}
 private float collide(int max, double delta, double pos){
 	double future = delta+pos;
 	if (future<0||future>max)

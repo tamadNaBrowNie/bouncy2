@@ -186,7 +186,7 @@ public class Main extends Application {
         frameCount = 0;
 
         try {
-			es.invokeAll(particles);
+			//es.invokeAll(particles);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -245,6 +245,7 @@ public class Main extends Application {
         double deltaTime = (now - lastUpdateTime) / 1_000_000_000.0;
         lastUpdateTime = now;
         frameCount++;
+        particles.forEach((p)->p.call());
         // Update FPS display every 0.5 seconds
         if (now - lastFPSTime >= 500_000_000) {
             fps = frameCount / ((now - lastFPSTime) / 1_000_000_000.0);

@@ -37,6 +37,7 @@ public class Main extends Application {
         Pane paneContainer = new Pane();
         canvas = new Canvas(1280, 720);
         Pane paneBall = new Pane();
+        paneBall.setLayoutX(270);
         paneBall.setMinHeight(720);
         paneBall.setMinWidth(1280);
 
@@ -183,6 +184,14 @@ public class Main extends Application {
         lastUpdateTime = System.nanoTime();
         lastFPSTime = System.nanoTime();
         frameCount = 0;
+
+        try {
+			es.invokeAll(particles);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
         new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -193,7 +202,6 @@ public class Main extends Application {
 					e.printStackTrace();
 				}
 
-                es.invokeAll(particles);
                 draw();
             }
         }.start();

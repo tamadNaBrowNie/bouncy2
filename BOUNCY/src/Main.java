@@ -287,7 +287,11 @@ public class Main extends Application {
         
         for (Particle particle : particles) {
         	
-        	es.execute(new p(particle,gc));
+        	//es.execute(new p(particle,gc));
+            gc.setFill(particle.getBall().getFill());
+            gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
+                        particle.getBall().getCenterY() - particle.getBall().getRadius(),
+                        particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);
         }
         try {
         	  latch.await();

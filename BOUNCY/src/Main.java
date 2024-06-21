@@ -208,37 +208,43 @@ public class Main extends Application {
         }.start();
     }
 
-    private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity, double angle) {
+    private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity, double angle, Pane paneBall) {
       //  double totalDistance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
         double dx = (endX - startX) / (n - 1);
         double dy = (endY - startY) / (n - 1);
-
+        
         for (int i = 0; i < n; i++) {
             double x = startX + i * dx;
             double y = 720-(startY + i * dy);
-            particles.add(new Particle(x, y, velocity, Math.toRadians(angle)));
+            Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
+            particles.add(p);
+            paneBall.getChildren().add(p.getBall());
         }
     }
 
-    private void addParticlesByAngle(int n, double startX, double startY, double startAngle, double endAngle, double velocity) {
+    private void addParticlesByAngle(int n, double startX, double startY, double startAngle, double endAngle, double velocity, Pane paneBall) {
         double angleDiff = (endAngle - startAngle) / (n - 1);
 
         for (int i = 0; i < n; i++) {
             double angle = startAngle + i * angleDiff;
             double x = startX ;
-            double y = 720-startY ; // negative sin because Y increases downwards
-            particles.add(new Particle(x, y, velocity, Math.toRadians(angle)));
+            double y = 720-startY ; // negative sin because Y increases downwards\
+            Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
+            particles.add(p);
+            paneBall.getChildren().add(p.getBall());
         }
     }
 
-    private void addParticlesByVelocity(int n, double startX, double startY, double startVelocity, double endVelocity, double angle) {
+    private void addParticlesByVelocity(int n, double startX, double startY, double startVelocity, double endVelocity, double angle, Pane paneBall) {
         double velocityDiff = (endVelocity - startVelocity) / (n - 1);
 
         for (int i = 0; i < n; i++) {
             double velocity = startVelocity + i * velocityDiff;
             double x = startX ;
-            double y = 720-startY ; // negative sin because Y increases downwards
-            particles.add(new Particle(x, y, velocity, Math.toRadians(angle)));
+            double y = 720-startY ; // negative sin because Y increases downwards     
+            Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
+            particles.add(p);
+            paneBall.getChildren().add(p.getBall());
         }
     }
     

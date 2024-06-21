@@ -9,8 +9,8 @@ public class Ctrlr implements EventHandler<ActionEvent>() {
 
 this.circle= circle;
 this.x= 
-this.circle.getLayoutX();
-this.y= this.circle.getLayoutY ();
+circle.getLayoutX();
+this.y= circle.getLayoutY ();
 
 this.dx= dx;
 this.dy= dy;

@@ -192,6 +192,8 @@ public class Main extends Application {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+
+                es.invokeAll(particles);
                 draw();
             }
         }.start();
@@ -246,7 +248,6 @@ public class Main extends Application {
     
     private void draw() {
 
-        es.invokeAll(particles);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         for (Particle particle : particles) {

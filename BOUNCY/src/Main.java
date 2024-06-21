@@ -245,22 +245,13 @@ public class Main extends Application{
 	                
 
 	                
-                	//testing
-                	testBalls.add(new Particle(100.f, 12.f, 32.f, 3.1f));
-                	
-	                for(int i=0;i<testBalls.size();i++)
-	                {
-	                	//add to pane yung circles
-		    	        paneBall.getChildren().add(testBalls.get(0).getBall());
-	                }
-                	
 	                
 
-	                /*
-	                int x1= Integer.parseInt(inputStartX.getText());
-	                int x2 = Integer.parseInt(inputEndX.getText());
-	                int y1= Integer.parseInt(inputStartY.getText()); 
-	                int y2= Integer.parseInt(inputEndY.getText());
+	                
+	                float x1= Float.parseFloat(inputStartX.getText());
+	                float x2= Float.parseFloat(inputEndX.getText());
+	                float y1= Float.parseFloat(inputStartY.getText()); 
+	                float y2= Float.parseFloat(inputEndY.getText());
 	                
 	                double v1 = Double.parseDouble(inputStartVelocity.getText());
 	                double v2 =Double.parseDouble(inputEndVelocity.getText());
@@ -270,7 +261,25 @@ public class Main extends Application{
 	                
 	                int formType = 0; //pag 0 invalid
 	                
+	                //TEST PARTICLE SPAWNING
+	                Particle tempParticle = new Particle(x1, y1, 32.f, 3.1f);
+                	testBalls.add(tempParticle);
+                	
+                	try {
+						tempParticle.call();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+                	
+	                for(int i=0;i<testBalls.size();i++)
+	                {
+	                	//add to pane yung circles
+	                	
+		    	        paneBall.getChildren().add(testBalls.get(i).getBall());
+	                }
 
+	                /*
 	                if(inputNParticles.getText().isEmpty())
 	                		{
                 				testLabel.setText("PARTICLES COUNT MUST NOT BE LEFT BLANK");

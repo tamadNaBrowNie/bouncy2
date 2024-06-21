@@ -2,12 +2,7 @@ import java.awt.Color; //ball coloring wala lang para colorful
 import java.awt.Graphics;
 import java.util.concurrent.Callable;
 
-import javax.swing.JComponent;	//swing tho not java fx
-import javax.swing.JPanel; //gui
-
 import javafx.scene.shape.Circle;
-
-
 
 public class Particle implements Callable {
 	
@@ -25,7 +20,7 @@ public class Particle implements Callable {
 				this.x = x;
 				this.y = y;
 //				this.circle = new Circle(10.f,Color.RED);
-				this.circle = new Circle(10.f); //ayaw nya ng color nag eerror
+				this.circle = new Circle(10.f); //
 				this.circle.setCenterX ( this.x);
 				this.circle.setCenterY ( this.y);
 	}
@@ -42,7 +37,7 @@ private float collide(int max, double delta, double pos){
 	public Object call() throws Exception {
 		this.circle.setTranslateX(dx);
 		this.circle.setTranslateY(dy);
-		this.x += this.dx;
+		this.x+= this.dx;
 		this.y+= this.dy;
 		
 		this.dx *= this.collide(1280,dx,x);
@@ -51,25 +46,3 @@ private float collide(int max, double delta, double pos){
 		throw new UnsupportedOperationException("Unimplemented method 'call'");
 	}
 }
-	
-	//probs dont need these getters if dito din naman irrender mga particles
-//	public int getX(){
-//		return this.x;
-//	}
-//	public int getY(){
-//		return this.y;
-//	}
-//	public int getDeg(){
-//		return this.deg;
-//	}
-//	public int getVel(){
-//		return this.vel;
-//	}
-//	
-//	@Override
-//	public void paint(Graphics g) {
-//		super.paint(g);
-//		g.setColor(Color.black);
-//		g.fillOval(0,0,25,25); //<- TODO: 0,0 yung x and y starting pos ng bola
-//		
-	

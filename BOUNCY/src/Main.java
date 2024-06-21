@@ -1,4 +1,5 @@
 import javafx.scene.layout.*;
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -10,18 +11,21 @@ import javafx.stage.Stage;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-//GUI
+
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javafx.scene.layout.BackgroundFill;
+
+import java.lang.Math; //foor squareroot
 
 //Ditey yung main gui bale
 public class Main extends Application{
@@ -32,8 +36,13 @@ public class Main extends Application{
     	launch(args);
     }
 
-    private int n_balls = 0;  
-	    
+    private int current_n_particles = 0;   //tester
+	private int fps = 0;//frameount
+	Graphics g;
+	Particle[] p = new Particle[100000];
+	int points_x[];
+	int points_y[];
+    
 	//when launch, call here
 	public void start(Stage primaryStage) throws Exception{
 	//		JFrame root = new JFrame();
@@ -57,13 +66,107 @@ public class Main extends Application{
 	//		panelContainer.add(panelBall);
 	//		panelContainer.add(panelControl);		
 			
-			/////CONTROL PANEL
-			Label labelX = new Label("Pos X:");
-	        TextField inputX = new TextField();
-	        Label labelY = new Label("Pos Y:");
-	        TextField inputY = new TextField();
-	
-	        //set stage?
+			/*
+			Particles can be added in batches. This is in three forms:
+				 • Provide an integer n indicating the number of particles to
+				 add. Keep the velocity and angle constant. Provide a start
+				 point and end point. Particles are added with a uniform
+				 distance between the given start and end points.
+				 
+				 • Provide an integer n indicating the number of particles to
+				 add. Keep the start point and velocity constant. Provide a
+				 start Θ and end Θ. Particles are added with uniform distance
+				 between the given start Θ and end Θ.
+				 
+				 • Provide an integer n indicating the number of particles to
+				 add. Keep the start point and angle constant. Provide a start
+				 velocity and end velocity. Particles are added with a uniform
+				 difference between the given start and end velocities.
+			 */
+				 
+			//int n = num of particles to add
+			//constant velocity,angle / startpoint,velocity / startpoint,angle
+			//CHECK IF EMPTY:
+			// start point, end point -> if not empty then type=1
+			// start angle, end angle -> then type 2
+			// start velocity, end velocity -> then type 2 
+			
+			
+			
+			int type = 0;
+			
+			Label labelHeader = new Label("Please leave textfield blank if inapplicable.");
+			Label labelNParticles = new Label("Number of Particles");
+			
+			Label labelStartEndPos = new Label("Start and End Points [x,y]: ");
+			Label labelStart = new Label("Start: ");
+			Label labelEnd = new Label("End: ");
+
+			Label labelStartEndAngle = new Label("Start and End Angles: ");
+			Label labelStartEndVelocity = new Label("Start and End Velocity: ");
+			
+			Label labelDesignation = new Label("");
+			
+			TextField inputNParticles= new TextField();
+			
+			//Type 1 Particles are added with a uniform distance between the given start and end points, if provided inputs
+			TextField inputStartX= new TextField();
+			inputStartX.setMaxWidth(100);
+			TextField inputStartY= new TextField();
+			inputStartY.setMaxWidth(100);
+			TextField inputEndX= new TextField();
+			inputEndX.setMaxWidth(100);
+			TextField inputEndY= new TextField();
+			inputEndY.setMaxWidth(100);
+			
+			//Type 2 Particles are added with uniform distance between the given start Θ and end Θ.
+			TextField inputStartAngle= new TextField();
+			TextField inputEndAngle= new TextField();
+			
+			//Type 3 if velocities are provided: Particles are added with a uniform difference between the given start and end velocities.
+			TextField inputStartVelocity= new TextField();
+			TextField inputEndVelocity= new TextField();
+			
+			GridPane gpInputs = new GridPane();
+			gpInputs.setMaxWidth(250);
+			gpInputs.addRow(0, labelHeader);
+			
+			//table form para neat
+//			gpInputRow1.addRow(0, labelNParticles, inputNParticles);
+			gpInputs.addRow(1, labelNParticles);
+			gpInputs.addRow(2, inputNParticles);
+		
+			gpInputs.addRow(3, labelStartEndPos);
+			
+			GridPane gpInputStartXY = new GridPane();
+			GridPane gpInputEndXY = new GridPane();
+			GridPane gpInputVelocities = new GridPane();
+			GridPane gpInputAngles = new GridPane();
+
+			gpInputStartXY.addRow(0, labelStart, inputStartX, inputStartY);
+			gpInputs.addRow(4, gpInputStartXY);
+			gpInputEndXY.addRow(0, labelEnd, inputEndX, inputEndY);
+			gpInputs.addRow(5, gpInputEndXY);
+			
+//			gpInputs.addRow(3, gpInputRow1);
+			
+
+			gpInputAngles.addRow(0, inputStartAngle, inputEndAngle);
+			gpInputs.addRow(6, labelStartEndAngle);
+			gpInputs.addRow(7, gpInputAngles);
+
+			gpInputVelocities.addRow(0, inputStartVelocity, inputEndVelocity);
+			gpInputs.addRow(8, labelStartEndVelocity);
+			gpInputs.addRow(9, gpInputVelocities);
+			
+
+	        //TODO: add thread on button
+	        Button btnSubmit = new Button("ADD PARTICLE BATCH");
+			gpInputs.addRow(10, btnSubmit);
+			
+			
+			
+			
 	        GridPane gridPane = new GridPane();
 	        GridPane gpControl = new GridPane();
 	        gpControl.setAlignment(Pos.BASELINE_CENTER);
@@ -77,36 +180,31 @@ public class Main extends Application{
 	        Label labelVel = new Label("Velocity (px/s):");
 	        TextField inputVel = new TextField();
 	
-	        //TODO: add thread on button
-	        Button btnSubmit = new Button("ADD BALL");
-	        
-	        
-	        gridPane.setAlignment(Pos.BASELINE_CENTER);
-	        gridPane.addRow(0,labelX,inputX);
-	        gridPane.addRow(1,labelY,inputY);
-	        gridPane.addRow(2,labelDeg, inputDeg);
-	        gridPane.addRow(3,labelVel, inputVel);
-	//        gridPane.addRow(3,cbPrint, btnSubmit);
-	//        gridPane.addRow(4,l3, answer);
-	//        gridPane.addRow(3,btnSubmit);
-	//        paneBall.prefWidthProperty();
-	        
-	//        GridPane gridBallContainer = new GridPane();
-	//        gridBallContainer.setPrefWidth(1280);
-	//        gridBallContainer.setPrefWidth(1280);
 	        paneBall.setMinWidth(1280);
-	        paneControl.setMaxWidth(100);
+	        
+	        
+	        Label testLabel = new Label("TEST SHOULD APPEAR ON THE PANEL FOR THE BALL");
+            paneBall.getChildren().add(testLabel);
+	        
+	        
+	        paneControl.setMaxWidth(250);
 	        TextArea tester = new TextArea("(Test) Balls rn:\n");
 	        tester.setMaxSize(250, 720);
+//	        
+//	        gpControl.addRow(0,gridPane);
+//	        gpControl.addRow(1,btnSubmit);
+//	        gpControl.addRow(2,tester);
+//	        
 	        
-	        gpControl.addRow(0,gridPane);
-	        gpControl.addRow(1,btnSubmit);
-	        gpControl.addRow(2,tester);
+	        gpInputs.addRow(11, tester);
 	        
-	//        vboxControl.getChildren().add(tester);
-	//        vboxControl.getChildren().add(gridPane);
-	//        vboxControl.getChildren().add(btnSubmit);
-	        paneControl.getChildren().add(gpControl);
+	        GridPane gpContainer = new GridPane();
+	        gpContainer.addRow(0, gpInputs);
+	        
+	        gpContainer.addRow(0, paneBall);
+//	        paneControl.getChildren().add(gpControl);
+//	        paneControl.getChildren().addAll(gpInputs);
+
 	        
 	        
 	//        vboxControl.gethChildren
@@ -131,9 +229,12 @@ public class Main extends Application{
 	//        paneBall.setBackground(Color.getColor("#FFFFFF"));
 	        
 	        
-	        paneContainer.getChildren().addAll(paneControl,paneBall);
-	        Scene scene = new Scene(paneContainer);
+//	        paneContainer.getChildren().addAll(paneControl,paneBall);
 	        
+//	        Scene scene = new Scene(paneContainer);
+	        
+	        Scene scene = new Scene(gpContainer);
+
 	        primaryStage.setTitle("BOUNCING BALLS - grp i forgot num");
 	        primaryStage.setScene(scene);
 	        primaryStage.show();
@@ -146,16 +247,185 @@ public class Main extends Application{
 	            public void handle(ActionEvent event) {
 	                //clear first
 	                String temp = "";
-	                String velocity=inputVel.getText();
-	                String x=inputX.getText();
-	                String y=inputY.getText();
-	                String degrees=inputDeg.getText();
+	                
+	                /*
+//	                inputStartX.getText();
+//	    			inputStartY.getText();
+//	    			inputEndX.getText();
+//	    			inputEndY.getText();
+	    			
+	    			//Type 2 Particles are added with uniform distance between the given start Θ and end Θ.
+	    			inputStartAngle.getText();
+	    			inputEndAngle.getText();
+	    			
+	    			//Type 3 if velocities are provided: Particles are added with a uniform difference between the given start and end velocities.
+	    			inputStartVelocity.getText();
+	    			inputEndVelocity.getText();
+	                */
+	                
+	                //THIS IS CONSIDERING NA WALANG NEGATIVES
+	                //when clicked, see which type oof spawning particles u want by checking which ones are constant/same start and ends
+	                
+	                int x1= Integer.parseInt(inputStartX.getText());
+	                int x2 = Integer.parseInt(inputEndX.getText());
+	                int y1= Integer.parseInt(inputStartY.getText()); 
+	                int y2= Integer.parseInt(inputEndY.getText());
+	                
+	                double v1 = Double.parseDouble(inputStartVelocity.getText());
+	                double v2 =Double.parseDouble(inputEndVelocity.getText());
+	                
+	                double a1 = Double.parseDouble(inputStartAngle.getText());
+	                double a2 =  Double.parseDouble(inputEndAngle.getText());
+	                
+	                int formType = 0; //pag 0 invalid
+	                
+	                
+	                if(inputNParticles.getText().isEmpty())
+	                		{
+                				testLabel.setText("PARTICLES COUNT MUST NOT BE LEFT BLANK");
+	                		}
+	                else {
+	                	int n_particles = Integer.parseInt(inputNParticles.getText(),10);
+	                	
+		                if ((x1 == x2) && (y1==y2))
+		                {
+		                	//starting and ending points are constants, so two options: 2 or 3rd type
+		                	if (v1 == v2)
+		                	{
+		                		if (a1==a2) {
+		                			//all are constants, does not fit spawn criteria, so pass
+			                		testLabel.setText("All are CONSTANTS, does not fit spawn criteria, must have 2 constant factors ONLY.");
+		                		}
+		                		else {
 	
+			                		testLabel.setText("START/END POS, AND VELOCITIES ARE CONSTANT! (Type2)");
+			                		formType=2;
+		                		}
+		                	}
+		                	else {
+		                		testLabel.setText("START/END POS, AND ANGLES ARE CONSTANT! (Type3)");
+		                		formType=3;
+		                	}
+		                	
+		                }
+		                else {
+		                	if (v1==v2 && a1==a2)	
+		                	{
+		                		testLabel.setText("VELOCITIES AND ANGLES ARE CONSTANT! (Type1)");
+		                		formType=1;
+		                		//if type 1 pasok dito, Particles are added with a uniform distance between the given start and end points.
+		                		//TODO: calculate distances of points
+		                		tester.appendText("DISTANCE FORMULA, straight line between pt 1 and pt 2 div n_partickes\n\n");
+		                		//d=√((x2 – x1)² + (y2 – y1)²)
+		                		double distanceSqrX = (x2-x1) * (x2-x1);
+		                		double distanceSqrY = (y2-y1) * (y2-y1);
+		                		double distanceFinal = Math.sqrt(distanceSqrX+distanceSqrY);
+		                		tester.appendText("Distance: "+ distanceFinal + "\nPoints in between number of px (estimate, will not work for 1 particle): "+ Math.round(distanceFinal/n_particles)+"\n");
+		                		
+		                		
+		                		//line formula -> y=mx+b, where m is slope
+		                		// m = y2-y1 / x2-x1
+		                		//^ to find the points  in between
+		                		//
+		                		
+		                		//experimental:
+		                		int distanceOfX = Math.abs(x2-x1);
+		                		int distanceOfY = Math.abs(y2-y1);
+		                		
+		                		//what if find increments of points between x
+		                		//and find increments of n_particle points between y
+		                		//tapos yun ung plot na lol, simplistic pero tanga ako sa math so it fits it sits
+		                		
+		                		//from starting point to end point, find all points
+		                		
+		                		//how many partitions= n_particles-1 (di kasama starting point)
+		                		int inc_x=Math.round(distanceOfX/n_particles);
+		                		int inc_y=Math.round(distanceOfY/n_particles);
+		                		int smaller_x=0;
+		                		int smaller_y=0;
+		                		//find which is less
+		                		boolean goingRight = false;
+		                		boolean goingUp = false;
+		                		
+		                		if (x1<x2) {
+			                		smaller_x=x1;
+			                		goingRight=true;
+		                		}
+		                		else {
+		                			smaller_x=x2;
+		                		}
+		                		if (y1<y2) {
+		                			smaller_y=y1;
+		                			goingUp = true;
+		                		}
+		                		else {
+		                			smaller_y=y2;
+		                		}
+		                		
+		                		for(int i=0; i<n_particles; i++)
+		                		{
+		                			if (goingUp){
+		                				if (goingRight)
+		                				{
+		                					p[i] = new Particle(smaller_x,x2,smaller_y,y2,a1,a2,v1,v2,formType);
+		                				}
+		                				else {
+		                					p[i] = new Particle(x1,smaller_x,smaller_y,y2,a1,a2,v1,v2,formType);
+		                				}
+		                			}
+		                			else {
+		                				if (goingRight)
+		                				{
+		                					p[i] = new Particle(smaller_x,x2,y1,smaller_y,a1,a2,v1,v2,formType);
+		                				}
+		                				else {
+		                					p[i] = new Particle(x1,smaller_x,y1,smaller_y,a1,a2,v1,v2,formType);
+		                				}
+		                			}
+		                			
+		                			tester.appendText("["+smaller_x+",");
+		                			smaller_x+=inc_x;
+		                			
+		                			tester.appendText(""+smaller_y+"]\n");
+		                			smaller_y+=inc_y;
+				                	
+		                			
+
+		                		}
+		                		
+		                		
+			                		//draw graphics and update the movement/bounce of he particle should be at Particle.java
+//			                	}
+		                	}
+		                	else {
+		                		testLabel.setText("No constants, does not fit spawn criteria, must have 2 combination of constant start/end.");
+		                	}
+		                	
+		                	
+		                	
 	                //TODO: add the thread thing here
 	                
-	                tester.appendText(n_balls+" at pos ("+x+","+y+") "+velocity+"deg + "+velocity+"px/s  \n");
-	                n_balls++;
-	
+	                //NOTE: The addding thread now works, just need to edit the Ball.java to show the actual ball
+	                //TODO: make sure the ball shows at the right part of the screen (need margins)
+//	                Particle p = new Particle(5,123,1234,1);
+	                
+//	                
+//	                temp = "Ball "+n_balls+" "+ball.getDeg()+" "+ball.getX();
+//	                testLabel.setText(temp);
+//	                tester.appendText(n_balls+" at pos ("+startx+","+y+") "+velocity+"deg + "+velocity+"px/s  \n");
+		            current_n_particles++;
+	                }}
 	            }});
+	        
+	        
+	        
+	        //FPS THINGY
+	        //TODO
 		}
-}
+	}
+	
+	
+	
+	
+	
+	

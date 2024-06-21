@@ -23,7 +23,7 @@ public class Main extends Application {
     private Canvas canvas;
     private Label fpsLabel;
     private long lastUpdateTime=System.nanoTime();;
-    private long lastFPSTime;
+    private long lastFPSTime= System.nanoTime();;
     private int frameCount;
     private double fps;
     public static ExecutorService es;
@@ -194,7 +194,7 @@ public class Main extends Application {
         });
 
         
-        lastFPSTime = System.nanoTime();
+    
         frameCount = 0;
         
         // try {
@@ -261,30 +261,29 @@ public class Main extends Application {
             paneBall.getChildren().add(p.getBall());
         }
     }
-    class ctr extends Task<double>
     private void update(long now) {
 
         double curr = now - lastFPSTime ;
-        if(now - lastUpdateTime >16666666.6667)
-        {            
-            lastUpdateTime = now;
-    // particles.forEach((p)->p.call());
-            try {
-                es.invokeAll(particles);
-                
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (curr<500_000_000) 
+        {
+                fps = frameCount* 1_000_000_000.0 / curr ;
+                frameCount = 0;
+                lastFPSTime = now;
+                fpsLabel.setText(String.format("FPS: %.2f", fps));
+        }
+        if(now - lastUpdateTime <=16666666.6667)
+            return;
+       lastUpdateTime = now;
+       // particles.forEach((p)->p.call());
+        try {
+            es.invokeAll(particles);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
         }
       //  double deltaTime = (now - lastUpdateTime) / 1_000_000_000.0;
 
-        if (curr<500_000_000) return;
 
-        fps = frameCount* 1_000_000_000.0 / curr ;
-        frameCount = 0;
-        lastFPSTime = now;
-        fpsLabel.setText(String.format("FPS: %.2f", fps));
-            
                 
     }
         // Platform.runLater(new Runnable() {

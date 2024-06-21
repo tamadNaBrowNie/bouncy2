@@ -285,6 +285,7 @@ public class Main extends Application{
 	                double a2 =  Double.parseDouble(inputEndAngle.getText());
 	                
 	                int formType = 0; //pag 0 invalid
+	                int n_particles = Integer.parseInt(inputNParticles.getText());
 	                
 	                //TEST PARTICLE SPAWNING
 	                
@@ -292,7 +293,7 @@ public class Main extends Application{
                 	tempParticle = new Particle(x1, y1, 32.f, 3.1f);
                  	testBalls.add(tempParticle);
 
-	                for(int i=0;i<testBalls.size();i++)
+	                for(int i=0;i<n_particles;i++)
 	                {
 		    	        paneBall.getChildren().add(tempParticle.getBall());
 		    	        try {
@@ -301,13 +302,13 @@ public class Main extends Application{
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-	                 	System.out.println(testBalls.get(i).getBall().toString());
+	                 	System.out.println("Test: "+testBalls.size());
 	                }
 	                
 	                
 	                //HHIDE KO MUNA TO PARA MADALI  MAG TEST
 	                /*
-	                if(inputNParticles.getText().isEmpty())
+	                if(inputNParticles.getText().isEmpty())z
 	                		{
                 				testLabel.setText("PARTICLES COUNT MUST NOT BE LEFT BLANK");
 	                		}

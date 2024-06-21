@@ -186,7 +186,7 @@ public class Main extends Application {
         frameCount = 0;
 
         try {
-			//es.invokeAll(particles);
+			es.invokeAll(particles);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

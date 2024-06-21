@@ -246,17 +246,17 @@ public class Main extends Application {
         }
     }
     
-    private void update(long now) throws Exception {
+    private void update(long now) {
         double deltaTime = (now - lastUpdateTime) / 1_000_000_000.0;
         lastUpdateTime = now;
         frameCount++;
-        particles.forEach((p)->{
-			try {
-				p.call();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+        particles.forEach((p)->{p.call();
+			// try {
+			// 	p.call();
+			// } catch (Exception e) {
+			// 	// TODO Auto-generated catch block
+			// 	e.printStackTrace();
+			// }
 		});
         // Update FPS display every 0.5 seconds
         if (now - lastFPSTime >= 500_000_000) {
@@ -281,7 +281,7 @@ public class Main extends Application {
 }
 	
     private void draw() {
-    	CountDownLatch latch = new CountDownLatch(particles.size());
+//    	CountDownLatch latch = new CountDownLatch(particles.size());
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         
@@ -293,18 +293,11 @@ public class Main extends Application {
                         particle.getBall().getCenterY() - particle.getBall().getRadius(),
                         particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);
         }
-        try {
-        	  latch.await();
-        	} catch (InterruptedException E) {
-        	   // handle
-        	}
+//        try {
+//        	  latch.await();
+//        	} catch (InterruptedException E) {
+//        	   // handle
+//        	}
     }
-//
-//    private void draw() {
-//        GraphicsContext gc = canvas.getGraphicsContext2D();
-//        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-//        for (Particle particle : particles) {
-//         //   particle.draw(gc);
-//        }
-//    }
+
 }

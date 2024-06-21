@@ -255,15 +255,23 @@ public class Main extends Application {
     }
     
     private void draw() {
-
+    	CountDownLatch latch = new CountDownLatch(particles.size());
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         for (Particle particle : particles) {
+        	es.execute(new Runnable{
+        		public void run(){
             gc.setFill(particle.getBall().getFill());
             gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
                         particle.getBall().getCenterY() - particle.getBall().getRadius(),
-                        particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);
+                        particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);}
+        		})
         }
+        try {
+        	  latch.await();
+        	} catch (InterruptedException E) {
+        	   // handle
+        	}
     }
 //
 //    private void draw() {

@@ -24,8 +24,8 @@ public class Main extends Application {
     private Label fpsLabel;
     private long lastUpdateTime=System.nanoTime();;
     private long lastFPSTime= System.nanoTime();;
-    private int frameCount;
-    private double fps;
+    private int frameCount = 0;
+    private double fps = 0;
     public static ExecutorService es;
     
     public static void main(String[] args) {
@@ -195,7 +195,6 @@ public class Main extends Application {
 
         
     
-        frameCount = 0;
         
         // try {
 		// 	//es.invokeAll(particles);

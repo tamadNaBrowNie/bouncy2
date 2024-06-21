@@ -29,7 +29,38 @@ import java.lang.Math; //foor squareroot
 
 //Ditey yung main gui bale
 public class Main extends Application{
-	
+	private static Particle[] modeS(){
+		int n = 0;
+		Particle[] particles = new Particle[n];
+		//TODO:: @Alex make the inputs from gui
+		float start = 0,end =0,x = 0,y = 0,t = 0,d = (end-start)/n;
+		for(int i = 0; i<n; i++){
+			particles[i] = new Particle(x,y,t,start+d*i);
+		}
+		return particles;
+
+	}
+	public static Particle[] modeT(){
+		int n = 0;
+		Particle[] particles = new Particle[n];
+		float start = 0,end =0,x = 0,y = 0,v = 0,d= (end-start)/n;
+		for(int i = 0; i<n; i++){
+			particles[i] = new Particle(x,y,start+d*i,v);
+		}
+		return particles;
+		
+	}
+	public static Particle[] modeP(){
+		int n = 0;
+		Particle[] particles = new Particle[n];
+		float e_x = 0,e_y =0,x = 0,y = 0,v = 0,t=0, dx = (e_x-x)/n, dy = (e_y-y)/n;
+		particles[0] = new Particle(x, y, t, v);
+		for(int i = 1; i<n; i++){
+			particles[i] = new Particle(x+=dx,y+=dy,t,v);
+		}
+		return particles;
+		
+	}
     public static void main(String[] args) {
     	//call new gui
 //    	new Main().setVisible(true); //old jframe ver
@@ -93,6 +124,7 @@ public class Main extends Application{
 			
 			
 			
+
 			int type = 0;
 			
 			Label labelHeader = new Label("Please leave textfield blank if inapplicable.");
@@ -202,6 +234,7 @@ public class Main extends Application{
 	        gpContainer.addRow(0, gpInputs);
 	        
 	        gpContainer.addRow(0, paneBall);
+			gpContainer.add
 //	        paneControl.getChildren().add(gpControl);
 //	        paneControl.getChildren().addAll(gpInputs);
 
@@ -279,7 +312,7 @@ public class Main extends Application{
 	                
 	                int formType = 0; //pag 0 invalid
 	                
-	                
+	                Particle test = new Particle(100,12,10,1);
 	                if(inputNParticles.getText().isEmpty())
 	                		{
                 				testLabel.setText("PARTICLES COUNT MUST NOT BE LEFT BLANK");

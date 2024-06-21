@@ -5,16 +5,28 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.awt.Color;
+
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Panel;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import javafx.scene.*;
+import javafx.scene.paint.*;
+import javafx.scene.canvas.*;
+//import javafx.scene.paint.Color;
+
+import javafx.scene.shape.Circle;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -26,6 +38,8 @@ import javax.swing.JTextField;
 import javafx.scene.layout.BackgroundFill;
 
 import java.lang.Math; //foor squareroot
+import java.util.ArrayList;
+import java.util.List;
 
 //Ditey yung main gui bale
 public class Main extends Application{
@@ -40,11 +54,16 @@ public class Main extends Application{
 	private int fps = 0;//frameount
 	Graphics g;
 	Particle[] p = new Particle[100000];
+    private List<Particle> particles = new ArrayList<>();
+
+    ArrayList<Circle> balls;
+    
 	int points_x[];
 	int points_y[];
     
 	//when launch, call here
 	public void start(Stage primaryStage) throws Exception{
+		balls= new ArrayList<Circle>();
 	//		JFrame root = new JFrame();
 	//		root.setSize(1530,720); //in px-> 1280+250
 	//		root.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -159,13 +178,8 @@ public class Main extends Application{
 			gpInputs.addRow(8, labelStartEndVelocity);
 			gpInputs.addRow(9, gpInputVelocities);
 			
-
-	        //TODO: add thread on button
 	        Button btnSubmit = new Button("ADD PARTICLE BATCH");
 			gpInputs.addRow(10, btnSubmit);
-			
-			
-			
 			
 	        GridPane gridPane = new GridPane();
 	        GridPane gpControl = new GridPane();
@@ -181,7 +195,68 @@ public class Main extends Application{
 	        TextField inputVel = new TextField();
 	
 	        paneBall.setMinWidth(1280);
+//	        Background bgVal = new Background();
+//	        BackgroundFill bgBal = new BackgroundFill(Color.RED, null, null);
+//	        Pane  pane  = new Pane();
+
+//	        BackgroundFill backgroundFill =
+//	                new BackgroundFill(
+//	                        new Paint(true, Color.valueOf("#FFFFFF")),
+//	                        new CornerRadii(10),
+//	                        new Insets(0,0,0,0)
+//	                        );
+
+//	        Background background =
+//	                new Background(backgroundFill);
+//
+//	        pane.setBackground(background);
 	        
+	        
+	        Pane canvasTest = new Pane();
+//	        Panel panel = new Panel();
+//	        panel.setForeground(Color.GREEN);
+	        
+	        
+	        //ADDING A BALL IS LIKE THIS
+//	        canvasTest.setBackground(new Background(BackgroundFill(Paint(Color.DARKRED), CornerRadii radii, Insets insets)));
+	        //this ball now can be seen
+//	        
+	        Circle ball = new Circle(10); //makes it black withoutsacrificing awt.Circle
+//	        ball.setStyle(value);
+//	    	Circle ball = new Circle(10, Color.RED);
+	        ball.relocate(1200, 500);
+	        
+	        canvasTest.getChildren().addAll(balls);
+	        
+	        
+	        
+//	        canvasTest.add(panel);
+
+
+            paneBall.getChildren().add(canvasTest);
+            
+            
+//	        stage.setTitle("Moving Ball");
+//	        stage.setScene(scene);
+//	        stage.show();
+	        
+	        
+	        
+	        
+//	        Bounds bounds = canvas.getBoundsInLocal();
+//	        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(3), 
+//	                new KeyValue(ball.layoutXProperty(), bounds.getMaxX()-ball.getRadius())));
+//	        timeline.setCycleCount(2);
+//	        timeline.play();
+	        
+	        
+//	        
+//	        paneBall.setBackground(new Background(
+//	        		new BackgroundFill(
+//	                        new Paint(true, Color.valueOf("#FFFFFF")),
+//	                        new CornerRadii(10),
+//	                        new Insets(0,0,0,0)
+//	                        );
 	        
 	        Label testLabel = new Label("TEST SHOULD APPEAR ON THE PANEL FOR THE BALL");
             paneBall.getChildren().add(testLabel);
@@ -201,37 +276,22 @@ public class Main extends Application{
 	        GridPane gpContainer = new GridPane();
 	        gpContainer.addRow(0, gpInputs);
 	        
+	        
+	        //DIDNT WORK
+	        Canvas canvas = new Canvas(1280, 720);
+	        GraphicsContext gc = canvas.getGraphicsContext2D();
+//	        canvas.setStyle("-fx-background-color: black;");
+//	        canvas.setBackground(Color.red);
+//	        gc.setFill(PaintContext p); <---- causes issues
+	        
+	        //TEST IF MAG SHOW USING IBA
+//	        Panel panel = new Panel();
+//	        panel.setBackground(Color.green);
+//	        paneBall.getChildren().add(canvas);
+//	        paneBall.getChildren().addanel);/
 	        gpContainer.addRow(0, paneBall);
-//	        paneControl.getChildren().add(gpControl);
-//	        paneControl.getChildren().addAll(gpInputs);
-
 	        
 	        
-	//        vboxControl.gethChildren
-	//        vboxControl.getChildren().add(labelX);
-	//        vboxControl.getChildren().add(inputX);
-	//        vboxControl.getChildren().add(labelY);
-	//        vboxControl.getChildren().add(inputY);
-	//        vboxControl.getChildren().add(labelDeg);
-	//        vboxControl.getChildren().add(inputDeg);
-	        
-	//        panelControl.add(labelX);
-	//        panelControl.add(inputX);
-	//        panelControl.add(labelVel);
-	//        panelControl.add(inputVel);
-	//        panelControl.add(btnSubmit);
-	//        panelControl.add(vboxControl);
-	        
-	        
-	//        paneControl.getChildren().add(tester);
-	//        Paint bgColor = new Paint(valueOf('#ffffff'));
-	//        BackgroundFill bgc = new BackgroundFill(valueOf(Color.red), null, null);
-	//        paneBall.setBackground(Color.getColor("#FFFFFF"));
-	        
-	        
-//	        paneContainer.getChildren().addAll(paneControl,paneBall);
-	        
-//	        Scene scene = new Scene(paneContainer);
 	        
 	        Scene scene = new Scene(gpContainer);
 
@@ -239,7 +299,7 @@ public class Main extends Application{
 	        primaryStage.setScene(scene);
 	        primaryStage.show();
 	        primaryStage.setHeight(720);
-	        primaryStage.setWidth(1530);
+//	        primaryStage.setWidth(1530);
 	             
 	        
 	        btnSubmit.setOnAction(new EventHandler<ActionEvent>() {
@@ -266,6 +326,8 @@ public class Main extends Application{
 	                //THIS IS CONSIDERING NA WALANG NEGATIVES
 	                //when clicked, see which type oof spawning particles u want by checking which ones are constant/same start and ends
 	                
+	                
+	                //TODO: make it so that it also gets if negative number dito
 	                int x1= Integer.parseInt(inputStartX.getText());
 	                int x2 = Integer.parseInt(inputEndX.getText());
 	                int y1= Integer.parseInt(inputStartY.getText()); 
@@ -367,19 +429,19 @@ public class Main extends Application{
 		                			if (goingUp){
 		                				if (goingRight)
 		                				{
-		                					p[i] = new Particle(smaller_x,x2,smaller_y,y2,a1,a2,v1,v2,formType);
+		                					p[i] = new Particle(smaller_x,x2,smaller_y,y2,a1,a2,v1,v2,formType,gc);
 		                				}
 		                				else {
-		                					p[i] = new Particle(x1,smaller_x,smaller_y,y2,a1,a2,v1,v2,formType);
+		                					p[i] = new Particle(x1,smaller_x,smaller_y,y2,a1,a2,v1,v2,formType,gc);
 		                				}
 		                			}
 		                			else {
 		                				if (goingRight)
 		                				{
-		                					p[i] = new Particle(smaller_x,x2,y1,smaller_y,a1,a2,v1,v2,formType);
+		                					p[i] = new Particle(smaller_x,x2,y1,smaller_y,a1,a2,v1,v2,formType,gc);
 		                				}
 		                				else {
-		                					p[i] = new Particle(x1,smaller_x,y1,smaller_y,a1,a2,v1,v2,formType);
+		                					p[i] = new Particle(x1,smaller_x,y1,smaller_y,a1,a2,v1,v2,formType,gc);
 		                				}
 		                			}
 		                			
@@ -389,8 +451,6 @@ public class Main extends Application{
 		                			tester.appendText(""+smaller_y+"]\n");
 		                			smaller_y+=inc_y;
 				                	
-		                			
-
 		                		}
 		                		
 		                		
@@ -402,18 +462,7 @@ public class Main extends Application{
 		                	}
 		                	
 		                	
-		                	
-	                //TODO: add the thread thing here
-	                
-	                //NOTE: The addding thread now works, just need to edit the Ball.java to show the actual ball
-	                //TODO: make sure the ball shows at the right part of the screen (need margins)
-//	                Particle p = new Particle(5,123,1234,1);
-	                
-//	                
-//	                temp = "Ball "+n_balls+" "+ball.getDeg()+" "+ball.getX();
-//	                testLabel.setText(temp);
-//	                tester.appendText(n_balls+" at pos ("+startx+","+y+") "+velocity+"deg + "+velocity+"px/s  \n");
-		            current_n_particles++;
+		               current_n_particles++;
 	                }}
 	            }});
 	        
@@ -421,8 +470,32 @@ public class Main extends Application{
 	        
 	        //FPS THINGY
 	        //TODO
+	        
 		}
-	}
+//
+//
+//    private void update(long now) {
+//        double deltaTime = (now - lastUpdateTime) / 1_000_000_000.0;
+//        lastUpdateTime = now;
+//        for (Particle particle : particles) {
+//            particle.update(deltaTime, canvas.getWidth(), canvas.getHeight());
+//        }
+//
+//        frameCount++;
+//        if (frameCount % 30 == 0) { // Update FPS every 30 frames
+//            fps = 30.0 / deltaTime;
+//            fpsLabel.setText(String.format("FPS: %.2f", fps));
+//        }
+//    }
+//
+//    private void draw() {
+//        GraphicsContext gc = canvas.getGraphicsContext2D();
+//        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+//        for (Particle particle : particles) {
+//            particle.draw(gc);
+//        }
+//    }
+}
 	
 	
 	

@@ -6,13 +6,14 @@ public class Ctrlr implements EventHandler<ActionEvent>() {
     double dx,dy,x,y;
     Circle circle;
     Ctrlr(double dx,double dy,Circle circle) {
+
+this.circle= circle;
 this.x= 
 this.circle.getLayoutX();
 this.y= this.circle.getLayoutY ();
 
 this.dx= dx;
 this.dy= dy;
-this.circle= circle;
     }
 @Override
     public void handle(ActionEvent t) {		

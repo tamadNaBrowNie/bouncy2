@@ -140,7 +140,7 @@ public class Main extends Application {
                     paneBall.getChildren().add(particles.get(i).getBall());
                 }
                 //clear particles for reuse
-                particles.clear();
+
                 
             } catch (NumberFormatException e) {
                 tester.appendText("Invalid input\n");

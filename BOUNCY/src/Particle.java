@@ -1,8 +1,6 @@
 import java.awt.Graphics;
 import java.util.concurrent.Callable;
 
-import javax.swing.plaf.synth.Region;
-
 import javafx.scene.shape.Circle;
 import javafx.scene.transform.Translate;
 import javafx.scene.paint.Color;
@@ -18,12 +16,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-public class Particle extends Region implements Callable<double[]> {
+public class Particle  implements Callable<double[]> {
 	
 	Graphics g;
 	Circle circle;
 	private double x,y, dx,dy;
 	private Timeline tl;
+
 	Particle(double x,double  y,
 			double theta, double v){ 
 		double ppu = v/60;
@@ -35,23 +34,8 @@ public class Particle extends Region implements Callable<double[]> {
 		this.circle.setCenterY ( this.y);
 		this.circle.setLayoutX(this.x);
 		this.circle.setLayoutY ( this.y);
-		this.tl = new Timeline(new KeyFrame(Duration.millis(17),
-				new EventHandler<ActionEvent>() {
-			double dx = ppu*Math.cos(theta); //Step on x or velocity
-        	double dy = -ppu* Math.sin(theta);
-	@Override
-            public void handle(ActionEvent t) {		
-if (this.x<=0||1280<=this.x){
-	this.dx *=-1;
-}
-if (this.y<=0||this.y>=720){
-	this.dy *=-1;
-}
-this.x += dx;
-this.y+= dy;
-this.circle.setLayoutX(this.x);
-this.circle.setLayoutY ( this.y);
-		});}
+		this.tl = new Timeline(new KeyFrame(Duration.millis(17)),Ctrlr(x,y, ppu*Math.cos(theta),-ppu* Math.sin(theta),this.circle));
+			}
 	}
 
 	public Circle getBall(){

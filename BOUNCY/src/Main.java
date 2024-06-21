@@ -183,8 +183,8 @@ public class Main extends Application {
         frameCount = 0;
         
         try {
-			es.invokeAll(particles);
-            //particles.forEach(p->p.call());
+			//es.invokeAll(particles);
+            particles.forEach(p->p.call());
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

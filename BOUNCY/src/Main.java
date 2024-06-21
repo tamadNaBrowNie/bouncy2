@@ -22,7 +22,7 @@ public class Main extends Application {
     private List<Particle> particles = new ArrayList<>();
     private Canvas canvas;
     private Label fpsLabel;
-    private long lastUpdateTime;
+    private long lastUpdateTime=System.nanoTime();;
     private long lastFPSTime;
     private int frameCount;
     private double fps;
@@ -80,10 +80,16 @@ public class Main extends Application {
         Button btnAddByVelocity = new Button("Add by Velocity");
 
 
+        TextArea tester = new TextArea("(Test) Balls rn:\n");
+        tester.setMaxSize(250, 720);
+
+        GridPane gpControl = new GridPane();
         Separator separator1 = new Separator();
-        Separator separator2 = new Separator();
-        Separator separator3 = new Separator();
-        gridPane.setAlignment(Pos.BASELINE_CENTER);
+        // Separator separator2 = new Separator();
+        // Separator separator3 = new Separator();
+        
+        //Platform.runLater(new Runnable() {public void run(){
+            gridPane.setAlignment(Pos.BASELINE_CENTER);
         gridPane.addRow(0, labelStartX, inputStartX);
         gridPane.addRow(1, labelEndX, inputEndX);
         gridPane.addRow(2, labelStartY, inputStartY);
@@ -91,24 +97,21 @@ public class Main extends Application {
         gridPane.addRow(4, separator1);
         gridPane.addRow(5, labelStartAngle, inputStartAngle);
         gridPane.addRow(6, labelEndAngle, inputEndAngle);
-        gridPane.addRow(7, separator2);
+        gridPane.addRow(7, separator1);
         gridPane.addRow(8, labelStartVelocity, inputStartVelocity);
         gridPane.addRow(9, labelEndVelocity, inputEndVelocity);
-        gridPane.addRow(10, separator3);
+        gridPane.addRow(10, separator1);
         gridPane.addRow(11, labelVelocity, inputVelocity);
         gridPane.addRow(12, labelAngle, inputAngle);
         gridPane.addRow(13, labelCount, inputCount);
 
-        TextArea tester = new TextArea("(Test) Balls rn:\n");
-        tester.setMaxSize(250, 720);
-
-        GridPane gpControl = new GridPane();
         gpControl.addRow(0, gridPane);
         gpControl.addRow(1, btnAddByDistance);
         gpControl.addRow(2, btnAddByAngle);
         gpControl.addRow(3, btnAddByVelocity);
         gpControl.addRow(4, tester);
-
+    // }}
+// );
         paneControl.getChildren().add(gpControl);
 //        paneContainer.getChildren().addAll(paneControl, canvas, fpsLabel);
 //        paneContainer.getChildren().addAll(paneControl, paneBall, fpsLabel);
@@ -179,31 +182,33 @@ public class Main extends Application {
             }
         });
 
-        lastUpdateTime = System.nanoTime();
+        
         lastFPSTime = System.nanoTime();
         frameCount = 0;
         
-        try {
-			//es.invokeAll(particles);
-            particles.forEach(p->p.call());
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        // try {
+		// 	//es.invokeAll(particles);
+        //     particles.forEach(p->p.call());
+		// } catch (InterruptedException e) {
+		// 	// TODO Auto-generated catch block
+		// 	e.printStackTrace();
+		// }
         
         new AnimationTimer() {
             @Override
             public void handle(long now) {
+                
                 try {
-					update(now);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+                    update(now);
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 
                 draw();
-            }
-        }.start();
+      
+            }.start();
+       
     }
 
     private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity, double angle, Pane paneBall) {
@@ -245,35 +250,46 @@ public class Main extends Application {
             paneBall.getChildren().add(p.getBall());
         }
     }
-    
+    class ctr extends Task<double>
     private void update(long now) {
-        double deltaTime = (now - lastUpdateTime) / 1_000_000_000.0;
-        lastUpdateTime = now;
-        frameCount++;
-        particles.forEach((p)->{p.call();
-			// try {
-			// 	p.call();
-			// } catch (Exception e) {
-			// 	// TODO Auto-generated catch block
-			// 	e.printStackTrace();
-			// }
-		});
-        // Update FPS display every 0.5 seconds
-        if (now - lastFPSTime >= 500_000_000) {
-            fps = frameCount / ((now - lastFPSTime) / 1_000_000_000.0);
-            fpsLabel.setText(String.format("FPS: %.2f", fps));
-            frameCount = 0;
-            lastFPSTime = now;
+
+        double curr = now - lastFPSTime ;
+        if(now - lastUpdateTime >16666666.6667)
+        {            
+            lastUpdateTime = now;
+    // particles.forEach((p)->p.call());
+            try {
+                es.invokeAll(particles);
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+      //  double deltaTime = (now - lastUpdateTime) / 1_000_000_000.0;
+
+        if (curr<500_000_000) return;
+
+        fps = frameCount* 1_000_000_000.0 / curr ;
+        frameCount = 0;
+        lastFPSTime = now;
+        fpsLabel.setText(String.format("FPS: %.2f", fps));
+            
+                
     }
-    class p implements Runnable{
+        // Platform.runLater(new Runnable() {
+        //     public void run() {
+        //         fpsLabel.setText(String.format("FPS: %.2f", fps));}
+        //     });
+			
+    }
+    class p extends Task<Void>{
     	Particle particle;
     	GraphicsContext gc;
 		p(Particle ball,GraphicsContext gc){
 			this.particle=ball;
 			this.gc =gc;
 		}
-		public void run(){ 
+		protected void call() throws Exception{ 
 			gc.setFill(particle.getBall().getFill());
         gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
                     particle.getBall().getCenterY() - particle.getBall().getRadius(),
@@ -286,12 +302,12 @@ public class Main extends Application {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         
         for (Particle particle : particles) {
-        	
-        	//es.execute(new p(particle,gc));
-            gc.setFill(particle.getBall().getFill());
-            gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
-                        particle.getBall().getCenterY() - particle.getBall().getRadius(),
-                        particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);
+        	//bad idea
+        	es.execute(new p(particle,gc));
+            // gc.setFill(particle.getBall().getFill());
+            // gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
+            //             particle.getBall().getCenterY() - particle.getBall().getRadius(),
+            //             particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);
         }
 //        try {
 //        	  latch.await();

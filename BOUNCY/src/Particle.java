@@ -1,13 +1,12 @@
-import java.awt.Color; //ball coloring wala lang para colorful
+//ball coloring wala lang para colorful
 import java.awt.Graphics;
 import java.util.concurrent.Callable;
+import javafx.scene.shape.Circle;
+import javafx.scene.transform.Translate;
 
-import javax.swing.JComponent;	//swing tho not java fx
-import javax.swing.JPanel; //gui
+import javafx.scene.paint.Color;
 
-
-
-public class Particle implements Callable {
+public class Particle implements Callable<double[]> {
 	
 	Thread th;
 	Graphics g;
@@ -21,7 +20,7 @@ public class Particle implements Callable {
 		this.tra = new Translate (ppu*Math.cos(rad),-ppu* Math.sin(rad));
 				this.x = x;
 				this.y = y;
-				this.circle = new Circle(10.f,Color.RED);
+				this.circle = new Circle(10,Color.RED);
 				this.circle.setCenterX ( this.x);
 				this.circle.setCenterY ( this.y);
 	}
@@ -29,7 +28,7 @@ public Circle getBall(){
 	return this.circle;
 }
 	@Override
-	public Object call() throws Exception {
+	public double[] call() throws Exception {
 		if (this.x<=0||1280<=this.x){
 			this.tra.setX(-(this.tra.getX()));
 		}
@@ -41,9 +40,10 @@ public Circle getBall(){
 		this.y+= dy;
 		
 		this.circle.getTransforms().addAll(this.tra);
-
+		double [] res = {this.x,this.y};
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'call'");
+
+		return res;
 	}
 }
 	

@@ -6,5 +6,13 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="C:/Users/shawn/Documents/ParSim/bouncy/BOUNCY/lib/javafx.base.jar"/>
+	<classpathentry kind="lib" path="C:/Users/shawn/Documents/ParSim/bouncy/BOUNCY/lib/javafx.controls.jar"/>
+	<classpathentry kind="lib" path="C:/Users/shawn/Documents/ParSim/bouncy/BOUNCY/lib/javafx.fxml.jar"/>
+	<classpathentry kind="lib" path="C:/Users/shawn/Documents/ParSim/bouncy/BOUNCY/lib/javafx.graphics.jar"/>
+	<classpathentry kind="lib" path="C:/Users/shawn/Documents/ParSim/bouncy/BOUNCY/lib/javafx.media.jar"/>
+	<classpathentry kind="lib" path="C:/Users/shawn/Documents/ParSim/bouncy/BOUNCY/lib/javafx.swing.jar"/>
+	<classpathentry kind="lib" path="C:/Users/shawn/Documents/ParSim/bouncy/BOUNCY/lib/javafx.web.jar"/>
+	<classpathentry kind="lib" path="C:/Users/shawn/Documents/ParSim/bouncy/BOUNCY/lib/javafx-swt.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

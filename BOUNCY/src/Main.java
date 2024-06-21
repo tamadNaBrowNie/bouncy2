@@ -234,7 +234,7 @@ public class Main extends Application{
 	        gpContainer.addRow(0, gpInputs);
 	        
 	        gpContainer.addRow(0, paneBall);
-			gpContainer.add
+			//gpContainer.add
 //	        paneControl.getChildren().add(gpControl);
 //	        paneControl.getChildren().addAll(gpInputs);
 
@@ -400,19 +400,19 @@ public class Main extends Application{
 		                			if (goingUp){
 		                				if (goingRight)
 		                				{
-		                					p[i] = new Particle(smaller_x,x2,smaller_y,y2,a1,a2,v1,v2,formType);
+		                					//p[i] = new Particle(smaller_x,x2,smaller_y,y2,a1,a2,v1,v2,formType);
 		                				}
 		                				else {
-		                					p[i] = new Particle(x1,smaller_x,smaller_y,y2,a1,a2,v1,v2,formType);
+		                					//p[i] = new Particle(x1,smaller_x,smaller_y,y2,a1,a2,v1,v2,formType);
 		                				}
 		                			}
 		                			else {
 		                				if (goingRight)
 		                				{
-		                					p[i] = new Particle(smaller_x,x2,y1,smaller_y,a1,a2,v1,v2,formType);
+		                					//p[i] = new Particle(smaller_x,x2,y1,smaller_y,a1,a2,v1,v2,formType);
 		                				}
 		                				else {
-		                					p[i] = new Particle(x1,smaller_x,y1,smaller_y,a1,a2,v1,v2,formType);
+		                					//p[i] = new Particle(x1,smaller_x,y1,smaller_y,a1,a2,v1,v2,formType);
 		                				}
 		                			}
 		                			

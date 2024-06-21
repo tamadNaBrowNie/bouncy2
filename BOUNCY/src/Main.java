@@ -218,9 +218,10 @@ public class Main extends Application {
 
                 draw();
       
-            }.start();
+            }
        
-    }
+    }.start();
+}
 
     private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity, double angle, Pane paneBall) {
       //  double totalDistance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
@@ -271,7 +272,7 @@ public class Main extends Application {
                 lastFPSTime = now;
                 fpsLabel.setText(String.format("FPS: %.2f", fps));
         }
-        if(now - lastUpdateTime <=16666666.6667)
+        if(now - lastUpdateTime <=16666666.666666667)
             return;
        lastUpdateTime = now;
        // particles.forEach((p)->p.call());
@@ -291,7 +292,7 @@ public class Main extends Application {
         //         fpsLabel.setText(String.format("FPS: %.2f", fps));}
         //     });
 			
-    }
+    
     class p extends Task<Void>{
     	Particle particle;
     	GraphicsContext gc;
@@ -325,5 +326,6 @@ public class Main extends Application {
 //        	   // handle
 //        	}
     }
+
 
 }

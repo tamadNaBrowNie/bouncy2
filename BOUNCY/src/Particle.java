@@ -17,6 +17,7 @@ import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 public class Particle  implements Callable<double[]> {
+
 	
 	Graphics g;
 	Circle circle;
@@ -34,8 +35,10 @@ public class Particle  implements Callable<double[]> {
 		this.circle.setCenterY ( this.y);
 		this.circle.setLayoutX(this.x);
 		this.circle.setLayoutY ( this.y);
+
 		this.tl = new Timeline(new KeyFrame(Duration.millis(17)),Ctrlr(x,y, ppu*Math.cos(theta),-ppu* Math.sin(theta),this.circle));
 			}
+
 	}
 
 	public Circle getBall(){

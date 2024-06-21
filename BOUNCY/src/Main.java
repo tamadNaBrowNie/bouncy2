@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,10 +37,10 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         Pane paneContainer = new Pane();
         canvas = new Canvas(1280, 720);
-        Pane paneBall = new Pane();
-        paneBall.setLayoutX(270);
-        paneBall.setMinHeight(720);
-        paneBall.setMinWidth(1280);
+        Pane ballPane = new Pane();
+        ballPane.setLayoutX(270);
+        ballPane.setMinHeight(720);
+        ballPane.setMinWidth(1280);
 
         fpsLabel = new Label("FPS: 0");
         fpsLabel.setLayoutX(50);
@@ -112,7 +113,7 @@ public class Main extends Application {
 //        paneContainer.getChildren().addAll(paneControl, canvas, fpsLabel);
 //        paneContainer.getChildren().addAll(paneControl, paneBall, fpsLabel);
 
-      paneContainer.getChildren().addAll(paneControl, paneBall, fpsLabel);
+      paneContainer.getChildren().addAll(paneControl, ballPane, fpsLabel);
 
 //        Scene scene = new Scene(paneContainer, 1530, 720);
       Scene scene = new Scene(paneContainer);
@@ -132,7 +133,7 @@ public class Main extends Application {
 
                 int n = Integer.parseInt(inputCount.getText()); // ayaw umayos, n laging 1
                 tester.appendText(n + " particles added with constant velocity and angle\n");
-                addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle,ballPane);
+                addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, ballPane);
                 n_balls = particles.size();
                 
             
@@ -249,7 +250,14 @@ public class Main extends Application {
         double deltaTime = (now - lastUpdateTime) / 1_000_000_000.0;
         lastUpdateTime = now;
         frameCount++;
-        particles.forEach((p)->p.call());
+        particles.forEach((p)->{
+			try {
+				p.call();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
         // Update FPS display every 0.5 seconds
         if (now - lastFPSTime >= 500_000_000) {
             fps = frameCount / ((now - lastFPSTime) / 1_000_000_000.0);

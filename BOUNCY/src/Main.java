@@ -132,13 +132,10 @@ public class Main extends Application {
 
                 int n = Integer.parseInt(inputCount.getText()); // ayaw umayos, n laging 1
                 tester.appendText(n + " particles added with constant velocity and angle\n");
-                addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle);
-                n_balls += n;
+                addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle,ballPane);
+                n_balls = particles.size();
                 
-                for (int i=0;i<n;i++)
-                {
-                    paneBall.getChildren().add(particles.get(i).getBall());
-                }
+            
                 //clear particles for reuse
 
                 
@@ -156,8 +153,8 @@ public class Main extends Application {
                 double velocity = Double.parseDouble(inputVelocity.getText());
 
                 int n = Integer.parseInt(inputCount.getText());
-                addParticlesByAngle(n, startX, startY, startAngle, endAngle, velocity);
-                n_balls += n;
+                addParticlesByAngle(n, startX, startY, startAngle, endAngle, velocity,ballPane);
+                n_balls = particles.size();
                 tester.appendText(n + " particles added with constant start point and velocity\n");
             } catch (NumberFormatException e) {
                 tester.appendText("Invalid input\n");
@@ -173,8 +170,8 @@ public class Main extends Application {
                 double angle = Double.parseDouble(inputAngle.getText());
 
                 int n = Integer.parseInt(inputCount.getText());
-                addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle);
-                n_balls += n;
+                addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle,ballPane);
+                n_balls = particles.size();
                 tester.appendText(n + " particles added with constant start point and angle\n");
             } catch (NumberFormatException e) {
                 tester.appendText("Invalid input\n");

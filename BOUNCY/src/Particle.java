@@ -27,7 +27,6 @@ public class Particle extends Region implements Callable<double[]> {
 	Particle(double x,double  y,
 			double theta, double v){ 
 		double ppu = v/60;
-		double rad = Math.toRadians(theta);
 
 		this.x = x;
 		this.y = y;
@@ -38,8 +37,8 @@ public class Particle extends Region implements Callable<double[]> {
 		this.circle.setLayoutY ( this.y);
 		this.tl = new Timeline(new KeyFrame(Duration.millis(17),
 				new EventHandler<ActionEvent>() {
-			double dx = ppu*Math.cos(rad); //Step on x or velocity
-        	double dy = -ppu* Math.sin(rad);
+			double dx = ppu*Math.cos(theta); //Step on x or velocity
+        	double dy = -ppu* Math.sin(theta);
 	@Override
             public void handle(ActionEvent t) {		
 if (this.x<=0||1280<=this.x){

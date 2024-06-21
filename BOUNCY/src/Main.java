@@ -234,7 +234,6 @@ public class Main extends Application {
     private void update(long now) throws Exception {
         double deltaTime = (now - lastUpdateTime) / 1_000_000_000.0;
         lastUpdateTime = now;
-        es.invokeAll(particles);
         frameCount++;
         // Update FPS display every 0.5 seconds
         if (now - lastFPSTime >= 500_000_000) {
@@ -246,6 +245,8 @@ public class Main extends Application {
     }
     
     private void draw() {
+
+        es.invokeAll(particles);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         for (Particle particle : particles) {

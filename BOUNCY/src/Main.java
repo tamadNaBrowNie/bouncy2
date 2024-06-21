@@ -26,6 +26,7 @@ import javax.swing.JTextField;
 import javafx.scene.layout.BackgroundFill;
 
 import java.lang.Math; //foor squareroot
+import java.util.ArrayList;
 
 //Ditey yung main gui bale
 public class Main extends Application{
@@ -42,8 +43,10 @@ public class Main extends Application{
 	Particle[] p = new Particle[100000];
 	int points_x[];
 	int points_y[];
+	ArrayList<Particle> testBalls = new ArrayList<Particle>();
     
 	//when launch, call here
+	@Override
 	public void start(Stage primaryStage) throws Exception{
 	//		JFrame root = new JFrame();
 	//		root.setSize(1530,720); //in px-> 1280+250
@@ -185,7 +188,8 @@ public class Main extends Application{
 	        
 	        Label testLabel = new Label("TEST SHOULD APPEAR ON THE PANEL FOR THE BALL");
             paneBall.getChildren().add(testLabel);
-	        
+            
+            //circle should be added to paneBall
 	        
 	        paneControl.setMaxWidth(250);
 	        TextArea tester = new TextArea("(Test) Balls rn:\n");
@@ -202,32 +206,6 @@ public class Main extends Application{
 	        gpContainer.addRow(0, gpInputs);
 	        
 	        gpContainer.addRow(0, paneBall);
-//	        paneControl.getChildren().add(gpControl);
-//	        paneControl.getChildren().addAll(gpInputs);
-
-	        
-	        
-	//        vboxControl.gethChildren
-	//        vboxControl.getChildren().add(labelX);
-	//        vboxControl.getChildren().add(inputX);
-	//        vboxControl.getChildren().add(labelY);
-	//        vboxControl.getChildren().add(inputY);
-	//        vboxControl.getChildren().add(labelDeg);
-	//        vboxControl.getChildren().add(inputDeg);
-	        
-	//        panelControl.add(labelX);
-	//        panelControl.add(inputX);
-	//        panelControl.add(labelVel);
-	//        panelControl.add(inputVel);
-	//        panelControl.add(btnSubmit);
-	//        panelControl.add(vboxControl);
-	        
-	        
-	//        paneControl.getChildren().add(tester);
-	//        Paint bgColor = new Paint(valueOf('#ffffff'));
-	//        BackgroundFill bgc = new BackgroundFill(valueOf(Color.red), null, null);
-	//        paneBall.setBackground(Color.getColor("#FFFFFF"));
-	        
 	        
 //	        paneContainer.getChildren().addAll(paneControl,paneBall);
 	        
@@ -235,7 +213,6 @@ public class Main extends Application{
 	        
 	        Scene scene = new Scene(gpContainer);
 
-	        primaryStage.setTitle("BOUNCING BALLS - grp i forgot num");
 	        primaryStage.setScene(scene);
 	        primaryStage.show();
 	        primaryStage.setHeight(720);
@@ -266,6 +243,20 @@ public class Main extends Application{
 	                //THIS IS CONSIDERING NA WALANG NEGATIVES
 	                //when clicked, see which type oof spawning particles u want by checking which ones are constant/same start and ends
 	                
+
+	                
+                	//testing
+                	testBalls.add(new Particle(100.f, 12.f, 32.f, 3.1f));
+                	
+	                for(int i=0;i<testBalls.size();i++)
+	                {
+	                	//add to pane yung circles
+		    	        paneBall.getChildren().add(testBalls.get(0).getBall());
+	                }
+                	
+	                
+
+	                /*
 	                int x1= Integer.parseInt(inputStartX.getText());
 	                int x2 = Integer.parseInt(inputEndX.getText());
 	                int y1= Integer.parseInt(inputStartY.getText()); 
@@ -279,7 +270,7 @@ public class Main extends Application{
 	                
 	                int formType = 0; //pag 0 invalid
 	                
-	                
+
 	                if(inputNParticles.getText().isEmpty())
 	                		{
                 				testLabel.setText("PARTICLES COUNT MUST NOT BE LEFT BLANK");
@@ -309,6 +300,7 @@ public class Main extends Application{
 		                	
 		                }
 		                else {
+		                	
 		                	if (v1==v2 && a1==a2)	
 		                	{
 		                		testLabel.setText("VELOCITIES AND ANGLES ARE CONSTANT! (Type1)");
@@ -401,6 +393,7 @@ public class Main extends Application{
 		                		testLabel.setText("No constants, does not fit spawn criteria, must have 2 combination of constant start/end.");
 		                	}
 		                	
+		                		*/
 		                	
 		                	
 	                //TODO: add the thread thing here
@@ -414,8 +407,9 @@ public class Main extends Application{
 //	                testLabel.setText(temp);
 //	                tester.appendText(n_balls+" at pos ("+startx+","+y+") "+velocity+"deg + "+velocity+"px/s  \n");
 		            current_n_particles++;
-	                }}
-	            }});
+//	                }}
+	            }
+	            });
 	        
 	        
 	        

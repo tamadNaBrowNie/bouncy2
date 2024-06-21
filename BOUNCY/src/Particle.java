@@ -5,6 +5,8 @@ import java.util.concurrent.Callable;
 import javax.swing.JComponent;	//swing tho not java fx
 import javax.swing.JPanel; //gui
 
+import javafx.scene.shape.Circle;
+
 
 
 public class Particle implements Callable {
@@ -22,7 +24,8 @@ public class Particle implements Callable {
 		this.dy = -ppu* Math.sin(rad);
 				this.x = x;
 				this.y = y;
-				this.circle = new Circle(10.f,Color.RED);
+//				this.circle = new Circle(10.f,Color.RED);
+				this.circle = new Circle(10.f); //ayaw nya ng color nag eerror
 				this.circle.setCenterX ( this.x);
 				this.circle.setCenterY ( this.y);
 	}

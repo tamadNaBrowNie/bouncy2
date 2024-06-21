@@ -36,9 +36,13 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         Pane paneContainer = new Pane();
         canvas = new Canvas(1280, 720);
+        Pane paneBall = new Pane();
+        paneBall.setMinHeight(720);
+        paneBall.setMinWidth(1280);
+
         fpsLabel = new Label("FPS: 0");
-        fpsLabel.setLayoutX(1300);
-        fpsLabel.setLayoutY(10);
+        fpsLabel.setLayoutX(50);
+        fpsLabel.setLayoutY(600);
 
         Pane paneControl = new Pane();
         paneControl.setMaxWidth(250);
@@ -104,8 +108,13 @@ public class Main extends Application {
         gpControl.addRow(4, tester);
 
         paneControl.getChildren().add(gpControl);
-        paneContainer.getChildren().addAll(paneControl, canvas, fpsLabel);
-        Scene scene = new Scene(paneContainer, 1530, 720);
+//        paneContainer.getChildren().addAll(paneControl, canvas, fpsLabel);
+//        paneContainer.getChildren().addAll(paneControl, paneBall, fpsLabel);
+
+      paneContainer.getChildren().addAll(paneControl, paneBall, fpsLabel);
+
+//        Scene scene = new Scene(paneContainer, 1530, 720);
+      Scene scene = new Scene(paneContainer);
 
         primaryStage.setTitle("Particle Physics Simulator");
         primaryStage.setScene(scene);
@@ -120,10 +129,18 @@ public class Main extends Application {
                 double velocity = Double.parseDouble(inputVelocity.getText());
                 double angle = Double.parseDouble(inputAngle.getText());
 
-                int n = Integer.parseInt(inputCount.getText());
+                int n = Integer.parseInt(inputCount.getText()); // ayaw umayos, n laging 1
+                tester.appendText(n + " particles added with constant velocity and angle\n");
                 addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle);
                 n_balls += n;
-                tester.appendText(n + " particles added with constant velocity and angle\n");
+                
+                for (int i=0;i<n;i++)
+                {
+                    paneBall.getChildren().add(particles.get(i).getBall());
+                }
+                //clear particles for reuse
+                particles.clear();
+                
             } catch (NumberFormatException e) {
                 tester.appendText("Invalid input\n");
             }
@@ -217,10 +234,6 @@ public class Main extends Application {
     private void update(long now) throws Exception {
         double deltaTime = (now - lastUpdateTime) / 1_000_000_000.0;
         lastUpdateTime = now;
-//        for (Particle particle : particles) {
-//            particle.call();
-//        }
-        
         es.invokeAll(particles);
         frameCount++;
         // Update FPS display every 0.5 seconds
@@ -231,12 +244,23 @@ public class Main extends Application {
             lastFPSTime = now;
         }
     }
-
+    
     private void draw() {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         for (Particle particle : particles) {
-         //   particle.draw(gc);
+            gc.setFill(particle.getBall().getFill());
+            gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
+                        particle.getBall().getCenterY() - particle.getBall().getRadius(),
+                        particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);
         }
     }
+//
+//    private void draw() {
+//        GraphicsContext gc = canvas.getGraphicsContext2D();
+//        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+//        for (Particle particle : particles) {
+//         //   particle.draw(gc);
+//        }
+//    }
 }

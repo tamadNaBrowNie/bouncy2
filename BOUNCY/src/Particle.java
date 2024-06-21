@@ -21,6 +21,8 @@ public class Particle extends Region implements Callable<double[]> {
 				this.circle = new Circle(10,Color.RED);
 				this.circle.setCenterX ( this.x);
 				this.circle.setCenterY ( this.y);
+				this.circle.setLayoutX(this.x);
+				this.circle.setLayoutY ( this.y);
 	}
 
 	public Circle getBall(){
@@ -36,9 +38,11 @@ public class Particle extends Region implements Callable<double[]> {
 			this.dy *=-1;
 		}
 		this.x += dx;
-		this.y+= dy;
-		this.circle.setCenterX ( this.x);
+		this.y+= dy;this.circle.setCenterX ( this.x);
 		this.circle.setCenterY ( this.y);
+		this.circle.setLayoutX(this.x);
+		this.circle.setLayoutY ( this.y);
+		
 		double [] res = {this.x,this.y};
 		return res;
 	}

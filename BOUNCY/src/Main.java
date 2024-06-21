@@ -26,6 +26,7 @@ public class Main extends Application {
     private int frameCount;
     private double fps;
     public static ExecutorService es;
+    
     public static void main(String[] args) {
     	es = Executors.newCachedThreadPool();
         launch(args);
@@ -72,14 +73,25 @@ public class Main extends Application {
         Button btnAddByAngle = new Button("Add by Angle");
         Button btnAddByVelocity = new Button("Add by Velocity");
 
+
+        Separator separator1 = new Separator();
+        Separator separator2 = new Separator();
+        Separator separator3 = new Separator();
         gridPane.setAlignment(Pos.BASELINE_CENTER);
-        gridPane.addRow(0, labelStartX, inputStartX, labelEndX, inputEndX);
-        gridPane.addRow(1, labelStartY, inputStartY, labelEndY, inputEndY);
-        gridPane.addRow(2, labelStartAngle, inputStartAngle, labelEndAngle, inputEndAngle);
-        gridPane.addRow(3, labelStartVelocity, inputStartVelocity, labelEndVelocity, inputEndVelocity);
-        gridPane.addRow(4, labelVelocity, inputVelocity);
-        gridPane.addRow(5, labelAngle, inputAngle);
-        gridPane.addRow(6, labelCount, inputCount);
+        gridPane.addRow(0, labelStartX, inputStartX);
+        gridPane.addRow(1, labelEndX, inputEndX);
+        gridPane.addRow(2, labelStartY, inputStartY);
+        gridPane.addRow(3, labelEndY, inputEndY);
+        gridPane.addRow(4, separator1);
+        gridPane.addRow(5, labelStartAngle, inputStartAngle);
+        gridPane.addRow(6, labelEndAngle, inputEndAngle);
+        gridPane.addRow(7, separator2);
+        gridPane.addRow(8, labelStartVelocity, inputStartVelocity);
+        gridPane.addRow(9, labelEndVelocity, inputEndVelocity);
+        gridPane.addRow(10, separator3);
+        gridPane.addRow(11, labelVelocity, inputVelocity);
+        gridPane.addRow(12, labelAngle, inputAngle);
+        gridPane.addRow(13, labelCount, inputCount);
 
         TextArea tester = new TextArea("(Test) Balls rn:\n");
         tester.setMaxSize(250, 720);

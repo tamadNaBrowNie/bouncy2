@@ -8,7 +8,6 @@ import javafx.scene.paint.Color;
 
 public class Particle extends Region implements Callable<double[]> {
 	
-	Thread th;
 	Graphics g;
 	Circle circle;
 	private double x,y;

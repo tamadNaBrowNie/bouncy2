@@ -13,6 +13,8 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main extends Application {
     private int n_balls = 0;
@@ -23,9 +25,11 @@ public class Main extends Application {
     private long lastFPSTime;
     private int frameCount;
     private double fps;
-
+    public static ExecutorService es;
     public static void main(String[] args) {
+    	es = Executors.newCachedThreadPool();
         launch(args);
+        es.shutdown();
     }
 
     public void start(Stage primaryStage) {
@@ -38,7 +42,7 @@ public class Main extends Application {
         Pane paneControl = new Pane();
         paneControl.setMaxWidth(250);
 
-        GridPane gridPane = new GridPane();
+        GridPane gridPane = new GridPane(); 
         gridPane.setAlignment(Pos.BASELINE_CENTER);
 
         Label labelStartX = new Label("Start X:");
@@ -197,14 +201,15 @@ public class Main extends Application {
             particles.add(new Particle(x, y, velocity, Math.toRadians(angle)));
         }
     }
-
+    
     private void update(long now) throws Exception {
         double deltaTime = (now - lastUpdateTime) / 1_000_000_000.0;
         lastUpdateTime = now;
-        for (Particle particle : particles) {
-            particle.call();
-        }
-
+//        for (Particle particle : particles) {
+//            particle.call();
+//        }
+        
+        es.invokeAll(particles);
         frameCount++;
         // Update FPS display every 0.5 seconds
         if (now - lastFPSTime >= 500_000_000) {

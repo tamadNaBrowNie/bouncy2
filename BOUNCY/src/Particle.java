@@ -13,9 +13,9 @@ public class Particle implements Callable<double[]> {
 	Circle circle;
 	private double x,y;
 	private Translate tra;
-	Particle(float x,float  y,
-			float theta, float v){ 
-		float ppu = v/60;
+	Particle(double x,double  y,
+			double theta, double v){ 
+		double ppu = v/60;
 		double rad = Math.toRadians(theta);
 		this.tra = new Translate (ppu*Math.cos(rad),-ppu* Math.sin(rad));
 				this.x = x;
@@ -24,6 +24,7 @@ public class Particle implements Callable<double[]> {
 				this.circle.setCenterX ( this.x);
 				this.circle.setCenterY ( this.y);
 	}
+
 public Circle getBall(){
 	return this.circle;
 }

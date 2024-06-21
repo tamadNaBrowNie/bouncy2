@@ -165,13 +165,13 @@ public class Main extends Application {
     }
 
     private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity, double angle) {
-        double totalDistance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+      //  double totalDistance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
         double dx = (endX - startX) / (n - 1);
         double dy = (endY - startY) / (n - 1);
 
         for (int i = 0; i < n; i++) {
             double x = startX + i * dx;
-            double y = startY + i * dy;
+            double y = 720-(startY + i * dy);
             particles.add(new Particle(x, y, velocity, Math.toRadians(angle)));
         }
     }
@@ -181,8 +181,8 @@ public class Main extends Application {
 
         for (int i = 0; i < n; i++) {
             double angle = startAngle + i * angleDiff;
-            double x = startX + velocity * Math.cos(Math.toRadians(angle));
-            double y = startY - velocity * Math.sin(Math.toRadians(angle)); // negative sin because Y increases downwards
+            double x = startX ;
+            double y = 720-startY ; // negative sin because Y increases downwards
             particles.add(new Particle(x, y, velocity, Math.toRadians(angle)));
         }
     }
@@ -192,8 +192,8 @@ public class Main extends Application {
 
         for (int i = 0; i < n; i++) {
             double velocity = startVelocity + i * velocityDiff;
-            double x = startX + velocity * Math.cos(Math.toRadians(angle));
-            double y = startY - velocity * Math.sin(Math.toRadians(angle)); // negative sin because Y increases downwards
+            double x = startX ;
+            double y = 720-startY ; // negative sin because Y increases downwards
             particles.add(new Particle(x, y, velocity, Math.toRadians(angle)));
         }
     }

@@ -3,10 +3,10 @@ import java.awt.Graphics;
 import java.util.concurrent.Callable;
 import javafx.scene.shape.Circle;
 import javafx.scene.transform.Translate;
-
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 
-public class Particle implements Callable<double[]> {
+public class Particle extends Region implements Callable<double[]> {
 	
 	Thread th;
 	Graphics g;
@@ -37,9 +37,11 @@ public Circle getBall(){
 			this.tra.setY(-(this.tra.getY()));
 		}
 		double dx = this.tra.getX(), dy = this.tra.getY();
+	
+		
+		this.relocate(dx, dy);
 		this.x += dx;
 		this.y+= dy;
-		
 		this.circle.getTransforms().addAll(this.tra);
 		double [] res = {this.x,this.y};
 		// TODO Auto-generated method stub

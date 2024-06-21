@@ -255,10 +255,10 @@ public class Main extends Application {
         }
     }
     class p implements Runnable{
-    	Particle ball;
+    	Particle particle;
     	GraphicsContext gc;
 		p(Particle ball,GraphicsContext gc){
-			this.ball=ball;
+			this.particle=ball;
 			this.gc =gc;
 		}
 		public void run(){ 

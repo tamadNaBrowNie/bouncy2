@@ -36,7 +36,7 @@ public class Particle  implements Callable<double[]> {
 		this.circle.setLayoutX(this.x);
 		this.circle.setLayoutY ( this.y);
 
-		this.tl = new Timeline(new KeyFrame(Duration.millis(17)),new Ctrlr(x,y, ppu*Math.cos(theta),-ppu* Math.sin(theta),this.circle));
+		this.tl = new Timeline(new KeyFrame(Duration.millis(17)),new Ctrlr(ppu*Math.cos(theta),-ppu* Math.sin(theta),this.circle));
 			}
 
 	}

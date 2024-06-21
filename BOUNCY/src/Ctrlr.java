@@ -5,9 +5,11 @@ import javafx.scene.shape.Circle;
 public class Ctrlr implements EventHandler<ActionEvent>() {
     double dx,dy,x,y;
     Circle circle;
-    Ctrlr(double x,double y,double dx,double dy,Circle circle) {
-this.x= x;
-this.y= y;
+    Ctrlr(double dx,double dy,Circle circle) {
+this.x= 
+this.circle.getLayoutX();
+this.y= this.circle.getLayoutY ();
+
 this.dx= dx;
 this.dy= dy;
 this.circle= circle;

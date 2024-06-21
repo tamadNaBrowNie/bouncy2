@@ -184,9 +184,10 @@ public class Main extends Application {
         lastUpdateTime = System.nanoTime();
         lastFPSTime = System.nanoTime();
         frameCount = 0;
-
+        
         try {
-			es.invokeAll(particles);
+			//es.invokeAll(particles);
+            particles.forEach(p->p.call());
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

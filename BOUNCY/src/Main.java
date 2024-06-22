@@ -121,6 +121,14 @@ public class Main extends Application {
         gpControl.addRow(2, btnAddByAngle);
         gpControl.addRow(3, btnAddByVelocity);
         gpControl.addRow(4, tester);
+        
+        Button clearScr = new Button("RESET BALLS");
+        clearScr.resize(50, 200);
+        clearScr.setOnAction(event -> {
+        	particles.clear();
+        	ballPane.getChildren().clear();
+        });
+        gpControl.addRow(5, clearScr);
     // }}
 // );
         

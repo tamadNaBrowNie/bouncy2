@@ -51,7 +51,7 @@ public class Main extends Application {
 
         Pane paneControl = new Pane();
         paneControl.setMaxWidth(250);
-
+        Particle[] t=new Particle[1];
         GridPane gridPane = new GridPane(); 
         gridPane.setAlignment(Pos.BASELINE_CENTER);
 
@@ -128,12 +128,14 @@ public class Main extends Application {
         GridPane gpContainer = new GridPane();
         
         Particle part1 = new Particle(20,90,70,400);
-        
-        ballPane.getChildren().add(part1.getBall());
+//        t [0]= part1;
+         particles.add(new Particle(20,90,70,400));
+//        ballPane.getChildren().add(part1.getBall());
 //    	addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, ballPane);
 
         
-        
+
+//        particles.forEach(p->ballPane.getChildren().add(p.getBall()));
         
         
         
@@ -148,7 +150,6 @@ public class Main extends Application {
 
 //        Scene scene = new Scene(paneContainer, 1530, 720);
 
-        particles.forEach(p->ballPane.getChildren().add(p.getBall()));
       Scene scene = new Scene(paneContainer);
 
         primaryStage.setTitle("Particle Physics Simulator");
@@ -166,11 +167,11 @@ public class Main extends Application {
 
                 int n = Integer.parseInt(inputCount.getText()); // ayaw umayos, n laging 1
                 tester.appendText(n + " particles added with constant velocity and angle\n");
-                Platform.runLater(
-                    new Runnable(){
-                        public void run(){
+//                Platform.runLater(
+//                    new Runnable(){
+//                        public void run(){
                 	addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, ballPane);
-                        	}});
+//                        	}});
                 n_balls = particles.size();
                 
             
@@ -191,13 +192,13 @@ public class Main extends Application {
                 final double velocity = Double.parseDouble(inputVelocity.getText());
 
                 final int n = Integer.parseInt(inputCount.getText());
-                Platform.runLater(
-                    new Runnable(){
-                        public void run(){
+//                Platform.runLater(
+//                    new Runnable(){
+//                        public void run(){
                             addParticlesByAngle(n, startX, startY, startAngle, endAngle, velocity,ballPane);
-                        }
-                    }
-                );
+//                        }
+//                    }
+//                );
                 n_balls = particles.size();
                 tester.appendText(n + " particles added with constant start point and velocity\n");
             } catch (NumberFormatException e) {
@@ -214,10 +215,11 @@ public class Main extends Application {
                 final double angle = Double.parseDouble(inputAngle.getText());
 
                 final int n = Integer.parseInt(inputCount.getText());
-                Platform.runLater(
-                    new Runnable(){
-                        public void run(){
-                addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle,ballPane);}});
+//                Platform.runLater(
+//                    new Runnable(){
+//                        public void run(){
+                addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle,ballPane);
+//                }});
                 n_balls = particles.size();
                 tester.appendText(n + " particles added with constant start point and angle\n");
             } catch (NumberFormatException e) {
@@ -225,7 +227,28 @@ public class Main extends Application {
             }
         });
 
-        
+        for(int i = 0; i< particles.size(); i++) {
+        	
+        	  ballPane.getChildren().add(particles.get(i).getBall());
+//        	  try {
+//				particles.get(i).call();
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+        	//  try {
+//        		  particles.get(i).call();
+        	//} catch (Exception e) {
+//        		// TODO Auto-generated catch block
+//        		e.printStackTrace();
+        	//}
+        	  }
+//        		try {
+////        			es.invokeAll(particles);
+//        		} catch (InterruptedException e) {
+//        			// TODO Auto-generated catch block
+//        			e.printStackTrace();
+//        		}
     
         // try {
 		// 	//es.invokeAll(particles);

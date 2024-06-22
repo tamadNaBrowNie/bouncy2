@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -22,7 +23,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-    private List<Particle> ball_buf = new ArrayList<>();
+    private List<Particle> ball_buf =Collections.synchronizedList(new ArrayList<Particle>());
 //    private Canvas canvas= new Canvas(1280, 720);;
     private Label fpsLabel = new Label("FPS: 0");;
     private long lastFPSTime= System.nanoTime();;
@@ -30,13 +31,7 @@ public class Main extends Application {
     private double fps = 0;
     public static ExecutorService es;
     
-    public static void main(String[] args) {
-    	es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-//    	es = Executors.newFixedThreadPool(2);
-//    	es = Executors.newCachedThreadPool();
-        launch(args);
-        es.shutdown();
-    }
+    
    private Pane paneContainer = new Pane();
   
    private Pane ballPane = new Pane();
@@ -89,7 +84,13 @@ public class Main extends Application {
 //    paneContainer.getChildren().addAll(paneControl, canvas, fpsLabel);
     
     private GridPane gpContainer = new GridPane();
-
+    public static void main(String[] args) {
+    	es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+//    	es = Executors.newFixedThreadPool(2);
+//    	es = Executors.newCachedThreadPool();
+        launch(args);
+        es.shutdown();
+    }
     public void start(Stage primaryStage) {
                
 //        Particle part1 = new Particle(20,90,70,400);
@@ -255,16 +256,34 @@ private synchronized void addBall(Particle p) {
 private synchronized void clrBall() {
 	ball_buf.clear();
 }
-private synchronized List<Circle> balls() throws InterruptedException {
-	return es.invokeAll(ball_buf).parallelStream().map(t -> {
-		try {
-			return t.get();
-		} catch (InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}).collect(Collectors.toList());
+private synchronized List<Circle> balls() {
+	try {
+		return es.invokeAll(ball_buf).parallelStream().map(t -> {
+			try {
+				return t.get();
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}).collect(Collectors.toList());
+	} catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	return null;
+
+
+}
+private synchronized List<Circle> sballs() {		return ball_buf.parallelStream().map(t -> {
+	try {
+	return t.call();
+} catch (Exception e) {
+	e.printStackTrace();
+}
+return null;
+}).collect(Collectors.toList());
+
 }
     private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity, double angle, Pane ballPane) {
         double dx = (endX - startX) / (n);
@@ -300,16 +319,8 @@ drawBalls(ballPane);
 }
 	private void drawBalls(Pane ballPane) {
 		try {
-//			ballPane.getChildren().addAll(balls());
-			ballPane.getChildren().addAll(ball_buf.parallelStream().map(t -> {
-				try {
-					return t.call();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				return null;
-			}).collect(Collectors.toList()));
+//			ballPane.getChildren().addAll(sballs());
+			ballPane.getChildren().addAll(balls());
 			clrBall();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

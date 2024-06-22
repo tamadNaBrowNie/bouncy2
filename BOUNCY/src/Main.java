@@ -1,5 +1,7 @@
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -85,11 +87,12 @@ public class Main extends Application {
 
         GridPane gpControl = new GridPane();
         Separator separator1 = new Separator();
-        // Separator separator2 = new Separator();
-        // Separator separator3 = new Separator();
+        Separator separator2 = new Separator();
+        Separator separator3 = new Separator();
+        //need diff separators lagi, no reusing
         
         //Platform.runLater(new Runnable() {public void run(){
-            gridPane.setAlignment(Pos.BASELINE_CENTER);
+        gridPane.setAlignment(Pos.BASELINE_CENTER);
         gridPane.addRow(0, labelStartX, inputStartX);
         gridPane.addRow(1, labelEndX, inputEndX);
         gridPane.addRow(2, labelStartY, inputStartY);
@@ -97,10 +100,10 @@ public class Main extends Application {
         gridPane.addRow(4, separator1);
         gridPane.addRow(5, labelStartAngle, inputStartAngle);
         gridPane.addRow(6, labelEndAngle, inputEndAngle);
-        gridPane.addRow(7, separator1);
+        gridPane.addRow(7, separator2);
         gridPane.addRow(8, labelStartVelocity, inputStartVelocity);
         gridPane.addRow(9, labelEndVelocity, inputEndVelocity);
-        gridPane.addRow(10, separator1);
+        gridPane.addRow(10, separator3);
         gridPane.addRow(11, labelVelocity, inputVelocity);
         gridPane.addRow(12, labelAngle, inputAngle);
         gridPane.addRow(13, labelCount, inputCount);
@@ -299,11 +302,12 @@ public class Main extends Application {
 			this.particle=ball;
 			this.gc =gc;
 		}
-		protected void call() throws Exception{ 
+		protected Void call() throws Exception{ 
 			gc.setFill(particle.getBall().getFill());
         gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
                     particle.getBall().getCenterY() - particle.getBall().getRadius(),
-                    particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);}
+                    particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);
+		return null;}
 }
 	
     private void draw() {
@@ -313,7 +317,7 @@ public class Main extends Application {
         
         for (Particle particle : particles) {
         	//bad idea
-        	es.execute(new p(particle,gc));
+        	es.execute(new p(particle,gc)); //The method execute(Runnable) in the type Executor is not applicable for the arguments (Main.p)
             // gc.setFill(particle.getBall().getFill());
             // gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
             //             particle.getBall().getCenterY() - particle.getBall().getRadius(),

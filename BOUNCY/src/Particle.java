@@ -87,8 +87,8 @@ public class Particle  implements Callable<double[]> {
 		}
 		this.x += dx;
 		this.y+= dy;
-		this.circle.setCenterX ( this.x);
-		this.circle.setCenterY ( this.y);
+//		this.circle.setCenterX ( this.x);
+//		this.circle.setCenterY ( this.y);
 		this.circle.setLayoutX(this.x);
 		this.circle.setLayoutY ( this.y);
 		

@@ -126,7 +126,19 @@ public class Main extends Application {
 //        paneContainer.getChildren().addAll(paneControl, canvas, fpsLabel);
         
         GridPane gpContainer = new GridPane();
-        gpContainer.addRow(0, paneControl, separatorV, canvas);
+        
+        Particle part1 = new Particle(20,90,70,400);
+        
+        ballPane.getChildren().add(part1.getBall());
+        		
+        
+        
+        
+        
+        
+//        gpContainer.addRow(0, paneControl, separatorV, canvas);
+        		
+        gpContainer.addRow(0, paneControl, separatorV, ballPane);
         paneContainer.getChildren().addAll(gpContainer, fpsLabel);
         
 //        paneContainer.getChildren().addAll(paneControl, paneBall, fpsLabel);

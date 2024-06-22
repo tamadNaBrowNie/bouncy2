@@ -25,8 +25,8 @@ public class Particle  implements Callable<double[]> {
 		this.circle = new Circle(10,Color.RED);
 //		this.circle.setCenterX ( this.x);
 //		this.circle.setCenterY ( this.y);
-		this.circle.setLayoutX(this.x);
-		this.circle.setLayoutY ( this.y);
+		this.circle.setLayoutX(this.x+ circle.getRadius()*2);
+		this.circle.setLayoutY ( this.y+ circle.getRadius()*2);
 //		EventHandler<ActionEvent> foo = new Ctrlr(ppu*Math.cos(theta),-ppu* Math.sin(theta),this.circle);
 
 		//this.tl = new Timeline(new KeyFrame(Duration.millis(17)),foo);
@@ -45,12 +45,12 @@ public class Particle  implements Callable<double[]> {
             	//move the ball
             	circle.setLayoutX(circle.getLayoutX() + dx);
             	circle.setLayoutY(circle.getLayoutY() + dy);
-
+            	double x = circle.getLayoutX(),y = circle.getLayoutY(),d =   circle.getRadius()*2;
 //                Bounds bounds = canvas.getBoundsInLocal();
                 
                 //If the ball reaches the left or right border make the step negative
-                if(circle.getLayoutX() <= (0 + circle.getRadius()) || 
-                		circle.getLayoutX() >= (1280 - circle.getRadius()) ){
+                if(x< (d ) || 
+                		x> (1280 - d) ){
 
                 	dx = -dx;
                 	
@@ -58,8 +58,8 @@ public class Particle  implements Callable<double[]> {
                 }
 
                 //If the ball reaches the bottom or top border make the step negative
-                if((circle.getLayoutY() >= (720 - circle.getRadius())) || 
-                        (circle.getLayoutY() <= (0 + circle.getRadius()))){
+                if((circle.getLayoutY() > (720 - d)) || 
+                        (circle.getLayoutY() <d)){
 
                 	dy = -dy;
 

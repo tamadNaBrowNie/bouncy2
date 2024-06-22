@@ -1,32 +1,31 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import java.lang.Object;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Main extends Application {
     private int n_balls = 0;
     private List<Particle> particles = new ArrayList<>();
     private Canvas canvas;
     private Label fpsLabel;
-    private long lastUpdateTime=System.nanoTime();;
+    private long lastUpdateTime=System.nanoTime();
     private long lastFPSTime= System.nanoTime();;
     private int frameCount = 0;
     private double fps = 0;
@@ -154,7 +153,9 @@ public class Main extends Application {
                 tester.appendText(n + " particles added with constant velocity and angle\n");
                 Platform.runLater(
                     new Runnable(){
-                        public void run(){addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, ballPane);}});
+                        public void run(){
+                	addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, ballPane);
+                        	}});
                 n_balls = particles.size();
                 
             
@@ -219,13 +220,15 @@ public class Main extends Application {
 		// 	// TODO Auto-generated catch block
 		// 	e.printStackTrace();
 		// }
-        
+        lastUpdateTime=System.nanoTime();
+        lastFPSTime= System.nanoTime();
         new AnimationTimer() {
             @Override
             public void handle(long now) {
-                
+            	frameCount++;
                 try {
-                    update(now);
+                	//double curr = now - lastFPSTime ;
+                   update(now);
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -240,20 +243,22 @@ public class Main extends Application {
 
     private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity, double angle, Pane paneBall) {
       //  double totalDistance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-        double dx = (endX - startX) / (n - 1);
-        double dy = (endY - startY) / (n - 1);
-        
+        double dx = (endX - startX) / (n);
+        double dy = (endY - startY) / (n);
+        double x = startX;
+        double y = 720-(startY );
         for (int i = 0; i < n; i++) {
-            double x = startX + i * dx;
-            double y = 720-(startY + i * dy);
+            
             Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
             particles.add(p);
             paneBall.getChildren().add(p.getBall());
+            x+=dx;
+            y+=dy;
         }
     }
 
     private void addParticlesByAngle(int n, double startX, double startY, double startAngle, double endAngle, double velocity, Pane paneBall) {
-        double angleDiff = (endAngle - startAngle) / (n - 1);
+        double angleDiff = (endAngle - startAngle) / (n);
 
         for (int i = 0; i < n; i++) {
             double angle = startAngle + i * angleDiff;
@@ -266,7 +271,7 @@ public class Main extends Application {
     }
 
     private void addParticlesByVelocity(int n, double startX, double startY, double startVelocity, double endVelocity, double angle, Pane paneBall) {
-        double velocityDiff = (endVelocity - startVelocity) / (n - 1);
+        double velocityDiff = (endVelocity - startVelocity) / (n);
 
         for (int i = 0; i < n; i++) {
             double velocity = startVelocity + i * velocityDiff;
@@ -280,20 +285,29 @@ public class Main extends Application {
     private void update(long now) {
 
         double curr = now - lastFPSTime ;
-        if (curr<500_000_000) 
+        
+        if (curr>=500_000_000) 
         {
-                fps = frameCount* 1_000_000_000.0 / curr ;
+                fps = frameCount*1_000_000_000.0 / curr ;
                 frameCount = 0;
                 lastFPSTime = now;
                 fpsLabel.setText(String.format("FPS: %.2f", fps));
         }
+
         if(now - lastUpdateTime <=16666666.666666667)
             return;
        lastUpdateTime = now;
        // particles.forEach((p)->p.call());
         try {
             es.invokeAll(particles);
-            
+//            particles.forEach((p)->{
+//				try {
+//					p.call();
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			});
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -317,11 +331,11 @@ public class Main extends Application {
         
         for (Particle particle : particles) {
         	//bad idea
-        	es.execute(new Pen(particle,gc)); //The method execute(Runnable) in the type Executor is not applicable for the arguments (Main.p)
-            // gc.setFill(particle.getBall().getFill());
-            // gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
-            //             particle.getBall().getCenterY() - particle.getBall().getRadius(),
-            //             particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);
+//        	es.execute(new Pen(particle,gc)); //The method execute(Runnable) in the type Executor is not applicable for the arguments (Main.p)
+             gc.setFill(particle.getBall().getFill());
+             gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
+                         particle.getBall().getCenterY() - particle.getBall().getRadius(),
+                         particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);
         }
     }
 //        try {

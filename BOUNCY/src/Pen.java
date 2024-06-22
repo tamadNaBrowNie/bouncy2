@@ -1,6 +1,5 @@
 
 import javafx.concurrent.Task;
-
 import javafx.scene.canvas.GraphicsContext;
 class Pen extends Task<Void>{
     Particle particle;

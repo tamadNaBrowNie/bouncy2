@@ -1,21 +1,11 @@
 import java.awt.Graphics;
 import java.util.concurrent.Callable;
 
-import javafx.scene.shape.Circle;
-import javafx.scene.transform.Translate;
-import javafx.scene.paint.Color;
-import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
-import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.stage.Stage;
-import javafx.util.Duration;
 public class Particle  implements Callable<double[]> {
 
 	

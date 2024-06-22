@@ -1,6 +1,6 @@
 
-import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.shape.Circle;
 public class Ctrlr implements EventHandler<ActionEvent>{
     double dx,dy,x,y;

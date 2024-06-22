@@ -48,8 +48,8 @@ public class Main extends Application {
         ballPane.setMinWidth(1280);
 
         fpsLabel = new Label("FPS: 0");
-        fpsLabel.setLayoutX(50);
-        fpsLabel.setLayoutY(600);
+        fpsLabel.setLayoutX(1450);
+        fpsLabel.setLayoutY(10);
 
         Pane paneControl = new Pane();
         paneControl.setMaxWidth(250);
@@ -87,11 +87,14 @@ public class Main extends Application {
 
         TextArea tester = new TextArea("(Test) Balls rn:\n");
         tester.setMaxSize(250, 720);
+       
 
         GridPane gpControl = new GridPane();
         Separator separator1 = new Separator();
         Separator separator2 = new Separator();
         Separator separator3 = new Separator();
+        Separator separator4 = new Separator();
+
         //need diff separators lagi, no reusing
         Separator separatorV = new Separator();
         separatorV.setOrientation(Orientation.VERTICAL);
@@ -120,15 +123,23 @@ public class Main extends Application {
         gpControl.addRow(1, btnAddByDistance);
         gpControl.addRow(2, btnAddByAngle);
         gpControl.addRow(3, btnAddByVelocity);
-        gpControl.addRow(4, tester);
+        btnAddByDistance.setPrefWidth(250);
+//        gpControl.addRow(4, tester); //hide tester since guds na
         
-        Button clearScr = new Button("RESET BALLS");
-        clearScr.resize(50, 200);
-        clearScr.setOnAction(event -> {
+        Label notif = new Label("");
+        Button btnClear = new Button("RESET BALLS");
+        btnAddByDistance.setPrefWidth(250);
+        btnAddByVelocity.setPrefWidth(250);
+        btnAddByAngle.setPrefWidth(250);
+        btnClear.setPrefWidth(250);
+
+        btnClear.setOnAction(event -> {
         	particles.clear();
         	ballPane.getChildren().clear();
         });
-        gpControl.addRow(5, clearScr);
+        gpControl.addRow(4, separator2);
+        gpControl.addRow(5, btnClear);
+        gpControl.addRow(6, notif);
     // }}
 // );
         
@@ -189,9 +200,12 @@ public class Main extends Application {
 	                tester.appendText("Ball " + (i+particles.size())+ ": " + x + "," + y + ", v,a:" + velocity + "," + angle + "\n");
 				}
 				n = particles.size();
+				
 				tester.appendText(n + " particles added with constant angle and velocity\n");
             }
         	catch (NumberFormatException e) {
+                notif.setText("Invalid Input.");
+
                 tester.appendText("Invalid input\n");
             }
         });
@@ -223,6 +237,8 @@ public class Main extends Application {
 	            tester.appendText(n + " particles added with constant start point and velocity\n");
             }
         	catch (NumberFormatException e) {
+                notif.setText("Invalid Input.");
+
                 tester.appendText("Invalid input\n");
             }
         });
@@ -252,6 +268,8 @@ public class Main extends Application {
     			tester.appendText(n + " particles added with constant start point and velocity\n");
                 n_balls = particles.size();
             } catch (NumberFormatException e) {
+                notif.setText("Invalid Input.");
+
                 tester.appendText("Invalid input\n");
             }
         });

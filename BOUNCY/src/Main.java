@@ -130,7 +130,8 @@ public class Main extends Application {
         Particle part1 = new Particle(20,90,70,400);
         
         ballPane.getChildren().add(part1.getBall());
-        		
+//    	addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, ballPane);
+
         
         
         
@@ -264,7 +265,7 @@ public class Main extends Application {
             
             Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
             particles.add(p);
-//            paneBall.getChildren().add(p.getBall());
+            paneBall.getChildren().add(p.getBall());
             x+=dx;
             y-=dy;
         }
@@ -279,7 +280,7 @@ public class Main extends Application {
             double y = 720-startY ; // negative sin because Y increases downwards\
             Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
             particles.add(p);
-//            paneBall.getChildren().add(p.getBall());
+            paneBall.getChildren().add(p.getBall());
         }
     }
 
@@ -292,7 +293,7 @@ public class Main extends Application {
             double y = 720-startY ; // negative sin because Y increases downwards     
             Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
             particles.add(p);
-//            paneBall.getChildren().add(p.getBall());
+            paneBall.getChildren().add(p.getBall());
         }
     }
     private void update(long now) {

@@ -3,98 +3,90 @@ import java.util.concurrent.Callable;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
-public class Particle  implements Callable<double[]> {
+public class Particle  implements Callable<Circle> {
 
 	
-	Graphics g;
-	Circle circle;
-	private double x,y, dx,dy;
+	private double x,y,v,theta;
 	private Timeline tl;
-
+	
 	Particle(double x,double  y,
 			double theta, double v){ 
-		double ppu = v*0.0166666666667;
-
+	
 		this.x = x;
-		this.y = y;
-		this.circle = new Circle(10,Color.RED);
-//		this.circle.setCenterX ( this.x);
-//		this.circle.setCenterY ( this.y);
-		this.circle.setLayoutX(this.x+ circle.getRadius()*2);
-		this.circle.setLayoutY ( this.y+ circle.getRadius()*2);
-//		EventHandler<ActionEvent> foo = new Ctrlr(ppu*Math.cos(theta),-ppu* Math.sin(theta),this.circle);
-
-		//this.tl = new Timeline(new KeyFrame(Duration.millis(17)),foo);
-		
-		Timeline timeline = new Timeline(new KeyFrame(Duration.millis(17), 
-                new EventHandler<ActionEvent>() {
-
-//        	double dx = 7; //Step on x or velocity
-//        	double dy = 3; //Step on y
-
-			double dx = ppu*Math.cos(theta);
-			double dy = -ppu* Math.sin(theta);
-        	
-            @Override
-            public void handle(ActionEvent t) {
-            	//move the ball
-            	circle.setLayoutX(circle.getLayoutX() + dx);
-            	circle.setLayoutY(circle.getLayoutY() + dy);
-            	double x = circle.getLayoutX(),y = circle.getLayoutY(),d =   circle.getRadius()*2;
-//                Bounds bounds = canvas.getBoundsInLocal();
-                
-                //If the ball reaches the left or right border make the step negative
-                if(x< (d ) || 
-                		x> (1280 - d) ){
-
-                	dx = -dx;
-                	
-
-                }
-
-                //If the ball reaches the bottom or top border make the step negative
-                if((circle.getLayoutY() > (720 - d)) || 
-                        (circle.getLayoutY() <d)){
-
-                	dy = -dy;
-
-                }
-            }
-        }));
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
+		this.y = 720-y;
+		this.v = v;
+     this.theta=theta;
 		
         
 
 	}
 
-	public Circle getBall(){
-		return this.circle;
-	}
+	
 	
 	@Override
-	public double[] call() throws Exception {
-		if (this.x<=0||1280<=this.x){
-			this.dx *=-1;
-		}
-		if (this.y<=0||this.y>=720){
-			this.dy *=-1;
-		}
-		this.x += dx;
-		this.y+= dy;
+	public Circle call() throws Exception {
+		double ppu = v*0.0166666666667;
+
+		Circle circle = new Circle(2,Color.RED);
 //		this.circle.setCenterX ( this.x);
 //		this.circle.setCenterY ( this.y);
-		this.circle.setLayoutX(this.x);
-		this.circle.setLayoutY ( this.y);
+		circle.setLayoutX(this.x+ circle.getRadius()*2);
+		circle.setLayoutY ( this.y+ circle.getRadius()*2);
+//		EventHandler<ActionEvent> foo = new Ctrlr(ppu*Math.cos(theta),-ppu* Math.sin(theta),this.circle);
+
+		//this.tl = new Timeline(new KeyFrame(Duration.millis(17)),foo);
 		
-		//  tl.setCycleCount(Timeline.INDEFINITE);
-	    //     tl.play();
-		double [] res = {this.x,this.y};
-		return res;
+		this.tl= new Timeline(new KeyFrame(Duration.millis(17), 
+            new EventHandler<ActionEvent>() {
+
+//    	double dx = 7; //Step on x or velocity
+//    	double dy = 3; //Step on y
+
+		double dx = -ppu*Math.cos(theta);
+		double dy = -ppu* Math.sin(theta);
+    	
+        @Override
+        public void handle(ActionEvent t) {
+        	//move the ball
+        	
+        	double x = circle.getLayoutX(),y = circle.getLayoutY(),d =   circle.getRadius()*2;
+//            Bounds bounds = canvas.getBoundsInLocal();
+            
+            //If the ball reaches the left or right border make the step negative
+            if(x< (d ) || 
+            		x> (1280 - d) ){
+
+            	dx = -dx;
+            	
+
+            }
+
+            //If the ball reaches the bottom or top border make the step negative
+            if((circle.getLayoutY() > (720 - d)) || 
+                    (circle.getLayoutY() <d)){
+
+            	dy = -dy;
+
+            }
+            circle.setLayoutX(circle.getLayoutX() + dx);
+        	circle.setLayoutY(circle.getLayoutY() + dy);
+        }
+    }));
+
+
+		tl.setCycleCount(Timeline.INDEFINITE);
+
+	Platform.runLater(	
+		()->{		
+			tl.play();
+		}
+	);
+	        return circle;
 	}
 }

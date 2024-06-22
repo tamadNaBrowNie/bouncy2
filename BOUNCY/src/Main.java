@@ -295,20 +295,7 @@ public class Main extends Application {
         //     });
 			
     
-    class p extends Task<Void>{
-    	Particle particle;
-    	GraphicsContext gc;
-		p(Particle ball,GraphicsContext gc){
-			this.particle=ball;
-			this.gc =gc;
-		}
-		protected Void call() throws Exception{ 
-			gc.setFill(particle.getBall().getFill());
-        gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
-                    particle.getBall().getCenterY() - particle.getBall().getRadius(),
-                    particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);
-		return null;}
-}
+
 	
     private void draw() {
 //    	CountDownLatch latch = new CountDownLatch(particles.size());
@@ -317,7 +304,7 @@ public class Main extends Application {
         
         for (Particle particle : particles) {
         	//bad idea
-        	es.execute(new p(particle,gc)); //The method execute(Runnable) in the type Executor is not applicable for the arguments (Main.p)
+        	es.execute(new Pend(particle,gc)); //The method execute(Runnable) in the type Executor is not applicable for the arguments (Main.p)
             // gc.setFill(particle.getBall().getFill());
             // gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
             //             particle.getBall().getCenterY() - particle.getBall().getRadius(),

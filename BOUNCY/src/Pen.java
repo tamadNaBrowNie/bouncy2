@@ -2,10 +2,10 @@
 import javafx.concurrent.Task;
 
 import javafx.scene.canvas.GraphicsContext;
-class P extends Task<Void>{
+class Pen extends Task<Void>{
     Particle particle;
     GraphicsContext gc;
-    p(Particle ball,GraphicsContext gc){
+    Pen(Particle ball,GraphicsContext gc){
         this.particle=ball;
         this.gc =gc;
     }

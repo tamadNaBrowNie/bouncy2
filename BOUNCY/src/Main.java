@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 import javafx.scene.shape.Circle;
@@ -23,7 +24,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-    private List<Particle> ball_buf =Collections.synchronizedList(new ArrayList<Particle>());
+    private List<Particle> ball_buf =new ArrayList<Particle>();
 //    private Canvas canvas= new Canvas(1280, 720);;
     private Label fpsLabel = new Label("FPS: 0");;
     private long lastFPSTime= System.nanoTime();;
@@ -85,7 +86,8 @@ public class Main extends Application {
     
     private GridPane gpContainer = new GridPane();
     public static void main(String[] args) {
-    	es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    	 es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()-3);
+//        es = ForkJoinPool.commonPool();
 //    	es = Executors.newFixedThreadPool(2);
 //    	es = Executors.newCachedThreadPool();
         launch(args);

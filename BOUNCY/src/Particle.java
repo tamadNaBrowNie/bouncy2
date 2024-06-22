@@ -21,7 +21,7 @@ public class Particle implements Callable<double[]> {
 	Circle circle;
 	private double x,y, dx,dy;
 	private Timeline tl;
-	Particle(double x,double  y, double theta, double v, Pane canvas){ 
+	Particle(double x,double  y, double theta, double v){ 
 
 		double ppu = v*0.0166666666667;
 		

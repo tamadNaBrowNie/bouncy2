@@ -1,7 +1,9 @@
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -9,6 +11,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -27,6 +30,7 @@ public class Main extends Application {
     private int frameCount;
     private double fps;
     public static ExecutorService es;
+    private Pane paneBall;
     
     public static void main(String[] args) {
     	es = Executors.newCachedThreadPool();
@@ -35,12 +39,14 @@ public class Main extends Application {
     }
 
     public void start(Stage primaryStage) {
+        paneBall = new Pane();
+
         Pane paneContainer = new Pane();
         canvas = new Canvas(1280, 720);
-        Pane ballPane = new Pane();
-        ballPane.setLayoutX(270);
-        ballPane.setMinHeight(720);
-        ballPane.setMinWidth(1280);
+//        Pane paneBall = new Pane();
+        paneBall.setLayoutX(270);
+        paneBall.setMinHeight(720);
+        paneBall.setMinWidth(1280);
 
         fpsLabel = new Label("FPS: 0");
         fpsLabel.setLayoutX(50);
@@ -83,6 +89,9 @@ public class Main extends Application {
         Separator separator1 = new Separator();
         Separator separator2 = new Separator();
         Separator separator3 = new Separator();
+        Separator separatorV = new Separator();
+        separatorV.setOrientation(Orientation.VERTICAL);
+        
         gridPane.setAlignment(Pos.BASELINE_CENTER);
         gridPane.addRow(0, labelStartX, inputStartX);
         gridPane.addRow(1, labelEndX, inputEndX);
@@ -111,12 +120,52 @@ public class Main extends Application {
 
         paneControl.getChildren().add(gpControl);
 //        paneContainer.getChildren().addAll(paneControl, canvas, fpsLabel);
+        
+        GridPane gpContainer = new GridPane();
+//        gpContainer.addRow(0, paneControl, separatorV, canvas);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        //TESTING START EHREE
+//        int, double, double, double, double, double, double, Pane) in the type 
+//        addParticlesByDistance(5, 5, 3, 2, 30, 2, 4, paneBall);
+//        paneBall.getChildren().add(new Particle())
+        
+        
+//        double x,double  y,	double theta, double v, Pane canvas
+//        test particle
+        Particle testP = new Particle(100,200,3,4,paneBall);
+        particles.add(testP);
+        Particle testP2 = new Particle(0,50,6,74, paneBall);
+        particles.add(testP2);
+        
+        labelStartX.setText(particles.size()+" particle size:");
+        paneBall.getChildren().add(particles.get(0).getBall()); //add the CIRCLE to the pane
+        paneBall.getChildren().add(particles.get(1).getBall()); //add the CIRCLE to the pane
+
+        gpContainer.addRow(0, paneControl, separatorV, paneBall);
+        
+        paneContainer.getChildren().addAll(gpContainer, fpsLabel);
+        
+        
+        
+        
+        
+        
+        
+        
 //        paneContainer.getChildren().addAll(paneControl, paneBall, fpsLabel);
 
-      paneContainer.getChildren().addAll(paneControl, ballPane, fpsLabel);
-
+//      paneContainer.getChildren().addAll(paneControl, paneBall, fpsLabel);
 //        Scene scene = new Scene(paneContainer, 1530, 720);
-      Scene scene = new Scene(paneContainer);
+        Scene scene = new Scene(paneContainer,1280, 720, Color.ALICEBLUE);
 
         primaryStage.setTitle("Particle Physics Simulator");
         primaryStage.setScene(scene);
@@ -133,7 +182,13 @@ public class Main extends Application {
 
                 int n = Integer.parseInt(inputCount.getText()); // ayaw umayos, n laging 1
                 tester.appendText(n + " particles added with constant velocity and angle\n");
-                addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, ballPane);
+
+                
+                Platform.runLater(
+                    new Runnable(){
+                        public void run(){
+                	addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, paneBall);
+                        	}});
                 n_balls = particles.size();
                 
             
@@ -153,8 +208,14 @@ public class Main extends Application {
                 double endAngle = Double.parseDouble(inputEndAngle.getText());
                 double velocity = Double.parseDouble(inputVelocity.getText());
 
-                int n = Integer.parseInt(inputCount.getText());
-                addParticlesByAngle(n, startX, startY, startAngle, endAngle, velocity,ballPane);
+                final int n = Integer.parseInt(inputCount.getText());
+                Platform.runLater(
+                    new Runnable(){
+                        public void run(){
+                            addParticlesByAngle(n, startX, startY, startAngle, endAngle, velocity,paneBall);
+                        }
+                    }
+                );
                 n_balls = particles.size();
                 tester.appendText(n + " particles added with constant start point and velocity\n");
             } catch (NumberFormatException e) {
@@ -170,8 +231,12 @@ public class Main extends Application {
                 double endVelocity = Double.parseDouble(inputEndVelocity.getText());
                 double angle = Double.parseDouble(inputAngle.getText());
 
-                int n = Integer.parseInt(inputCount.getText());
-                addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle,ballPane);
+                final int n = Integer.parseInt(inputCount.getText());
+                Platform.runLater(
+                    new Runnable(){
+                        public void run(){
+                addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle,paneBall);}});
+
                 n_balls = particles.size();
                 tester.appendText(n + " particles added with constant start point and angle\n");
             } catch (NumberFormatException e) {
@@ -214,9 +279,12 @@ public class Main extends Application {
         for (int i = 0; i < n; i++) {
             double x = startX + i * dx;
             double y = 720-(startY + i * dy);
-            Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
+            Particle p = new Particle(x, y, velocity, Math.toRadians(angle), paneBall);
             particles.add(p);
             paneBall.getChildren().add(p.getBall());
+            x+=dx;
+            y+=dy;
+            
         }
     }
 
@@ -227,7 +295,7 @@ public class Main extends Application {
             double angle = startAngle + i * angleDiff;
             double x = startX ;
             double y = 720-startY ; // negative sin because Y increases downwards\
-            Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
+            Particle p = new Particle(x, y, velocity, Math.toRadians(angle), paneBall);
             particles.add(p);
             paneBall.getChildren().add(p.getBall());
         }
@@ -240,7 +308,7 @@ public class Main extends Application {
             double velocity = startVelocity + i * velocityDiff;
             double x = startX ;
             double y = 720-startY ; // negative sin because Y increases downwards     
-            Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
+            Particle p = new Particle(x, y, velocity, Math.toRadians(angle), paneBall);
             particles.add(p);
             paneBall.getChildren().add(p.getBall());
         }

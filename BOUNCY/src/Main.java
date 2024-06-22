@@ -134,6 +134,8 @@ public class Main extends Application {
 //      paneContainer.getChildren().addAll(paneControl, ballPane, fpsLabel);
 
 //        Scene scene = new Scene(paneContainer, 1530, 720);
+
+        particles.forEach(p->ballPane.getChildren().add(p.getBall()));
       Scene scene = new Scene(paneContainer);
 
         primaryStage.setTitle("Particle Physics Simulator");
@@ -212,7 +214,6 @@ public class Main extends Application {
 
         
     
-        
         // try {
 		// 	//es.invokeAll(particles);
         //     particles.forEach(p->p.call());
@@ -251,9 +252,9 @@ public class Main extends Application {
             
             Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
             particles.add(p);
-            paneBall.getChildren().add(p.getBall());
+//            paneBall.getChildren().add(p.getBall());
             x+=dx;
-            y+=dy;
+            y-=dy;
         }
     }
 
@@ -266,7 +267,7 @@ public class Main extends Application {
             double y = 720-startY ; // negative sin because Y increases downwards\
             Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
             particles.add(p);
-            paneBall.getChildren().add(p.getBall());
+//            paneBall.getChildren().add(p.getBall());
         }
     }
 
@@ -279,7 +280,7 @@ public class Main extends Application {
             double y = 720-startY ; // negative sin because Y increases downwards     
             Particle p = new Particle(x, y, velocity, Math.toRadians(angle));
             particles.add(p);
-            paneBall.getChildren().add(p.getBall());
+//            paneBall.getChildren().add(p.getBall());
         }
     }
     private void update(long now) {
@@ -299,15 +300,15 @@ public class Main extends Application {
        lastUpdateTime = now;
        // particles.forEach((p)->p.call());
         try {
-            es.invokeAll(particles);
-//            particles.forEach((p)->{
-//				try {
-//					p.call();
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			});
+//            es.invokeAll(particles);
+            particles.forEach((p)->{
+				try {
+					p.call();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			});
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -332,7 +333,7 @@ public class Main extends Application {
         for (Particle particle : particles) {
         	//bad idea
 //        	es.execute(new Pen(particle,gc)); //The method execute(Runnable) in the type Executor is not applicable for the arguments (Main.p)
-             gc.setFill(particle.getBall().getFill());
+             //gc.setFill(particle.getBall().getFill());
              gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
                          particle.getBall().getCenterY() - particle.getBall().getRadius(),
                          particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);

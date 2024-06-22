@@ -14,4 +14,5 @@ class Pen extends Task<Void>{
     gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
                 particle.getBall().getCenterY() - particle.getBall().getRadius(),
                 particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);
-    return null;}
+    return null;
+    }}

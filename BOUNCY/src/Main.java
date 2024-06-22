@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -12,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import java.lang.Object;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +92,8 @@ public class Main extends Application {
         Separator separator2 = new Separator();
         Separator separator3 = new Separator();
         //need diff separators lagi, no reusing
+        Separator separatorV = new Separator();
+        separatorV.setOrientation(Orientation.VERTICAL);
         
         //Platform.runLater(new Runnable() {public void run(){
         gridPane.setAlignment(Pos.BASELINE_CENTER);
@@ -107,6 +111,9 @@ public class Main extends Application {
         gridPane.addRow(11, labelVelocity, inputVelocity);
         gridPane.addRow(12, labelAngle, inputAngle);
         gridPane.addRow(13, labelCount, inputCount);
+        
+
+        gridPane.setMaxWidth(250);
 
         gpControl.addRow(0, gridPane);
         gpControl.addRow(1, btnAddByDistance);
@@ -115,11 +122,17 @@ public class Main extends Application {
         gpControl.addRow(4, tester);
     // }}
 // );
+        
         paneControl.getChildren().add(gpControl);
 //        paneContainer.getChildren().addAll(paneControl, canvas, fpsLabel);
+        
+        GridPane gpContainer = new GridPane();
+        gpContainer.addRow(0, paneControl, separatorV, canvas);
+        paneContainer.getChildren().addAll(gpContainer, fpsLabel);
+        
 //        paneContainer.getChildren().addAll(paneControl, paneBall, fpsLabel);
 
-      paneContainer.getChildren().addAll(paneControl, ballPane, fpsLabel);
+//      paneContainer.getChildren().addAll(paneControl, ballPane, fpsLabel);
 
 //        Scene scene = new Scene(paneContainer, 1530, 720);
       Scene scene = new Scene(paneContainer);
@@ -304,18 +317,19 @@ public class Main extends Application {
         
         for (Particle particle : particles) {
         	//bad idea
-        	es.execute(new Pend(particle,gc)); //The method execute(Runnable) in the type Executor is not applicable for the arguments (Main.p)
+        	es.execute(new Pen(particle,gc)); //The method execute(Runnable) in the type Executor is not applicable for the arguments (Main.p)
             // gc.setFill(particle.getBall().getFill());
             // gc.fillOval(particle.getBall().getCenterX() - particle.getBall().getRadius(),
             //             particle.getBall().getCenterY() - particle.getBall().getRadius(),
             //             particle.getBall().getRadius() * 2, particle.getBall().getRadius() * 2);
         }
+    }
 //        try {
 //        	  latch.await();
 //        	} catch (InterruptedException E) {
 //        	   // handle
 //        	}
-    }
+
 
 
 }

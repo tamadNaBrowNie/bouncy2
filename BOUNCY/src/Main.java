@@ -264,7 +264,7 @@ public class Main extends Application {
             @Override
             public void handle(long now) {
 
-                frameCount++;
+                fps++;
                 try {
                     update(now);
                 } catch (Exception e) {
@@ -403,7 +403,6 @@ public class Main extends Application {
             ballPane.getChildren().addAll(balls());
             clrBall();
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -443,10 +442,11 @@ public class Main extends Application {
 
         if (curr < 500_000_000)
             return;
-        fps = frameCount * 1_000_000_000.0 / curr;
-        frameCount = 0;
-        lastFPSTime = now;
+        fps  *= 1_000_000_000.0 / curr;
+
         fpsLabel.setText(String.format("FPS: %.2f", fps));
+        lastFPSTime = now;
+        fps=0;
 
     }
 

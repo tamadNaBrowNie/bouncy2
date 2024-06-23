@@ -48,7 +48,7 @@ public class Particle implements Callable<Circle> {
 
 		// this.tl = new Timeline(new KeyFrame(Duration.millis(17)),foo);
 
-		this.tl = new Timeline(new KeyFrame(Duration.millis(17),
+		this.tl = new Timeline(new KeyFrame(Duration.millis(16.666667),
 				new EventHandler<ActionEvent>() {
 
 					// double dx = 7; //Step on x or velocity

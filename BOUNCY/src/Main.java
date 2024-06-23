@@ -297,6 +297,8 @@ public class Main extends Application {
             final double angle = Double.parseDouble(inputAngle.getText());
 
             final int n = Integer.parseInt(inputCount.getText());
+//            notif.setText("->"+ n +" "+startX+","+ startY+" v:+"+startVelocity+","+endVelocity+" a: "+angle);
+
             try {
                 if (n > 0)
                     addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle, ballPane);

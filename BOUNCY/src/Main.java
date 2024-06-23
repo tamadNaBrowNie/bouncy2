@@ -17,6 +17,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -67,6 +70,20 @@ public class Main extends Application {
     private Button btnAddByAngle = new Button("Add by Angle");
     private Button btnAddByVelocity = new Button("Add by Velocity");
 
+    private GridPane gpDistance = new GridPane();
+    private GridPane gpVelocity = new GridPane();
+    private GridPane gpAngle = new GridPane();
+    
+    private GridPane gpStartXY = new GridPane();
+    private GridPane gpEndXY = new GridPane();
+    private GridPane gpStartEndVelocity = new GridPane();
+    private GridPane gpStartEndAngle = new GridPane();
+
+    private TabPane paneTab = new TabPane();
+    private Tab tabDistance = new Tab("Add by Distance");
+    private Tab tabAngle = new Tab("Angle");
+    private Tab tabVelocity = new Tab("Velocity");
+    
     private TextArea tester = new TextArea("(Test) Balls rn:\n");
 
     private GridPane gpControl = new GridPane();
@@ -76,6 +93,15 @@ public class Main extends Application {
     // need diff separators lagi, no reusing
     private Separator separatorV = new Separator();
 
+    
+    private Label notif = new Label("");
+    private Label labelStartXY = new Label("Starting Points (X,Y):");
+    private Label labelEndXY = new Label("End Points (X,Y):");
+    private Label labelStartEndVelocity = new Label("Starting and Ending Velocity:");
+    private Label labelStartEndAngle = new Label("Starting and Ending Angle:");
+    private Label labelConstXY = new Label("Spawn Point (X,Y):");
+
+    
     // paneContainer.getChildren().addAll(paneControl, canvas, fpsLabel);
 
     private GridPane gpContainer = new GridPane();
@@ -100,9 +126,13 @@ public class Main extends Application {
         ballPane.setLayoutX(270);
         ballPane.setMinHeight(720);
         ballPane.setMinWidth(1280);
-        fpsLabel.setLayoutY(600);
-
+        
         paneControl.setMaxWidth(250);
+        
+        fpsLabel.setLayoutX(1450);
+        fpsLabel.setLayoutY(10);
+       
+        notif.setText(":)");
 
         gridPane.setAlignment(Pos.BASELINE_CENTER);
 
@@ -110,8 +140,6 @@ public class Main extends Application {
         // gpContainer.addRow(0, paneControl, separatorV, canvas);
 
         // particles.forEach(p->ballPane.getChildren().add(p.getBall()));
-        gpContainer.addRow(0, paneControl, separatorV, ballPane);
-        paneContainer.getChildren().addAll(gpContainer, fpsLabel);
 
         // paneContainer.getChildren().addAll(paneControl, paneBall, fpsLabel);
 
@@ -122,35 +150,103 @@ public class Main extends Application {
         separatorV.setOrientation(Orientation.VERTICAL);
 
         // Platform.runLater(new Runnable() {public void run(){
-        gridPane.setAlignment(Pos.BASELINE_CENTER);
-        gridPane.addRow(0, labelStartX, inputStartX);
-
-        gridPane.addRow(1, labelStartY, inputStartY);
-
-        gridPane.addRow(2, labelEndX, inputEndX);
-        gridPane.addRow(3, labelEndY, inputEndY);
-        gridPane.addRow(4, separator1);
-        gridPane.addRow(5, labelStartAngle, inputStartAngle);
-        gridPane.addRow(6, labelEndAngle, inputEndAngle);
-        gridPane.addRow(7, separator2);
-        gridPane.addRow(8, labelStartVelocity, inputStartVelocity);
-        gridPane.addRow(9, labelEndVelocity, inputEndVelocity);
-        gridPane.addRow(10, separator3);
-        gridPane.addRow(11, labelVelocity, inputVelocity);
-        gridPane.addRow(12, labelAngle, inputAngle);
-        gridPane.addRow(13, labelCount, inputCount);
+//        gridPane.setAlignment(Pos.BASELINE_CENTER);
+//        gridPane.addRow(0, labelStartX, inputStartX);
+//
+//        gridPane.addRow(1, labelStartY, inputStartY);
+//
+//        gridPane.addRow(2, labelEndX, inputEndX);
+//        gridPane.addRow(3, labelEndY, inputEndY);
+//        gridPane.addRow(4, separator1);
+//        gridPane.addRow(5, labelStartAngle, inputStartAngle);
+//        gridPane.addRow(6, labelEndAngle, inputEndAngle);
+//        gridPane.addRow(7, separator2);
+//        gridPane.addRow(8, labelStartVelocity, inputStartVelocity);
+//        gridPane.addRow(9, labelEndVelocity, inputEndVelocity);
+//        gridPane.addRow(10, separator3);
+//        gridPane.addRow(11, labelVelocity, inputVelocity);
+//        gridPane.addRow(12, labelAngle, inputAngle);
+//        gridPane.addRow(13, labelCount, inputCount);
 
         gridPane.setMaxWidth(250);
 
-        gpControl.addRow(0, gridPane);
-        gpControl.addRow(1, btnAddByDistance);
-        gpControl.addRow(2, btnAddByAngle);
-        gpControl.addRow(3, btnAddByVelocity);
-        gpControl.addRow(4, tester);
-        // }}
-        // );
+//        gpControl.addRow(0, gridPane);
+//        gpControl.addRow(1, btnAddByDistance);
+//        gpControl.addRow(2, btnAddByAngle);
+//        gpControl.addRow(3, btnAddByVelocity);
+//        gpControl.addRow(4, tester);
 
-        paneControl.getChildren().add(gpControl);
+
+        btnAddByDistance.setPrefWidth(250);
+        btnAddByVelocity.setPrefWidth(250);
+        btnAddByAngle.setPrefWidth(250);
+
+        paneTab.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+
+        paneTab.getTabs().addAll(tabDistance,tabAngle,tabVelocity);
+
+        //DISTANCE tab open by default
+        initTabDist();
+        
+        
+        
+        gpStartXY.addRow(0, inputStartX, inputStartY);
+        gpStartEndVelocity.addRow(0, inputStartVelocity, inputEndVelocity);
+        gpEndXY.addRow(0, inputEndX, inputEndY);
+        gpStartEndAngle.addRow(0, inputStartAngle, inputEndAngle);
+
+        
+        gpStartEndVelocity.setMaxWidth(250);
+        gpStartEndAngle.setMaxWidth(250);
+        gpStartXY.setMaxWidth(250);
+        gpEndXY.setMaxWidth(250);
+        gpVelocity.setMaxWidth(250);
+        gpDistance.setMaxWidth(250);
+        gpAngle.setMaxWidth(250);
+        tabVelocity.setContent(gpVelocity);
+        tabDistance.setContent(gpDistance);
+        tabAngle.setContent(gpAngle);
+
+        paneControl.getChildren().add(paneTab);
+        
+        gpContainer.addRow(0, paneControl, separatorV, ballPane);
+        paneContainer.getChildren().addAll(gpContainer, fpsLabel);
+        
+        tabVelocity.setOnSelectionChanged(e -> {
+        	tabDistance.setText("Distance");
+        	tabAngle.setText("Angle");
+        	tabVelocity.setText("Add by Velocity");
+        	
+        	gpDistance.getChildren().clear();
+        	gpAngle.getChildren().clear();
+        	gpVelocity.getChildren().clear();
+            initTabVelocity();
+            gpVelocity.setMaxWidth(250);
+            
+        });
+        
+        tabDistance.setOnSelectionChanged(e -> {
+        	tabDistance.setText("Add by Distance");
+        	tabAngle.setText("Angle");
+        	tabVelocity.setText("Velocity");
+
+        	gpDistance.getChildren().clear();
+        	gpAngle.getChildren().clear();
+        	gpVelocity.getChildren().clear();
+        	
+        	initTabDist();
+        });
+        
+        tabAngle.setOnSelectionChanged(e -> {
+        	tabDistance.setText("Distance");
+        	tabAngle.setText("Add by Angle");
+        	tabVelocity.setText("Velocity");
+        	
+        	initTabAngle();
+        });
+        
+        
+
         Scene scene = new Scene(paneContainer);
 
         primaryStage.setTitle("Particle Physics Simulator");
@@ -165,27 +261,13 @@ public class Main extends Application {
             double velocity = Double.parseDouble(inputVelocity.getText());
             double angle = Double.parseDouble(inputAngle.getText());
             int n = Integer.parseInt(inputCount.getText());
-
-            // THIS WORKS, just have to make multiple particles appear
-            // Particle p1 = new Particle(20,90,70,400);
-            // ballPane.getChildren().add(p1.getBall());
-
+            //it errrors if may null input
             try {
                 if (n > 0)
                     addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, ballPane);
-                // Platform.runLater(() ->
-                //
-                // addParticlesByDistance( n, startX, startY, endX, endY, velocity, angle,
-                // ballPane)
-                // );
             } catch (NumberFormatException e) {
-                tester.appendText("Invalid input\n");
-            }
-            ;
-            //
-            // Particle particle = new Particle(x, y, velocity, angle);
-            // ^THIS IS THE ERROR, not moving pag Math.toRadians(angle)
-
+                notif.setText("Invalid input\n");
+            };
         });
 
         btnAddByAngle.setOnAction(event -> {
@@ -203,7 +285,7 @@ public class Main extends Application {
                 // ()->addParticlesByAngle( n, startX, startY, startAngle, endAngle, velocity,
                 // ballPane));
             } catch (NumberFormatException e) {
-                tester.appendText("Invalid input\n");
+                notif.setText("Invalid input\n");
             }
         });
 
@@ -220,7 +302,7 @@ public class Main extends Application {
                     addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle, ballPane);
                 // Platform.runLater(()->addParticlesByVelocity(n,startX,startY,startVelocity,endVelocity,angle,ballPane));
             } catch (NumberFormatException e) {
-                tester.appendText("Invalid input\n");
+                notif.setText("Invalid input\n");
             }
         });
 
@@ -284,7 +366,67 @@ public class Main extends Application {
         }).collect(Collectors.toList());
 
     }
+    
+    private void initTabVelocity() {
+    	gpDistance.getChildren().clear();
+		gpAngle.getChildren().clear();
+		gpVelocity.getChildren().clear();
+		
+        gpVelocity.addRow(0, labelConstXY);
+        gpVelocity.addRow(1, gpEndXY);
+    	gpVelocity.addRow(2, labelStartEndVelocity);
+        gpVelocity.addRow(3, gpStartEndVelocity);
+        gpVelocity.addRow(4, labelAngle);
+        gpVelocity.addRow(5, inputAngle);
+        gpVelocity.addRow(6, separator1);
+        gpVelocity.addRow(7, labelCount);
+        gpVelocity.addRow(8, inputCount);
+        gpVelocity.addRow(9, btnAddByVelocity);
+        gpVelocity.setMaxWidth(250);
+        gpVelocity.addRow(10, notif);
+    }
+    private void initTabDist() {
+    	gpDistance.getChildren().clear();
+		gpAngle.getChildren().clear();
+		gpVelocity.getChildren().clear();
+		
+	    gpDistance.addRow(0, labelStartXY);
+	    gpDistance.addRow(1, gpStartXY);
+	    gpDistance.addRow(2, labelEndXY);
+	    gpDistance.addRow(3, gpEndXY);
+	    gpDistance.addRow(4, labelVelocity);
+	    gpDistance.addRow(5, inputVelocity);
+	    gpDistance.addRow(6, labelAngle);
+	    gpDistance.addRow(7, inputAngle);
+	    gpDistance.addRow(8, separator1);
+	    gpDistance.addRow(9, labelCount);
+	    gpDistance.addRow(10, inputCount);
+	    gpDistance.addRow(11, btnAddByDistance);
+	    gpDistance.setMaxWidth(250);
+        gpDistance.addRow(12, notif);
 
+    }
+    private void initTabAngle()
+    {
+    	gpDistance.getChildren().clear();
+		gpAngle.getChildren().clear();
+		gpVelocity.getChildren().clear();
+		
+		gpAngle.addRow(0, labelConstXY);
+	    gpAngle.addRow(1, gpEndXY);
+	    gpAngle.addRow(2, labelStartEndAngle);
+		gpAngle.addRow(3, gpStartEndAngle);
+	    gpAngle.addRow(4, labelVelocity);
+	    gpAngle.addRow(5, inputVelocity);
+	    gpAngle.addRow(6, separator1);
+	    gpAngle.addRow(7, labelCount);
+	    gpAngle.addRow(8, inputCount);
+	    gpAngle.addRow(9, btnAddByAngle);
+	    gpAngle.setMaxWidth(250);
+	    gpAngle.addRow(10, notif);
+
+    }
+    
     private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity,
             double angle, Pane ballPane) {
         double dx = (endX - startX) / (n);

@@ -298,7 +298,7 @@ for (int i = 0; i < n; i++) {
 
 	addBall(new Particle(xin, yin, Math.toRadians(angle), velocity));
     x += dx;
-    y -= dy;
+    y += dy;
     }
 
 drawBalls(ballPane);

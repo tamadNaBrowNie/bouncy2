@@ -9,10 +9,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
-public class Particle implements Callable<Circle> {
+public class Particle implements Callable<Timeline> {
 
 	private double x, y, v, theta;
 	private Timeline tl;
+	private Circle circle;
 
 	Particle(double x, double y,
 			double theta, double v) {
@@ -20,18 +21,7 @@ public class Particle implements Callable<Circle> {
 		this.x = x;
 		this.y = 720 - y;
 		this.v = v;
-		this.theta = theta;
-
-	}
-	public void play()
-	{
-		tl.play();
-	}	
-	@Override
-	public Circle call() throws Exception {
-		double ppu = v * 0.0166666666667;
-
-		Circle circle = new Circle(1, Color.RED);
+		this. circle = new Circle(5, Color.RED);
 		double d = circle.getRadius()*2;
 		this.x += d;
 		this.y += d;
@@ -42,8 +32,17 @@ public class Particle implements Callable<Circle> {
 			this.y = d;
 		circle.setLayoutX(this.x);
 		circle.setLayoutY(this.y);
-
-
+		
+		
+	}
+	public Circle getCircle()
+	{
+		return circle;
+	}	
+	@Override
+	public Timeline call() throws Exception {
+		double ppu = v * 0.0166666666667;
+		double d = circle.getRadius()*2;
 		this.tl = new Timeline(new KeyFrame(Duration.millis(16.666667),
 			new EventHandler<ActionEvent>() {
 
@@ -75,8 +74,8 @@ public class Particle implements Callable<Circle> {
 			}));
 
 		tl.setCycleCount(Timeline.INDEFINITE);
-
 		
-		return circle;
+		
+		return tl;
 	}
 }

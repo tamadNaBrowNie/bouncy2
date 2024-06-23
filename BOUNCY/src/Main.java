@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-
+import javafx.animation.Timeline;
 import javafx.scene.shape.Circle;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -288,37 +288,40 @@ public class Main extends Application {
 
     private synchronized List<Circle> balls() {
         try {
-        	List<Circle> circles = 
-        			es.invokeAll(ball_buf).parallelStream().map(Main::getBall).collect(Collectors.toList());
+        	List<Circle> circles = ball_buf.parallelStream().map(Particle::getCircle).collect(Collectors.toList());
+        	 es.invokeAll(ball_buf).parallelStream().map(t -> {
+				return getAnims(t);
+			}).collect(Collectors.toList()).forEach(Timeline::play);;
 //        	Platform.runLater(()->ball_buf.forEach(Particle::play));
-        	ball_buf.forEach(Particle::play);
+//        	ball_buf.forEach(Particle::play);
             return circles;
         } catch (InterruptedException e) {
+            e.printStackTrace();
+        }catch(NullPointerException e) {
             e.printStackTrace();
         }
         return null;
 
     }
 
-	private static Circle getBall(Future<Circle> t) {
+	private Timeline getAnims(Future<Timeline> t) {
 		try {
-		    return t.get();
-		} catch (InterruptedException | ExecutionException e) {
-
-		    e.printStackTrace();
+			return t.get();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return null;
 	}
 
+
+
     private synchronized List<Circle> sballs() {
-        return ball_buf.parallelStream().map(t -> {
-            try {
-                return t.call();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }).collect(Collectors.toList());
+        return ball_buf.parallelStream().map(Particle::getCircle
+        ).collect(Collectors.toList());
 
     }
     

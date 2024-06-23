@@ -263,7 +263,7 @@ public class Main extends Application {
                 }
                 return null;
             }).collect(Collectors.toList());
-        	ball_buf.stream().forEach(Particle::play);
+        	ball_buf.forEach(Particle::play);
             return circles;
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block

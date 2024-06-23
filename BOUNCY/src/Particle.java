@@ -1,4 +1,4 @@
-\import java.util.concurrent.Callable;
+import java.util.concurrent.Callable;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -32,14 +32,14 @@ public class Particle implements Callable<Circle> {
 		double ppu = v * 0.0166666666667;
 
 		Circle circle = new Circle(1, Color.RED);
-		double d = circle.getRadius();
-		this.x += circle.getRadius() * 2;
+		double d = circle.getRadius()*2;
+		this.x += d;
 		this.y += d;
 		if (this.x >= 1280) {
 			this.x = 1280 - d;
 		}
-		if (this.y > 720)
-			this.y = 720 - d;
+		if (this.y<0)
+			this.y = d;
 		circle.setLayoutX(this.x);
 		circle.setLayoutY(this.y);
 
@@ -47,9 +47,7 @@ public class Particle implements Callable<Circle> {
 		this.tl = new Timeline(new KeyFrame(Duration.millis(16.666667),
 			new EventHandler<ActionEvent>() {
 
-				// double dx = 7; //Step on x or velocity
-				// double dy = 3; //Step on y
-
+				
 				double dx = -ppu * Math.cos(theta);
 				double dy = -ppu * Math.sin(theta);
 
@@ -58,31 +56,26 @@ public class Particle implements Callable<Circle> {
 					// move the ball
 
 					double x = circle.getLayoutX(), y = circle.getLayoutY();
-					// Bounds bounds = canvas.getBoundsInLocal();
-
 					// If the ball reaches the left or right border make the step negative
 					if (x < (d) ||
 							x > (1280 - d)) {
-
-						dx *= -1;
+						dx = -dx;
 
 					}
 
 					// If the ball reaches the bottom or top border make the step negative
 					if ((y > (720 - d)) ||
 							y < d) {
-
-						dy *= -1;
+						dy = -dy;
 
 					}
-					// circle.relocate(x+dx, y+dy);
-					circle.setLayoutX(x + dx);
-					circle.setLayoutY(y + dy);
+					 circle.setLayoutX(x + dx);
+					 circle.setLayoutY(y + dy);
 				}
 			}));
 
 		tl.setCycleCount(Timeline.INDEFINITE);
-//		Platform.runLater(()->play());
+
 		
 		return circle;
 	}

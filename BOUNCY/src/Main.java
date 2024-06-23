@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-import javafx.animation.Timeline;
+
 import javafx.scene.shape.Circle;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -30,7 +30,7 @@ public class Main extends Application {
     private List<Particle> ball_buf = new ArrayList<Particle>();
     // private Canvas canvas= new Canvas(1280, 720);;
     private Label fpsLabel = new Label("FPS: 0");;
-    private long lastFPSTime = System.currentTimeMillis();;
+    private long lastFPSTime = System.nanoTime();;
     private int frameCount = 0;
     private double fps = 0;
     public static ExecutorService es;
@@ -261,7 +261,7 @@ public class Main extends Application {
         });
 
         System.nanoTime();
-        lastFPSTime = System.currentTimeMillis();
+        lastFPSTime = System.nanoTime();
         new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -288,40 +288,37 @@ public class Main extends Application {
 
     private synchronized List<Circle> balls() {
         try {
-        	List<Circle> circles = ball_buf.parallelStream().map(Particle::getCircle).collect(Collectors.toList());
-        	 es.invokeAll(ball_buf).parallelStream().map(t -> {
-				return getAnims(t);
-			}).collect(Collectors.toList()).forEach(Timeline::play);;
+        	List<Circle> circles = 
+        			es.invokeAll(ball_buf).parallelStream().map(Main::getBall).collect(Collectors.toList());
 //        	Platform.runLater(()->ball_buf.forEach(Particle::play));
-//        	ball_buf.forEach(Particle::play);
+        	ball_buf.forEach(Particle::play);
             return circles;
         } catch (InterruptedException e) {
-            e.printStackTrace();
-        }catch(NullPointerException e) {
             e.printStackTrace();
         }
         return null;
 
     }
 
-	private Timeline getAnims(Future<Timeline> t) {
+	private static Circle getBall(Future<Circle> t) {
 		try {
-			return t.get();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    return t.get();
+		} catch (InterruptedException | ExecutionException e) {
+
+		    e.printStackTrace();
 		}
 		return null;
 	}
 
-
-
     private synchronized List<Circle> sballs() {
-        return ball_buf.parallelStream().map(Particle::getCircle
-        ).collect(Collectors.toList());
+        return ball_buf.parallelStream().map(t -> {
+            try {
+                return t.call();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }).collect(Collectors.toList());
 
     }
     
@@ -446,9 +443,9 @@ public class Main extends Application {
 
         double curr = now - lastFPSTime;
 
-        if (curr < 500)
+        if (curr < 500_000_000)
             return;
-        fps  /= curr;
+        fps  *= 1_000_000_000.0 / curr;
 
         fpsLabel.setText(String.format("FPS: %.2f", fps));
         lastFPSTime = now;

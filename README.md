@@ -1,15 +1,16 @@
-Particle Physics Simulator on Java
+# Particle Physics Simulator on Java
 
-DEMO VIDEO: https://drive.google.com/file/d/1yxdbIFTXnD6hJwBhKlFrFCfu71CpvGeO/view?usp=sharing
+DEMO VIDEO: [https://drive.google.com/file/d/1yxdbIFTXnD6hJwBhKlFrFCfu71CpvGeO/view?usp=sharing](https://drive.google.com/file/d/1g1bjDGhr6YqjmY64ekCRlfWT6URu7z70/view?usp=sharing)
 
-How To Use:
-- This app has 3 modes:
-  + Add by Distance - constant 
-  + Add by Velocity
-  + Add by Angle
-
-- The GUI consists of text fields divided into parts: Start/End points, start/end velocity, start/end angle, constant velocity, constant angle, and number of particles to spawn. There is also a FPS counter at the bottom part of the buttons and a textarea for showing some info on the spawning particles.
-- Using the button "Add by Distance" will take only the fields for Start/End Points, Constant Velocity, and Constant Angle.
-- Similarly, using the button "Add by Angle" will take only the fields for Starting Points X/Y, and Constant Velocity.
-- Lastly, using the button "Add by Velocity" will take only the fields for Starting Points X/Y, and Constant Angle.
+### HOW TO USE]
+- Particles can be spawned in three (3) modes, represented by the tabs on the top left.
+  - Add by Distance _(default)_
+  - Add by Velocity
+  - Add by Angle
+- In order to spawn particles, numerical inputs must be placed on the appropriate fields. Blank fields will be considered Invalid Input and particles will not be spawned.
+- The tab "Add by Distance" will show only the fields for Start/End Points, Constant Velocity, and Constant Angle.
+- Similarly, under the tab "Add by Angle", only the fields for Starting Points X/Y, and Constant Velocity will be shown.
+- And on the "Add by Velocity" tab, only the fields for Starting Points X/Y, and Constant Angle will be shown.
+- Among all three modes, the inputs that are similar in nature (ex. taking constant velocity, taking starting X and Y coordinates) are shared, as well as the number of particles to spawn.
 - The particles will spawn as red Circles in the pane on the right with an area of 1280,720.
+- There is an FPS counter on the top right of the right pane indicating the program's frame rate.

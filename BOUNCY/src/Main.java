@@ -1,16 +1,14 @@
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javafx.scene.shape.Circle;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -43,21 +41,14 @@ public class Main extends Application {
 
     private GridPane gridPane = new GridPane();
 
-    private Label labelStartX = new Label("Start X:");
     private TextField inputStartX = new TextField();
-    private Label labelStartY = new Label("Start Y:");
     private TextField inputStartY = new TextField();
-    private Label labelEndX = new Label("End X:");
     private TextField inputEndX = new TextField();
-    private Label labelEndY = new Label("End Y:");
     private TextField inputEndY = new TextField();
-    private Label labelStartAngle = new Label("Start Angle:");
     private TextField inputStartAngle = new TextField();
-    private Label labelEndAngle = new Label("End Angle:");
     private TextField inputEndAngle = new TextField();
-    private Label labelStartVelocity = new Label("Start Velocity:");
+  
     private TextField inputStartVelocity = new TextField();
-    private Label labelEndVelocity = new Label("End Velocity:");
     private TextField inputEndVelocity = new TextField();
     private Label labelVelocity = new Label("Velocity (px/s):");
     private TextField inputVelocity = new TextField();
@@ -86,11 +77,8 @@ public class Main extends Application {
     
     private TextArea tester = new TextArea("(Test) Balls rn:\n");
 
-    private GridPane gpControl = new GridPane();
     private Separator separator1 = new Separator();
-    private Separator separator2 = new Separator();
-    private Separator separator3 = new Separator();
-    // need diff separators lagi, no reusing
+
     private Separator separatorV = new Separator();
 
     
@@ -102,7 +90,6 @@ public class Main extends Application {
     private Label labelConstXY = new Label("Spawn Point (X,Y):");
 
     
-    // paneContainer.getChildren().addAll(paneControl, canvas, fpsLabel);
 
     private GridPane gpContainer = new GridPane();
 
@@ -117,11 +104,6 @@ public class Main extends Application {
 
     public void start(Stage primaryStage) {
 
-        // Particle part1 = new Particle(20,90,70,400);
-        //
-        // ballPane.getChildren().add(part1.getBall());
-        // addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle,
-        // ballPane);
 
         ballPane.setLayoutX(270);
         ballPane.setMinHeight(720);
@@ -137,44 +119,15 @@ public class Main extends Application {
         gridPane.setAlignment(Pos.BASELINE_CENTER);
 
         tester.setMaxSize(250, 720);
-        // gpContainer.addRow(0, paneControl, separatorV, canvas);
 
-        // particles.forEach(p->ballPane.getChildren().add(p.getBall()));
-
-        // paneContainer.getChildren().addAll(paneControl, paneBall, fpsLabel);
-
-        // paneContainer.getChildren().addAll(paneControl, ballPane, fpsLabel);
-
-        // Scene scene = new Scene(paneContainer, 1530, 720);
 
         separatorV.setOrientation(Orientation.VERTICAL);
 
-        // Platform.runLater(new Runnable() {public void run(){
-//        gridPane.setAlignment(Pos.BASELINE_CENTER);
-//        gridPane.addRow(0, labelStartX, inputStartX);
-//
-//        gridPane.addRow(1, labelStartY, inputStartY);
-//
-//        gridPane.addRow(2, labelEndX, inputEndX);
-//        gridPane.addRow(3, labelEndY, inputEndY);
-//        gridPane.addRow(4, separator1);
-//        gridPane.addRow(5, labelStartAngle, inputStartAngle);
-//        gridPane.addRow(6, labelEndAngle, inputEndAngle);
-//        gridPane.addRow(7, separator2);
-//        gridPane.addRow(8, labelStartVelocity, inputStartVelocity);
-//        gridPane.addRow(9, labelEndVelocity, inputEndVelocity);
-//        gridPane.addRow(10, separator3);
-//        gridPane.addRow(11, labelVelocity, inputVelocity);
-//        gridPane.addRow(12, labelAngle, inputAngle);
-//        gridPane.addRow(13, labelCount, inputCount);
+
 
         gridPane.setMaxWidth(250);
 
-//        gpControl.addRow(0, gridPane);
-//        gpControl.addRow(1, btnAddByDistance);
-//        gpControl.addRow(2, btnAddByAngle);
-//        gpControl.addRow(3, btnAddByVelocity);
-//        gpControl.addRow(4, tester);
+
 
 
         btnAddByDistance.setPrefWidth(250);
@@ -262,8 +215,7 @@ public class Main extends Application {
 	            double velocity = Double.parseDouble(inputVelocity.getText());
 	            double angle = Double.parseDouble(inputAngle.getText());
 	            int n = Integer.parseInt(inputCount.getText());
-	            //it errrors if may null input
-            
+	        
                 if (n > 0)
                     addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, ballPane);
             } catch (NumberFormatException e) {
@@ -283,9 +235,7 @@ public class Main extends Application {
            
                 if (n > 0)
                     addParticlesByAngle(n, startX, startY, startAngle, endAngle, velocity, ballPane);
-                // Platform.runLater(
-                // ()->addParticlesByAngle( n, startX, startY, startAngle, endAngle, velocity,
-                // ballPane));
+        
             } catch (NumberFormatException e) {
                 notif.setText("Invalid input\n");
             }
@@ -303,7 +253,6 @@ public class Main extends Application {
             
                 if (n > 0)
                     addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle, ballPane);
-                // Platform.runLater(()->addParticlesByVelocity(n,startX,startY,startVelocity,endVelocity,angle,ballPane));
             } catch (NumberFormatException e) {
                 notif.setText("Invalid input\n");
             }
@@ -317,10 +266,8 @@ public class Main extends Application {
 
                 frameCount++;
                 try {
-                    // double curr = now - lastFPSTime ;
                     update(now);
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
 
@@ -339,24 +286,26 @@ public class Main extends Application {
 
     private synchronized List<Circle> balls() {
         try {
-        	List<Circle> circles = es.invokeAll(ball_buf).parallelStream().map(t -> {
-                try {
-                    return t.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                return null;
-            }).collect(Collectors.toList());
+        	List<Circle> circles = 
+        			es.invokeAll(ball_buf).parallelStream().map(Main::getBall).collect(Collectors.toList());
         	ball_buf.forEach(Particle::play);
             return circles;
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return null;
 
     }
+
+	private static Circle getBall(Future<Circle> t) {
+		try {
+		    return t.get();
+		} catch (InterruptedException | ExecutionException e) {
+
+		    e.printStackTrace();
+		}
+		return null;
+	}
 
     private synchronized List<Circle> sballs() {
         return ball_buf.parallelStream().map(t -> {
@@ -434,8 +383,7 @@ public class Main extends Application {
         double dx = (endX - startX) / (n);
         double dy = (endY - startY) / (n);
         double x = startX;
-        double y = startY; // Assuming 720 is the height of your pane and you want to invert the
-                           // y-coordinate
+        double y = startY; 
 
         for (int i = 0; i < n; i++) {
             double xin = x, yin = y;
@@ -447,20 +395,6 @@ public class Main extends Application {
 
         drawBalls(ballPane);
 
-        // ballPane.getChildren().add(p.getBall());
-
-        // ballPane.getChildren().addAll(tasks.stream().map(task -> {
-        // try {
-        // return task.get().getBall();
-        // } catch (InterruptedException | ExecutionException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
-        // return null;
-        // }).collect(Collectors.toList()));
-
-        // tester.appendText("Ball " + i + ": " + x + "," + y + ", v,a:" + velocity +
-        // "," + angle + "\n");
     }
 
     private void drawBalls(Pane ballPane) {
@@ -481,18 +415,7 @@ public class Main extends Application {
         for (int i = 0; i < n; i++) {
             addBall(new Particle(startX, startY, Math.toRadians(angle), velocity));
             angle += angleDiff;
-            // negative sin because Y increases downwards\
-            // // es.execute(new Task<Void>(){
-            //
-            // protected Void call(){
-            //
-            // Platform.runLater(()-> paneBall.getChildren().add(new Particle(startX,
-            // startY, Math.toRadians(angle), velocity).getBall()));
-            // return null;
-            // }
-            //
-            // });
-            // }
+
 
         }
         drawBalls(paneBall);
@@ -507,10 +430,7 @@ public class Main extends Application {
             double velocity = v;
 
             addBall(new Particle(startX, startY, Math.toRadians(angle), velocity));
-            // Platform.runLater(()->
-            // ballPane.getChildren().add(new Particle(startX, startY,
-            // Math.toRadians(angle), velocity).getBall());
-            // );
+      
             v += velocityDiff;
 
         }

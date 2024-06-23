@@ -373,7 +373,7 @@ public class Main extends Application {
 		gpVelocity.getChildren().clear();
 		
         gpVelocity.addRow(0, labelConstXY);
-        gpVelocity.addRow(1, gpEndXY);
+        gpVelocity.addRow(1, gpStartXY);
     	gpVelocity.addRow(2, labelStartEndVelocity);
         gpVelocity.addRow(3, gpStartEndVelocity);
         gpVelocity.addRow(4, labelAngle);
@@ -413,7 +413,7 @@ public class Main extends Application {
 		gpVelocity.getChildren().clear();
 		
 		gpAngle.addRow(0, labelConstXY);
-	    gpAngle.addRow(1, gpEndXY);
+	    gpAngle.addRow(1, gpStartXY);
 	    gpAngle.addRow(2, labelStartEndAngle);
 		gpAngle.addRow(3, gpStartEndAngle);
 	    gpAngle.addRow(4, labelVelocity);

@@ -57,14 +57,14 @@ public class Particle implements Callable<Circle> {
 
 					double x = circle.getLayoutX(), y = circle.getLayoutY();
 					// If the ball reaches the left or right border make the step negative
-					if (x < (d) ||
-							x > (1280 - d)) {
+					if (x < d ||
+							x > 1280 - d) {
 						dx = -dx;
 
 					}
 
 					// If the ball reaches the bottom or top border make the step negative
-					if ((y > (720 - d)) ||
+					if (y > 720 - d||
 							y < d) {
 						dy = -dy;
 

@@ -3,12 +3,14 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javafx.scene.shape.Circle;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -95,7 +97,7 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 3);
-        // es = ForkJoinPool.commonPool();
+//         es = ForkJoinPool.commonPool();
         // es = Executors.newFixedThreadPool(2);
         // es = Executors.newCachedThreadPool();
         launch(args);
@@ -276,11 +278,11 @@ public class Main extends Application {
         }.start();
     }
 
-    private synchronized void addBall(Particle p) {
+    private void addBall(Particle p) {
         ball_buf.add(p);
     }
 
-    private synchronized void clrBall() {
+    private void clrBall() {
         ball_buf.clear();
     }
 
@@ -288,6 +290,7 @@ public class Main extends Application {
         try {
         	List<Circle> circles = 
         			es.invokeAll(ball_buf).parallelStream().map(Main::getBall).collect(Collectors.toList());
+//        	Platform.runLater(()->ball_buf.forEach(Particle::play));
         	ball_buf.forEach(Particle::play);
             return circles;
         } catch (InterruptedException e) {

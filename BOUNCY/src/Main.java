@@ -30,7 +30,7 @@ public class Main extends Application {
     private List<Particle> ball_buf = new ArrayList<Particle>();
     // private Canvas canvas= new Canvas(1280, 720);;
     private Label fpsLabel = new Label("FPS: 0");;
-    private long lastFPSTime = System.nanoTime();;
+    private long lastFPSTime = System.currentTimeMillis();;
     private int frameCount = 0;
     private double fps = 0;
     public static ExecutorService es;
@@ -261,7 +261,7 @@ public class Main extends Application {
         });
 
         System.nanoTime();
-        lastFPSTime = System.nanoTime();
+        lastFPSTime = System.currentTimeMillis();
         new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -443,9 +443,9 @@ public class Main extends Application {
 
         double curr = now - lastFPSTime;
 
-        if (curr < 500_000_000)
+        if (curr < 500)
             return;
-        fps  *= 1_000_000_000.0 / curr;
+        fps  /= curr;
 
         fpsLabel.setText(String.format("FPS: %.2f", fps));
         lastFPSTime = now;

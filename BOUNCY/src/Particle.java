@@ -13,6 +13,7 @@ public class Particle implements Callable<Circle> {
 
 	private double x, y, v, theta;
 	private Timeline tl;
+	private Circle circle;
 
 	Particle(double x, double y,
 			double theta, double v) {
@@ -21,7 +22,8 @@ public class Particle implements Callable<Circle> {
 		this.y = 720 - y;
 		this.v = v;
 		this.theta = theta;
-
+		circle = new Circle(1, Color.RED);
+		this.tl = new Timeline();
 	}
 	public void play()
 	{
@@ -31,7 +33,7 @@ public class Particle implements Callable<Circle> {
 	public Circle call() throws Exception {
 		double ppu = v * 0.0166666666667;
 
-		Circle circle = new Circle(1, Color.RED);
+		
 		double d = circle.getRadius()*2;
 		this.x += d;
 		this.y += d;
@@ -43,8 +45,8 @@ public class Particle implements Callable<Circle> {
 		circle.setLayoutX(this.x);
 		circle.setLayoutY(this.y);
 
-
-		this.tl = new Timeline(new KeyFrame(Duration.millis(16.666667),
+		tl.getKeyFrames()
+.add(new KeyFrame(Duration.millis(16.666667),
 			new EventHandler<ActionEvent>() {
 
 				
@@ -73,6 +75,7 @@ public class Particle implements Callable<Circle> {
 					 circle.setLayoutY(y + dy);
 				}
 			}));
+		//		this.tl = new Timeline();
 
 		tl.setCycleCount(Timeline.INDEFINITE);
 

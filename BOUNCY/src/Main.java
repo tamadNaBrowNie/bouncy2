@@ -109,8 +109,8 @@ public class Main extends Application {
 
         paneControl.setMaxWidth(250);
 
-        fpsLabel.setLayoutX(1450);
-        fpsLabel.setLayoutY(10);
+        fpsLabel.setLayoutX(260);
+        fpsLabel.setLayoutY(0);
 
         notif.setText(":)");
 

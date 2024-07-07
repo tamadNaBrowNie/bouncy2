@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -11,6 +12,9 @@ import javafx.scene.shape.Circle;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -22,8 +26,17 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -34,17 +47,23 @@ public class Main extends Application {
     private int frameCount = 0;
     private double fps = 0;
     public static ExecutorService es;
+    private boolean hasExplorer = false;
+    private boolean isDebug = true; //show control panel initially
+
 
     private Pane paneContainer = new Pane();
 
     private Pane ballPane = new Pane();
-
+    private Pane paneRight = new Pane();
+    
     private Pane paneControl = new Pane();
 
     private GridPane gridPane = new GridPane();
 
     private TextField inputStartX = new TextField();
     private TextField inputStartY = new TextField();
+    private TextField inputXexp = new TextField();
+    private TextField inputYexp = new TextField();
     private TextField inputEndX = new TextField();
     private TextField inputEndY = new TextField();
     private TextField inputStartAngle = new TextField();
@@ -62,6 +81,9 @@ public class Main extends Application {
     private Button btnAddByDistance = new Button("Add by Distance");
     private Button btnAddByAngle = new Button("Add by Angle");
     private Button btnAddByVelocity = new Button("Add by Velocity");
+    private Button btnAddExplorer = new Button("Add Explorer");
+
+    private Button btnDebug = new Button("Debug Mode: ON");
 
     private GridPane gpDistance = new GridPane();
     private GridPane gpVelocity = new GridPane();
@@ -72,6 +94,8 @@ public class Main extends Application {
     private GridPane gpStartEndVelocity = new GridPane();
     private GridPane gpStartEndAngle = new GridPane();
 
+    private GridPane gpExplorer = new GridPane();
+
     private TabPane paneTab = new TabPane();
     private Tab tabDistance = new Tab("Add by Distance");
     private Tab tabAngle = new Tab("Angle");
@@ -80,17 +104,36 @@ public class Main extends Application {
     private TextArea tester = new TextArea("(Test) Balls rn:\n");
 
     private Separator separator1 = new Separator();
-
     private Separator separatorV = new Separator();
 
     private Label notif = new Label("");
+    private Label textTest = new Label("");
+
     private Label labelStartXY = new Label("Starting Points (X,Y):");
+    private Label labelXYexp = new Label("Spawn Explorer on (X,Y):");
     private Label labelEndXY = new Label("End Points (X,Y):");
     private Label labelStartEndVelocity = new Label("Starting and Ending Velocity:");
     private Label labelStartEndAngle = new Label("Starting and Ending Angle:");
     private Label labelConstXY = new Label("Spawn Point (X,Y):");
+    
+	private Pane paneExp = new Pane();
+	private Explorer explorer;
+    private StackPane spExplorer = new StackPane();
+//    private Pane camera = new StackPane();//making this stack pane is a bag idea
+    String bgFront = new File(System.getProperty("user.dir")+"\\src\\amongus.png").toURI().toString();
+    Image bgImage = new Image(bgFront);
+    String bgFlipped = new File(System.getProperty("user.dir")+"\\src\\amongusflipped.png").toURI().toString();
+    Image bgImageFlipped = new Image(bgFlipped);
 
     private GridPane gpContainer = new GridPane();
+    private GridPane paneLeft = new GridPane();
+    
+	private BooleanProperty s_key = new SimpleBooleanProperty();
+	private BooleanProperty a_key = new SimpleBooleanProperty();
+	private BooleanProperty w_key = new SimpleBooleanProperty();
+	private BooleanProperty d_key = new SimpleBooleanProperty();
+	private BooleanBinding keyPressed = s_key.or(a_key).or(w_key).or(d_key);
+
 
     public static void main(String[] args) {
         es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 3);
@@ -103,14 +146,24 @@ public class Main extends Application {
 
     public void start(Stage primaryStage) {
 
-        ballPane.setLayoutX(270);
+    	paneRight.setLayoutX(270);
+    	paneRight.setMinHeight(720);
+    	paneRight.setMinWidth(1280);
+        paneControl.setMaxWidth(250);
+        
         ballPane.setMinHeight(720);
         ballPane.setMinWidth(1280);
-
-        paneControl.setMaxWidth(250);
-
+        ballPane.setLayoutX(0);
+        ballPane.setLayoutY(0);
+    	
         fpsLabel.setLayoutX(1450);
         fpsLabel.setLayoutY(10);
+        
+        btnDebug.setLayoutX(250+20);
+        btnDebug.setLayoutY(10);
+        
+        textTest.setLayoutX(250+20);
+        textTest.setLayoutY(40);
 
         notif.setText(":)");
 
@@ -149,11 +202,294 @@ public class Main extends Application {
         tabDistance.setContent(gpDistance);
         tabAngle.setContent(gpAngle);
 
-        paneControl.getChildren().add(paneTab);
 
-        gpContainer.addRow(0, paneControl, separatorV, ballPane);
-        paneContainer.getChildren().addAll(gpContainer, fpsLabel);
+//        paneControl.getChildren().add(gpControls);
+        
+        gpExplorer.addRow(0,labelXYexp);
+        gpExplorer.addRow(1,inputXexp);
+        gpExplorer.addRow(1,inputYexp);
+        gpExplorer.addRow(2,btnAddExplorer);
+        gpExplorer.setMaxWidth(250);
+        
+        paneLeft.addRow(0,paneTab);
+        paneLeft.addRow(1,gpExplorer);
+        ballPane.setStyle(
+        		"-fx-background-color: white;"+
+                "-fx-border-color: blue;" + // Border color
+                "-fx-border-width: 1px;" // Border width
+        );
+        
+        paneRight.getChildren().add(ballPane);
+        paneRight.setStyle(
+                "-fx-border-color: grey;" + // Border color
+                "-fx-border-width: 5px;" // Border width
+        );
+        
+//        camera.getChildren().addAll(ballPane, spExplorer);
+//        gpContainer.addRow(0, paneControl, separatorV, ballPane);
+        gpContainer.addRow(0, paneLeft, separatorV, paneRight);
+        paneContainer.getChildren().addAll(gpContainer, fpsLabel, textTest, btnDebug);
+        Scene scene = new Scene(paneContainer);
+        primaryStage.setTitle("Particle Physics Simulator");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        
+        btnDebug.setOnAction(event ->{
+            //hide panel Control when debug is off,
+        	//change position of button
+        	//change text of button to Debug Mode: OFF
+        	if (isDebug) {
+            	btnDebug.setText("Debug Mode: OFF");
+            	gpContainer.getChildren().clear();
+                gpContainer.addRow(0, paneRight);
+                isDebug=false;
+                btnDebug.setLayoutX(20); 
+                fpsLabel.setLayoutX(1200);//1450-250 (width of panel on left)
+                textTest.setText("Debug: "+isDebug);
+                primaryStage.setWidth(1280);
+                
+                if(hasExplorer) {
+                	//zooms in the middle always,
+                	//so have to adjust position of both ballPane
+                	// - spExplorer's position will be adjusted to middle
+                	// - then paneRight.getWidth()/2 (midpoint) will be added to ballPane instead for it to move to midpoint-position
+                	paneRight.setScaleX(4.f);
+                	paneRight.setScaleY(4.f);
+                	
+                    paneExp.setMaxSize(30,30);
 
+                    //test
+//                    ballPane.setLayoutX(paneRight.getWidth()/2);//middle
+                    
+                    
+//                    ballPane.setLayoutX(1280/2+spExplorer.getLayoutX()/2);
+//                    
+//                	spExplorer.setMaxSize(1280, 720);//illusion, will fit to screen
+                	//FOOK IT I'LL JUST EDIT THE BALLS LAYER TO GIVE THE IMPRESSION AS IF ITS MOVING OPPOSITE THE EXPLORER
+//					camera.setScaleX(4f);
+//					camera.setScaleY(4f);
+//					
+//					camera.setLayoutX(1280/2+(spExplorer.getLayoutX()/2));
+//					
+					//NEW TEST: update camera to where the spExplorer is supposed to be mathematically nalang
+					
+	            	//set the screen middle to where the spExplorer is cuz middle is the zoom
+					//camera contains the ball pane and spExp
+					//while spExp moves in one direction, camera should move the opposite direction
+	            }
+                
+                //zoom in testing
+//                ballPane.setScaleX(2f);
+//            	ballPane.setScaleY(2f);
+            	//follow in animation timer
+                //try again: ball pane will be the one scaling and moving since i put it inside another container
+//                if(hasExplorer) {
+//                    ballPane.setScaleX(4f);
+//                	ballPane.setScaleY(4f);	
+//                }
+        	}
+        	else {
+            	btnDebug.setText("Debug Mode: ON");
+            	gpContainer.getChildren().clear();
+                gpContainer.addRow(0, paneLeft, separatorV, paneRight);
+                fpsLabel.setLayoutX(1450);
+                btnDebug.setLayoutX(250+20); //250 is size of control panel
+                isDebug=true;
+                textTest.setText("Debug: "+isDebug);
+                primaryStage.setWidth(1280+250); //full screen size: 1280+250
+                
+                //zoom testing
+                
+                if(hasExplorer)
+                {
+                	paneRight.setScaleX(1.f);
+                	paneRight.setScaleY(1.f);
+	            	spExplorer.setMaxSize(320, 180);
+	                paneExp.setMaxSize(30,30);
+                }
+        	}
+        	
+        });
+        
+        
+        btnAddExplorer.setOnAction(event -> {
+        	try {
+        		double expX = Double.parseDouble(inputXexp.getText());
+                double expY = Double.parseDouble(inputYexp.getText());
+        		
+                
+        		if (!hasExplorer){
+            		hasExplorer=true;
+            		paneExp = new Pane();
+                    paneExp.setBackground(new Background(new BackgroundImage (
+            				bgImage,
+            				BackgroundRepeat.NO_REPEAT,
+                            BackgroundRepeat.NO_REPEAT,
+                            null, new BackgroundSize(
+                            		BackgroundSize.AUTO,BackgroundSize.AUTO,
+                                    false,false,true,false
+                            )))
+            		);
+                    spExplorer.setLayoutX(expX);
+                    spExplorer.setLayoutY(expY);
+					
+//                    spExplorer.setBorder(10,10,10,10);
+                    spExplorer.setStyle(
+                            "-fx-border-color: red;" + // Border color
+                            "-fx-border-width: 1px;" // Border width
+                    );
+
+                    spExplorer.setPrefSize(320, 180); //div 4 zoom
+                    spExplorer.setLayoutX((paneRight.getWidth()/2)-(spExplorer.getWidth()/2));	//center it para zoomed again, 12
+                    spExplorer.setLayoutY((paneRight.getHeight()/2)-spExplorer.getHeight()/2);
+                    
+                    //idk why but the middle is 435,240 (not same coordinates as balls yet TODO)
+                    
+                    ballPane.setLayoutX((paneRight.getWidth()/2)+(spExplorer.getWidth()/2));
+                    ballPane.setLayoutY((paneRight.getHeight()/2)+(spExplorer.getHeight()/2));
+//                    ballPane.setLayoutX((paneRight.getWidth()/2)+spExplorer.getWidth()/2 + expX);	//yung ballpane lng ang gagalaw to give illusion na gumagalaw kuno
+//                    ballPane.setLayoutY((paneRight.getHeight()/2)+spExplorer.getHeight()/2 - expY); //reverse direction dapat
+//                    paneExp.setLayoutX(expX);
+//                    paneExp.setLayoutY(expY);
+	                paneExp.setMaxSize(30,30);
+
+//            		ballPane.getChildren().add(explorer.getPane()); // THIS MAKES IT VISIBLE ON THE RIGHT PANE
+//            		ballPane.getChildren().add(paneExp); // THIS MAKES IT VISIBLE ON THE RIGHT PANE
+
+            		btnAddExplorer.setDisable(true);
+    	            notif.setText("Explorer spawned.");
+            	
+//            		textTest.setText(System.getProperty("user.dir")+"\\src\\amongus.png");
+    	            //	CORRECT PATH!
+                    //file:///D:/Users/ghael/Documents/GitHub/Sites/MP/bouncy/BOUNCY/src/amongus.png
+    	            
+    	            
+    	            
+    	            ///another experiment
+//    	            ballPane.center
+    	            //to center the paneExp inside the ballPane, make a stack pane which corresponds to the "camera" kunware
+    	            //that automatically follows the child node, paneExp (the explorer)
+    	            spExplorer.getChildren().add(paneExp);
+    	            paneRight.getChildren().add(spExplorer);
+            	}
+        		
+	        } catch (NumberFormatException e) {
+	            notif.setText("Invalid Explorer coordinates.\n");
+	        }
+
+        	
+        	
+        });
+        
+        scene.setOnKeyPressed(e ->{
+        	//if (!isDebug && hasExplorer) //NOTE: uncomment when done testing
+            if (hasExplorer)
+
+        	{//DONE-could be better, make instead another animationtimer that checks if keys are being pressed or not
+        		switch(e.getCode())
+        		{
+        			case W:
+        				w_key.set(true);
+    	                textTest.setText("W is pressed.");
+    	                paneExp.setBackground(new Background(new BackgroundImage (
+                				bgImage,
+                				BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                null, new BackgroundSize(
+                                		BackgroundSize.AUTO,BackgroundSize.AUTO,
+                                        false,false,true,false
+                                )))
+                		);
+    	                break;
+        			case S:
+        				paneExp.setBackground(new Background(new BackgroundImage (
+                				bgImageFlipped,
+                				BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                null, new BackgroundSize(
+                                		BackgroundSize.AUTO,BackgroundSize.AUTO,
+                                        false,false,true,false
+                                )))
+                		);
+        				s_key.set(true);
+    	                textTest.setText("S is pressed.");
+    	                break;
+        			case A:
+        				a_key.set(true);
+    	                textTest.setText("A is pressed.");
+    	                paneExp.setBackground(new Background(new BackgroundImage (
+                				bgImageFlipped,
+                				BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                null, new BackgroundSize(
+                                		BackgroundSize.AUTO,BackgroundSize.AUTO,
+                                        false,false,true,false
+                                )))
+                		);
+    	                break;
+        			case D:
+        				d_key.set(true);
+    	                textTest.setText("D is pressed.");
+    	                paneExp.setBackground(new Background(new BackgroundImage (
+                				bgImage,
+                				BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                null, new BackgroundSize(
+                                		BackgroundSize.AUTO,BackgroundSize.AUTO,
+                                        false,false,true,false
+                                )))
+                		);
+    	                break;
+        		}
+//				if(e.getCode()==KeyCode.W) {
+//					w_key.set(true);
+//	                textTest.setText("W is pressed.");
+//	//                explorer.setLayoutX(explorer.getPane().getLayoutX() + 1);
+////	                paneExp.setLayoutY(paneExp.getLayoutY() - 10);//pixels per registered click idk
+//				}
+//				if(e.getCode()==KeyCode.S) {
+//					s_key.set(true);
+//	                textTest.setText("S is pressed.");
+////	                paneExp.setLayoutY(paneExp.getLayoutY() + 10);
+//				}
+//				if(e.getCode()==KeyCode.A) {
+//					a_key.set(true);
+//	                textTest.setText("A is pressed.");
+////	                paneExp.setLayoutX(paneExp.getLayoutX() - 10);
+//				}
+//				if(e.getCode()==KeyCode.D) {
+//					d_key.set(true);
+//	                textTest.setText("D is pressed.");
+////	                paneExp.setLayoutX(paneExp.getLayoutX() + 10);
+//				}
+        	}
+		});
+        scene.setOnKeyReleased(e ->{
+//        	if (!isDebug && hasExplorer)  //NOTE: uncomment when done testing
+        	if (hasExplorer)
+        	{
+        		switch(e.getCode())
+        		{
+        			case W:
+        				w_key.set(false);
+    	                textTest.setText("W is pressed.");
+    	                break;
+        			case S:
+        				s_key.set(false);
+    	                textTest.setText("S is pressed.");
+    	                break;
+        			case A:
+        				a_key.set(false);
+    	                textTest.setText("A is pressed.");
+    	                break;
+        			case D:
+        				d_key.set(false);
+    	                textTest.setText("D is pressed.");
+    	                break;
+        		}
+        	}
+        });
+        
         tabVelocity.setOnSelectionChanged(e -> {
             tabDistance.setText("Distance");
             tabAngle.setText("Angle");
@@ -185,13 +521,8 @@ public class Main extends Application {
             tabVelocity.setText("Velocity");
 
             initTabAngle();
-        });
-
-        Scene scene = new Scene(paneContainer);
-
-        primaryStage.setTitle("Particle Physics Simulator");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        });        
+       
 
         btnAddByDistance.setOnAction(event -> {
             try {
@@ -258,7 +589,60 @@ public class Main extends Application {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                
+                if(w_key.get()) {
+//                	if (spExplorer.getLayoutY()>0){
+//	                	spExplorer.setLayoutY(spExplorer.getLayoutY() - 1);
+	                	ballPane.setLayoutY(ballPane.getLayoutY()+ 1);
+//                	}
 
+                }
+                if(s_key.get()) {
+//                	if (spExplorer.getLayoutY()<720-spExplorer.getHeight()) {
+//		                spExplorer.setLayoutY(spExplorer.getLayoutY() + 1);
+                	ballPane.setLayoutY(ballPane.getLayoutY()- 1);
+
+//                	}
+                }
+                if(a_key.get()) {
+//                	if (spExplorer.getLayoutX()>=0) {
+//	                	camera.setLayoutX(camera.getLayoutX()+1);
+                	ballPane.setLayoutX(ballPane.getLayoutX()+ 1);
+
+//		                spExplorer.setLayoutX(spExplorer.getLayoutX() - 1);//pixels per registered click idk
+//                	}
+                }
+                if(d_key.get()) {
+//                	if (spExplorer.getLayoutX()<1280-spExplorer.getWidth()) { //outer bounds
+//	                	camera.setLayoutX(camera.getLayoutX()-1);
+                	ballPane.setLayoutX(ballPane.getLayoutX()- 1);
+//		                spExplorer.setLayoutX(spExplorer.getLayoutX() + 1);//pixels per registered click idk
+//                	}
+                }
+                
+                textTest.setText(spExplorer.getLayoutX() + ","+spExplorer.getLayoutY() +"\n"+ballPane.getLayoutX() + " = "+ballPane.getLayoutY());
+//                camera.setLayoutX(spExplorer.getLayoutX());
+                //experiment for zoom
+                //TODO: make the ballpane exactly follow the coordinates and size of the stack pane
+            	//TRYING THAT RN:
+            	//dont forget to reset it at the debug = true
+//                if(!isDebug)
+//                {
+//                	//the center of the pane is middle point (layoutX + width / 2)
+//                	//middle point of parent pane +- middle point of child pane should be center??
+////                	ballPane.setLayoutX((ballPane.getLayoutX()+ballPane.getWidth())/2-(spExplorer.getLayoutX()+spExplorer.getWidth())/2);
+//////                	ballPane.setLayoutY(spExplorer.getLayoutY());
+////                	ballPane.setPrefSize(320, 180);
+////                	ballPane.setScaleX(4f);
+////                	ballPane.setScaleY(4f);
+//                }
+//                ballPane.setLayoutX((ballPane.getLayoutX()+ballPane.getWidth())/2-(spExplorer.getLayoutX()+spExplorer.getWidth())/2);
+
+                //try lng
+//                ballPane.setLayoutY(spExplorer.getLayoutY());
+//                ballPane.setLayoutX(spExplorer.getLayoutX());
+                
+//                ballPane.setLayoutY(spExplorer.getLayoutY()+1);//well it is moving :v
             }
 
         }.start();
@@ -367,7 +751,8 @@ public class Main extends Application {
         gpAngle.addRow(10, notif);
 
     }
-
+  
+    
     private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity,
             double angle, Pane ballPane) {
         double dx = (endX - startX) / (n);
@@ -436,6 +821,8 @@ public class Main extends Application {
         fpsLabel.setText(String.format("FPS: %.2f", fps));
         lastFPSTime = now;
         fps = 0;
+        
+        
 
     }
 

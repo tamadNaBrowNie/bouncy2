@@ -134,6 +134,7 @@ public class Main extends Application {
 	private BooleanProperty d_key = new SimpleBooleanProperty();
 	private BooleanBinding keyPressed = s_key.or(a_key).or(w_key).or(d_key);
 
+	private GridPane gpDebug = new GridPane();
 
     public static void main(String[] args) {
         es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 3);
@@ -147,25 +148,32 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
 
     	paneRight.setLayoutX(270);
-    	paneRight.setMinHeight(720);
+    	paneRight.setPrefHeight(720);
     	paneRight.setMinWidth(1280);
         paneControl.setMaxWidth(250);
         
-        ballPane.setMinHeight(720);
+        ballPane.setPrefHeight(720);
         ballPane.setMinWidth(1280);
         ballPane.setLayoutX(0);
-        ballPane.setLayoutY(0);
-    	
-        fpsLabel.setLayoutX(1450);
-        fpsLabel.setLayoutY(10);
+        ballPane.setLayoutY(0);   
         
-        btnDebug.setLayoutX(250+20);
-        btnDebug.setLayoutY(10);
+//        fpsLabel.setLayoutX(260);
+//        fpsLabel.setLayoutY(0);
+//        
+//        btnDebug.setLayoutX(260);
+//        btnDebug.setLayoutY(10);
         
-        textTest.setLayoutX(250+20);
-        textTest.setLayoutY(40);
+//        textTest.setLayoutX(260);
+//        textTest.setLayoutY(40);
 
-        notif.setText(":)");
+        gpDebug.addRow(0, fpsLabel);
+        gpDebug.addRow(1, btnDebug);
+        gpDebug.addRow(2, textTest);
+        gpDebug.addRow(3, notif);
+        
+        gpDebug.setLayoutX(260);
+        gpDebug.setLayoutY(0);
+//        notif.setText(":)");
 
         gridPane.setAlignment(Pos.BASELINE_CENTER);
 
@@ -228,7 +236,9 @@ public class Main extends Application {
 //        camera.getChildren().addAll(ballPane, spExplorer);
 //        gpContainer.addRow(0, paneControl, separatorV, ballPane);
         gpContainer.addRow(0, paneLeft, separatorV, paneRight);
-        paneContainer.getChildren().addAll(gpContainer, fpsLabel, textTest, btnDebug);
+//        paneContainer.getChildren().addAll(gpContainer, fpsLabel, textTest, btnDebug);
+        paneContainer.getChildren().addAll(gpContainer, gpDebug);
+
         Scene scene = new Scene(paneContainer);
         primaryStage.setTitle("Particle Physics Simulator");
         primaryStage.setScene(scene);
@@ -239,12 +249,14 @@ public class Main extends Application {
         	//change position of button
         	//change text of button to Debug Mode: OFF
         	if (isDebug) {
-            	btnDebug.setText("Debug Mode: OFF");
+            	btnDebug.setText("Developer Mode: OFF");
             	gpContainer.getChildren().clear();
                 gpContainer.addRow(0, paneRight);
                 isDebug=false;
-                btnDebug.setLayoutX(20); 
-                fpsLabel.setLayoutX(1200);//1450-250 (width of panel on left)
+//                btnDebug.setLayoutX(10);
+//                fpsLabel.setLayoutX(10); //10 px from the width of the control panel
+//                fpsLabel.setLayoutY(0);
+                gpDebug.setLayoutX(10);
                 textTest.setText("Debug: "+isDebug);
                 primaryStage.setWidth(1280);
                 
@@ -289,11 +301,13 @@ public class Main extends Application {
 //                }
         	}
         	else {
-            	btnDebug.setText("Debug Mode: ON");
+            	btnDebug.setText("Developer Mode: ON");
             	gpContainer.getChildren().clear();
                 gpContainer.addRow(0, paneLeft, separatorV, paneRight);
-                fpsLabel.setLayoutX(1450);
-                btnDebug.setLayoutX(250+20); //250 is size of control panel
+//                fpsLabel.setLayoutX(260);
+//                btnDebug.setLayoutX(250+10); //250 is size of control panel
+                gpDebug.setLayoutX(260);
+
                 isDebug=true;
                 textTest.setText("Debug: "+isDebug);
                 primaryStage.setWidth(1280+250); //full screen size: 1280+250

@@ -124,6 +124,11 @@ public class Main extends Application {
     Image bgImage = new Image(bgFront);
     String bgFlipped = new File(System.getProperty("user.dir")+"\\src\\amongusflipped.png").toURI().toString();
     Image bgImageFlipped = new Image(bgFlipped);
+    String mapImgFile = new File(System.getProperty("user.dir")+"\\src\\masp.jpg").toURI().toString();
+    Image mapImg = new Image(mapImgFile);
+    Pane pSprite = new Pane();
+    String bigSpriteFile = new File(System.getProperty("user.dir")+"\\src\\amongus.png").toURI().toString();
+    Image bigSprite = new Image(bigSpriteFile);
 
     private GridPane gpContainer = new GridPane();
     private GridPane paneLeft = new GridPane();
@@ -134,6 +139,7 @@ public class Main extends Application {
 	private BooleanProperty d_key = new SimpleBooleanProperty();
 	private BooleanBinding keyPressed = s_key.or(a_key).or(w_key).or(d_key);
 
+	private StackPane spMiniMap = new StackPane();
 	private GridPane gpDebug = new GridPane();
 
     public static void main(String[] args) {
@@ -222,10 +228,44 @@ public class Main extends Application {
         paneLeft.addRow(0,paneTab);
         paneLeft.addRow(1,gpExplorer);
         ballPane.setStyle(
-        		"-fx-background-color: white;"+
+//        		"-fx-background-color: white;"+
                 "-fx-border-color: blue;" + // Border color
                 "-fx-border-width: 1px;" // Border width
         );
+        
+        ballPane.setBackground(new Background(new BackgroundImage (
+        		mapImg,
+				BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                null, new BackgroundSize(
+                		BackgroundSize.AUTO,BackgroundSize.AUTO,
+                        false,false,true,false
+                )))
+		);
+        
+        //test minimap = try to store the elements of the balls and display somewhere.
+        //this is going to show lang kunware na the balls that exist in the bounds of the
+        // spExplorer is being stored perfectly. Then their layoutXY can be shown in place like, x10 kunware
+        //so we can actually see it zoomed in
+        spMiniMap.setLayoutX(0);
+        spMiniMap.setPrefHeight(19*10);//The dimensions of the periphery are 19rows by 33 columns, (x10 para we can see what's actually happening)
+        spMiniMap.setPrefWidth(33*10);
+        spMiniMap.setLayoutY(paneRight.getHeight()-spMiniMap.getHeight());
+        paneRight.getChildren().add(spMiniMap);
+        pSprite = new Pane();
+        pSprite.setBackground(new Background(new BackgroundImage (
+        		bigSprite,
+				BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                null, new BackgroundSize(
+                		BackgroundSize.AUTO,BackgroundSize.AUTO,
+                        false,false,true,false
+                )))
+		);
+        spMiniMap.getChildren().add(pSprite);
+        pSprite.setMaxSize(30, 30);
+        
+//        -------------------
         
         paneRight.getChildren().add(ballPane);
         paneRight.setStyle(
@@ -265,29 +305,18 @@ public class Main extends Application {
                 	//so have to adjust position of both ballPane
                 	// - spExplorer's position will be adjusted to middle
                 	// - then paneRight.getWidth()/2 (midpoint) will be added to ballPane instead for it to move to midpoint-position
+
                 	paneRight.setScaleX(4.f);
                 	paneRight.setScaleY(4.f);
                 	
-                    paneExp.setMaxSize(30,30);
+                    paneExp.setMaxSize(3,3);
 
-                    //test
-//                    ballPane.setLayoutX(paneRight.getWidth()/2);//middle
-                    
-                    
-//                    ballPane.setLayoutX(1280/2+spExplorer.getLayoutX()/2);
-//                    
-//                	spExplorer.setMaxSize(1280, 720);//illusion, will fit to screen
-                	//FOOK IT I'LL JUST EDIT THE BALLS LAYER TO GIVE THE IMPRESSION AS IF ITS MOVING OPPOSITE THE EXPLORER
-//					camera.setScaleX(4f);
-//					camera.setScaleY(4f);
-//					
-//					camera.setLayoutX(1280/2+(spExplorer.getLayoutX()/2));
-//					
-					//NEW TEST: update camera to where the spExplorer is supposed to be mathematically nalang
-					
-	            	//set the screen middle to where the spExplorer is cuz middle is the zoom
-					//camera contains the ball pane and spExp
-					//while spExp moves in one direction, camera should move the opposite direction
+                    //TODO: within the box of the stackpane spExplorer,
+                    //get the id / or element num of those and render them to a new box, scaling their x and y to the screen.
+
+                    notif.setText("Elements inside the box are: ");
+                    //for loop to check which are inside
+                    notif.setText(notif.getText()+"ball %d at [%d,%d]");
 	            }
                 
                 //zoom in testing
@@ -353,19 +382,26 @@ public class Main extends Application {
                             "-fx-border-width: 1px;" // Border width
                     );
 
-                    spExplorer.setPrefSize(320, 180); //div 4 zoom
-                    spExplorer.setLayoutX((paneRight.getWidth()/2)-(spExplorer.getWidth()/2));	//center it para zoomed again, 12
-                    spExplorer.setLayoutY((paneRight.getHeight()/2)-spExplorer.getHeight()/2);
+                    spMiniMap.setStyle(
+                            "-fx-border-color: green;" + // Border color
+                            "-fx-border-width: 1px;" // Border width
+                    );
+//                    spExplorer.setPrefSize(320, 180); //div 4 zoom
+//                    The dimensions of the periphery are 19 rows by 33 columns,
+//                    with the sprite rendered in the very center. 
+                    spExplorer.setPrefSize(33, 19); //wow super small
+                    spExplorer.setLayoutX(expX);
+                    spExplorer.setLayoutY(expY);
+
+//                    spExplorer.setLayoutX((paneRight.getWidth()/2)-(spExplorer.getWidth()/2));	//center it para zoomed again, 12
+//                    spExplorer.setLayoutY((paneRight.getHeight()/2)-spExplorer.getHeight()/2);
                     
                     //idk why but the middle is 435,240 (not same coordinates as balls yet TODO)
                     
-                    ballPane.setLayoutX((paneRight.getWidth()/2)+(spExplorer.getWidth()/2));
-                    ballPane.setLayoutY((paneRight.getHeight()/2)+(spExplorer.getHeight()/2));
-//                    ballPane.setLayoutX((paneRight.getWidth()/2)+spExplorer.getWidth()/2 + expX);	//yung ballpane lng ang gagalaw to give illusion na gumagalaw kuno
-//                    ballPane.setLayoutY((paneRight.getHeight()/2)+spExplorer.getHeight()/2 - expY); //reverse direction dapat
-//                    paneExp.setLayoutX(expX);
-//                    paneExp.setLayoutY(expY);
-	                paneExp.setMaxSize(30,30);
+//                    ballPane.setLayoutX((paneRight.getWidth()/2)+(spExplorer.getWidth()/2));
+//                    ballPane.setLayoutY((paneRight.getHeight()/2)+(spExplorer.getHeight()/2));
+//                    
+                    paneExp.setMaxSize(3,3);
 
 //            		ballPane.getChildren().add(explorer.getPane()); // THIS MAKES IT VISIBLE ON THE RIGHT PANE
 //            		ballPane.getChildren().add(paneExp); // THIS MAKES IT VISIBLE ON THE RIGHT PANE
@@ -377,12 +413,6 @@ public class Main extends Application {
     	            //	CORRECT PATH!
                     //file:///D:/Users/ghael/Documents/GitHub/Sites/MP/bouncy/BOUNCY/src/amongus.png
     	            
-    	            
-    	            
-    	            ///another experiment
-//    	            ballPane.center
-    	            //to center the paneExp inside the ballPane, make a stack pane which corresponds to the "camera" kunware
-    	            //that automatically follows the child node, paneExp (the explorer)
     	            spExplorer.getChildren().add(paneExp);
     	            paneRight.getChildren().add(spExplorer);
             	}
@@ -606,36 +636,58 @@ public class Main extends Application {
                 
                 if(w_key.get()) {
 //                	if (spExplorer.getLayoutY()>0){
-//	                	spExplorer.setLayoutY(spExplorer.getLayoutY() - 1);
-	                	ballPane.setLayoutY(ballPane.getLayoutY()+ 1);
+	                	spExplorer.setLayoutY(spExplorer.getLayoutY() - 1);
+//	                	ballPane.setLayoutY(ballPane.getLayoutY()+ 1);
 //                	}
 
                 }
                 if(s_key.get()) {
 //                	if (spExplorer.getLayoutY()<720-spExplorer.getHeight()) {
-//		                spExplorer.setLayoutY(spExplorer.getLayoutY() + 1);
-                	ballPane.setLayoutY(ballPane.getLayoutY()- 1);
+		                spExplorer.setLayoutY(spExplorer.getLayoutY() + 1);
+//                	ballPane.setLayoutY(ballPane.getLayoutY()- 1);
 
 //                	}
                 }
                 if(a_key.get()) {
 //                	if (spExplorer.getLayoutX()>=0) {
 //	                	camera.setLayoutX(camera.getLayoutX()+1);
-                	ballPane.setLayoutX(ballPane.getLayoutX()+ 1);
+//                	ballPane.setLayoutX(ballPane.getLayoutX()+ 1);
 
-//		                spExplorer.setLayoutX(spExplorer.getLayoutX() - 1);//pixels per registered click idk
+		                spExplorer.setLayoutX(spExplorer.getLayoutX() - 1);//pixels per registered click idk
 //                	}
                 }
                 if(d_key.get()) {
 //                	if (spExplorer.getLayoutX()<1280-spExplorer.getWidth()) { //outer bounds
 //	                	camera.setLayoutX(camera.getLayoutX()-1);
-                	ballPane.setLayoutX(ballPane.getLayoutX()- 1);
-//		                spExplorer.setLayoutX(spExplorer.getLayoutX() + 1);//pixels per registered click idk
+//                	ballPane.setLayoutX(ballPane.getLayoutX()- 1);
+		                spExplorer.setLayoutX(spExplorer.getLayoutX() + 1);//pixels per registered click idk
 //                	}
                 }
                 
-                textTest.setText(spExplorer.getLayoutX() + ","+spExplorer.getLayoutY() +"\n"+ballPane.getLayoutX() + " = "+ballPane.getLayoutY());
-//                camera.setLayoutX(spExplorer.getLayoutX());
+//                textTest.setText("\nBounds of the periphery (in px):\nX: [%i,%i]\nY: [%i,%i]",
+//                		spExplorer.getLayoutX(),(paneRight.getWidth()-spExplorer.getWidth()),
+//                		spExplorer.getLayoutY(),(paneRight.getHeight()-spExplorer.getHeight())
+//                		);
+                
+//                if(hasExplorer)
+//                {
+//	                textTest.setText(spExplorer.getLayoutX()+","+spExplorer.getLayoutY()+
+//	                		"\nBounds of the periphery (in px):\n"
+//	                		+ "X: ["+spExplorer.getLayoutX()+","+(paneRight.getWidth()-spExplorer.getWidth())+"]\n"
+//	                		+ "Y: ["+spExplorer.getLayoutY()+","+(paneRight.getHeight()-spExplorer.getHeight())+"]");
+//                }
+                
+                if(hasExplorer)
+                {
+	                textTest.setText(spExplorer.getLayoutX()+","+spExplorer.getLayoutY()+
+	                		"\nBounds of the periphery (in px):\n"
+	                		+ "X: ["+spExplorer.getLayoutX()+","+(spExplorer.getLayoutX()+spExplorer.getWidth())+"]\n"
+	                		+ "Y: ["+spExplorer.getLayoutY()+","+(spExplorer.getLayoutY()+spExplorer.getHeight())+"]");
+                }
+                
+                
+
+                //                camera.setLayoutX(spExplorer.getLayoutX());
                 //experiment for zoom
                 //TODO: make the ballpane exactly follow the coordinates and size of the stack pane
             	//TRYING THAT RN:

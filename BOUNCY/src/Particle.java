@@ -13,8 +13,7 @@ public class Particle implements Callable<Circle> {
 
 	private double x, y, v, theta;
 	private Timeline tl;
-	private Circle circle;
-
+	
 	Particle(double x, double y,
 			double theta, double v) {
 
@@ -22,7 +21,6 @@ public class Particle implements Callable<Circle> {
 		this.y = 720 - y;
 		this.v = v;
 		this.theta = theta;
-		circle = new Circle(1, Color.RED);
 		this.tl = new Timeline();
 	}
 
@@ -32,16 +30,21 @@ public class Particle implements Callable<Circle> {
 
 	@Override
 	public Circle call() throws Exception {
+		Circle circle;
+		final int rad = 1;
+		circle = new Circle(rad, Color.RED);
 		double ppu = v * 0.0166666666667;
 
-		double d = circle.getRadius() * 2;
-		this.x += d;
-		this.y += d;
+		double d = rad << 2;
 		if (this.x >= 1280) {
 			this.x = 1280 - d;
+		}else if(0>=this.x){
+			this.x =d;	
 		}
-		if (this.y < 0)
+		if (this.y <= 0)
 			this.y = d;
+		else if (this.y>= 720)
+			this.y = 720-d;
 		circle.setLayoutX(this.x);
 		circle.setLayoutY(this.y);
 
@@ -55,8 +58,9 @@ public class Particle implements Callable<Circle> {
 							@Override
 							public void handle(ActionEvent t) {
 								// move the ball
-
+								boolean is_seen = true;
 								double x = circle.getLayoutX(), y = circle.getLayoutY();
+								// TODO: USE CONCURRENCY
 								// If the ball reaches the left or right border make the step negative
 								if (x < d ||
 										x > 1280 - d) {
@@ -70,12 +74,16 @@ public class Particle implements Callable<Circle> {
 									dy = -dy;
 
 								}
-								circle.setLayoutX(x + dx);
-								circle.setLayoutY(y + dy);
+								x+=dx;
+								y+=dy;
+								// TODO only set layout if visible
+								if(is_seen){
+								circle.setLayoutX(x);
+								circle.setLayoutY(y);
+								}
 							}
 						}));
-		// this.tl = new Timeline();
-
+		
 		tl.setCycleCount(Timeline.INDEFINITE);
 
 		return circle;

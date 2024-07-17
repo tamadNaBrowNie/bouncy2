@@ -27,7 +27,9 @@ public class Particle implements Callable<Circle> {
 	public void play() {
 		tl.play();
 	}
-
+	private double check(double coord, double d, double max, double delta){
+		return coord+(coord<d|| coord>max-d)?-max:max;
+	}
 	@Override
 	public Circle call() throws Exception {
 		Circle circle;
@@ -48,36 +50,25 @@ public class Particle implements Callable<Circle> {
 		circle.setLayoutX(this.x);
 		circle.setLayoutY(this.y);
 
+		double dx = -ppu * Math.cos(theta);
+		double dy = -ppu * Math.sin(theta);
 		tl.getKeyFrames()
 				.add(new KeyFrame(Duration.millis(16.666667),
 						new EventHandler<ActionEvent>() {
 
-							double dx = -ppu * Math.cos(theta);
-							double dy = -ppu * Math.sin(theta);
 
 							@Override
 							public void handle(ActionEvent t) {
 								// move the ball
-								boolean is_seen = true;
-								double x = circle.getLayoutX(), y = circle.getLayoutY();
+								double x , y;
 								// TODO: USE CONCURRENCY
-								// If the ball reaches the left or right border make the step negative
-								if (x < d ||
-										x > 1280 - d) {
-									dx = -dx;
-
-								}
-
-								// If the ball reaches the bottom or top border make the step negative
-								if (y > 720 - d ||
-										y < d) {
-									dy = -dy;
-
-								}
-								x+=dx;
-								y+=dy;
+								
+								x=check(circle.getLayoutX(),d,1280,dx);
+								y=check(circle.getLayoutY(),d,720,dy);
 								// TODO only set layout if visible
-								if(is_seen){
+								//TODO find a way to do a cull check (hide if out of bounds
+								// Wait i should do that in Main.java
+								if(circle.isVisible()){
 								circle.setLayoutX(x);
 								circle.setLayoutY(y);
 								}

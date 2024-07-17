@@ -162,7 +162,7 @@ public class Main extends Application {
         ballPane.setMinWidth(1280);
         ballPane.setLayoutX(0);
         ballPane.setLayoutY(0);   
-        
+        //ballPane.setClip(this.spExplorer);
 //        fpsLabel.setLayoutX(260);
 //        fpsLabel.setLayoutY(0);
 //        

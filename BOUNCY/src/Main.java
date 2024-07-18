@@ -261,17 +261,17 @@ public class Main extends Application {
         spMiniMap.setPrefWidth(33*10);
         spMiniMap.setLayoutY(paneRight.getHeight()-spMiniMap.getHeight());
         paneRight.getChildren().add(spMiniMap);
-        pSprite = new Pane();
-        pSprite.setBackground(new Background(new BackgroundImage (
-        		bigSprite,
-				BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                null, new BackgroundSize(
-                		BackgroundSize.AUTO,BackgroundSize.AUTO,
-                        false,false,true,false
-                )))
-		);
-        spMiniMap.getChildren().add(pSprite);
+//        pSprite = new Pane();
+//        pSprite.setBackground(new Background(new BackgroundImage (
+//        		bigSprite,
+//				BackgroundRepeat.NO_REPEAT,
+//                BackgroundRepeat.NO_REPEAT,
+//                null, new BackgroundSize(
+//                		BackgroundSize.AUTO,BackgroundSize.AUTO,
+//                        false,false,true,false
+//                )))
+//		);
+//        spMiniMap.getChildren().add(pSprite);
         pSprite.setMaxSize(30, 30);
         
 //        -------------------
@@ -380,10 +380,6 @@ public class Main extends Application {
                 "-fx-border-width: 1px;" // Border width
         );
 
-        spMiniMap.setStyle(
-                "-fx-border-color: green;" + // Border color
-                "-fx-border-width: 1px;" // Border width
-        );
         spExplorer.setPrefSize(X_MAX, Y_MAX); 
         spExplorer.getChildren().add(paneExp);
         paneRight.getChildren().add(spExplorer);
@@ -397,11 +393,12 @@ public class Main extends Application {
         		hasExplorer=!hasExplorer;
         		spExplorer.setVisible(hasExplorer);
         		if (hasExplorer){
-
-                    ballPane.setLayoutX(640-expX);
-                    ballPane.setLayoutX(360-expY);
-                    ballPane.setScaleX(39);
+//                    ballPane.setLayoutX(expX);
+//                    ballPane.setLayoutX(720-expY);
+                    ballPane.setScaleX(38);
                     ballPane.setScaleY(38);
+                    
+        			ballPane.relocate((640-expX)*ballPane.getScaleX(), (expY-360)*ballPane.getScaleY() );
     	            notif.setText("Explorer spawned.");
 //                    spExplorer.setBorder(10,10,10,10);
                   //                    spExplorer.setPrefSize(320, 180); //div 4 zoom
@@ -432,7 +429,9 @@ public class Main extends Application {
     	            
     	            
             	}else {
-            		
+            		ballPane.relocate(0,0);
+            		ballPane.setScaleX(1);
+                    ballPane.setScaleY(1);
             	}
         		
 	        } catch (NumberFormatException e) {
@@ -445,40 +444,31 @@ public class Main extends Application {
         
         scene.setOnKeyPressed(e ->{
         	//if (!isDebug && hasExplorer) //NOTE: uncomment when done testing
-            if (hasExplorer)
+
+        	if (hasExplorer)
 
         	{//DONE-could be better, make instead another animationtimer that checks if keys are being pressed or not
+
+                double moveY = ballPane.getLayoutY(),moveX = ballPane.getLayoutX();
+                double dx =ballPane.getScaleX(),dy = ballPane.getScaleY();
         		switch(e.getCode())
         		{
         			case W:
-        				w_key.set(true);
-    	                textTest.setText("W is pressed.");
-    	                paneExp.setBackground(new Background(new BackgroundImage (
-                				bgImage,
-                				BackgroundRepeat.NO_REPEAT,
-                                BackgroundRepeat.NO_REPEAT,
-                                null, new BackgroundSize(
-                                		BackgroundSize.AUTO,BackgroundSize.AUTO,
-                                        false,false,true,false
-                                )))
-                		);
+        				moveY+=dy;
+
+//        				w_key.set(true);
+//    	                textTest.setText("W is pressed.");
+
     	                break;
-        			case S:
-        				paneExp.setBackground(new Background(new BackgroundImage (
-                				bgImageFlipped,
-                				BackgroundRepeat.NO_REPEAT,
-                                BackgroundRepeat.NO_REPEAT,
-                                null, new BackgroundSize(
-                                		BackgroundSize.AUTO,BackgroundSize.AUTO,
-                                        false,false,true,false
-                                )))
-                		);
-        				s_key.set(true);
-    	                textTest.setText("S is pressed.");
+        			case S:moveY-=dy;
+
+//        				s_key.set(true);
+//    	                textTest.setText("S is pressed.");
     	                break;
-        			case A:
-        				a_key.set(true);
-    	                textTest.setText("A is pressed.");
+        			case A:moveX+=dx;
+
+//        				a_key.set(true);
+    	                
     	                paneExp.setBackground(new Background(new BackgroundImage (
                 				bgImageFlipped,
                 				BackgroundRepeat.NO_REPEAT,
@@ -490,8 +480,9 @@ public class Main extends Application {
                 		);
     	                break;
         			case D:
-        				d_key.set(true);
-    	                textTest.setText("D is pressed.");
+        				moveX-=dx;
+
+//        				d_key.set(true);
     	                paneExp.setBackground(new Background(new BackgroundImage (
                 				bgImage,
                 				BackgroundRepeat.NO_REPEAT,
@@ -503,27 +494,25 @@ public class Main extends Application {
                 		);
     	                break;
         		}
-//				if(e.getCode()==KeyCode.W) {
-//					w_key.set(true);
-//	                textTest.setText("W is pressed.");
-//	//                explorer.setLayoutX(explorer.getPane().getLayoutX() + 1);
-////	                paneExp.setLayoutY(paneExp.getLayoutY() - 10);//pixels per registered click idk
-//				}
-//				if(e.getCode()==KeyCode.S) {
-//					s_key.set(true);
-//	                textTest.setText("S is pressed.");
-////	                paneExp.setLayoutY(paneExp.getLayoutY() + 10);
-//				}
-//				if(e.getCode()==KeyCode.A) {
-//					a_key.set(true);
-//	                textTest.setText("A is pressed.");
-////	                paneExp.setLayoutX(paneExp.getLayoutX() - 10);
-//				}
-//				if(e.getCode()==KeyCode.D) {
-//					d_key.set(true);
-//	                textTest.setText("D is pressed.");
-////	                paneExp.setLayoutX(paneExp.getLayoutX() + 10);
-//				}
+
+                double halfSizX = ballPane.getWidth()*ballPane.getScaleX()*0.5,
+                		halfSizY = ballPane.getHeight()*ballPane.getScaleY()*0.5;
+                
+                if(moveX>halfSizX )
+                	moveX = halfSizX-38 ;
+                if(moveX<-halfSizX )
+                	moveX = 38-halfSizX ;
+                if(moveY>halfSizY)
+                	moveY = halfSizY-38 ;
+                if(moveY<-halfSizY )
+                	moveY = 38-halfSizY;
+                ballPane.setLayoutX(moveX);
+                ballPane.setLayoutY(moveY);
+
+                textTest.setText(
+                		"\nYou are at (in px):\n"
+                		+ "X: ["+(640-moveX)+"]\n"
+                		+ "Y: ["+(360-moveY)+"]");
         	}
 		});
         scene.setOnKeyReleased(e ->{
@@ -651,82 +640,8 @@ public class Main extends Application {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                double moveY = ballPane.getLayoutY(),moveX = ballPane.getLayoutX();
-                
-                if(w_key.get()) 
-                	moveY++;
-
-                
-                if(s_key.get()) 
-                	moveY--;
-
-                
-                if(a_key.get()) 
-                	moveX++;
-                	
-
-                if(d_key.get()) 
-                	moveX--;
-                
-                double halfSizX = ballPane.getWidth()/2,
-                		halfSizY = ballPane.getHeight()/2;
-                
-                if(moveX>halfSizX )
-                	moveX = halfSizX ;
-                if(moveX<-halfSizX )
-                	moveX = -halfSizX ;
-                if(moveY>halfSizY)
-                	moveY = halfSizY ;
-                if(moveY<-halfSizY )
-                	moveY = -halfSizY;
-                ballPane.setLayoutX(moveX);
-                ballPane.setLayoutY(moveY);
-                
-//                textTest.setText("\nBounds of the periphery (in px):\nX: [%i,%i]\nY: [%i,%i]",
-//                		spExplorer.getLayoutX(),(paneRight.getWidth()-spExplorer.getWidth()),
-//                		spExplorer.getLayoutY(),(paneRight.getHeight()-spExplorer.getHeight())
-//                		);
-                
-//                if(hasExplorer)
-//                {
-//	                textTest.setText(spExplorer.getLayoutX()+","+spExplorer.getLayoutY()+
-//	                		"\nBounds of the periphery (in px):\n"
-//	                		+ "X: ["+spExplorer.getLayoutX()+","+(paneRight.getWidth()-spExplorer.getWidth())+"]\n"
-//	                		+ "Y: ["+spExplorer.getLayoutY()+","+(paneRight.getHeight()-spExplorer.getHeight())+"]");
-//                }
-                
-                if(hasExplorer)
-                {
-	                textTest.setText(
-	                		"\nYou are at (in px):\n"
-	                		+ "X: ["+(640-moveX)+"]\n"
-	                		+ "Y: ["+(360-moveY)+"]");
-                }
-                
                 
 
-                //                camera.setLayoutX(spExplorer.getLayoutX());
-                //experiment for zoom
-                //TODO: make the ballpane exactly follow the coordinates and size of the stack pane
-            	//TRYING THAT RN:
-            	//dont forget to reset it at the debug = true
-//                if(!isDebug)
-//                {
-//                	//the center of the pane is middle point (layoutX + width / 2)
-//                	//middle point of parent pane +- middle point of child pane should be center??
-////                	ballPane.setLayoutX((ballPane.getLayoutX()+ballPane.getWidth())/2-(spExplorer.getLayoutX()+spExplorer.getWidth())/2);
-//////                	ballPane.setLayoutY(spExplorer.getLayoutY());
-////                	ballPane.setPrefSize(320, 180);
-////                	ballPane.setScaleX(4f);
-////                	ballPane.setScaleY(4f);
-//                }
-//                ballPane.setLayoutX((ballPane.getLayoutX()+ballPane.getWidth())/2-(spExplorer.getLayoutX()+spExplorer.getWidth())/2);
-
-                //try lng
-//                ballPane.setLayoutY(spExplorer.getLayoutY());
-//                ballPane.setLayoutX(spExplorer.getLayoutX());
-                
-//                ballPane.setLayoutY(spExplorer.getLayoutY()+1);//well it is moving :v
             }
 
         }.start();
@@ -774,10 +689,11 @@ private void anim() {
 									circle.setTranslateX(-circle.getTranslateX());
 								if (y > Y_MAX ||y < 0) 
 									circle.setTranslateY(-circle.getTranslateY());
-								if(circle.isVisible()) {
+//								if(circle.isVisible()) {
 									circle.setLayoutX(x + circle.getTranslateX());
 									circle.setLayoutY(y + circle.getTranslateY());
-								}
+//								}
+//								circle.relocate(x + circle.getTranslateX(),y + circle.getTranslateY())
 							});
 							
 						}

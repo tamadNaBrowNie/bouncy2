@@ -1,13 +1,14 @@
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+
+import com.sun.corba.se.impl.orbutil.graph.Node;
 
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -23,7 +24,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -49,19 +49,20 @@ import javafx.util.Duration;
 
 public class Main extends Application {
     private List<Particle> ball_buf = new ArrayList<Particle>();
-
-    private Label fpsLabel = new Label("FPS: 0");
-    private long lastFPSTime = System.nanoTime();
+    // private Canvas canvas= new Canvas(X_MAX, Y_MAX);;
+    private Label fpsLabel = new Label("FPS: 0");;
+    private long lastFPSTime = System.nanoTime();;
     private int frameCount = 0;
     private double fps = 0;
     public static ExecutorService es;
     private boolean hasExplorer = false;
     private boolean isDebug = true; //show control panel initially
 
-
+    private final double X_MAX =1280, Y_MAX=720;
     private Pane paneContainer = new Pane();
 
-    private StackPane ballPane = new StackPane();
+    private Pane ballPane = new Pane();
+    
     private Pane paneRight = new Pane();
     
     private Pane paneControl = new Pane();
@@ -125,7 +126,7 @@ public class Main extends Application {
     private Label labelConstXY = new Label("Spawn Point (X,Y):");
     
 	private Pane paneExp = new Pane();
-	private Explorer explorer;
+//	private Explorer explorer;
     private StackPane spExplorer = new StackPane();
 //    private Pane camera = new StackPane();//making this stack pane is a bag idea
     String bgFront = new File(System.getProperty("user.dir")+"\\src\\amongus.png").toURI().toString();
@@ -145,11 +146,11 @@ public class Main extends Application {
 	private BooleanProperty a_key = new SimpleBooleanProperty();
 	private BooleanProperty w_key = new SimpleBooleanProperty();
 	private BooleanProperty d_key = new SimpleBooleanProperty();
-	private BooleanBinding keyPressed = s_key.or(a_key).or(w_key).or(d_key);
+//	private BooleanBinding keyPressed = s_key.or(a_key).or(w_key).or(d_key);
 
 	private StackPane spMiniMap = new StackPane();
 	private GridPane gpDebug = new GridPane();
-	private final double X_MAX = 1280, Y_MAX = 720;
+
     public static void main(String[] args) {
         es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 3);
         // es = ForkJoinPool.commonPool();
@@ -163,14 +164,14 @@ public class Main extends Application {
 
     	paneRight.setLayoutX(270);
     	paneRight.setPrefHeight(Y_MAX);
-    	paneRight.setMinWidth(X_MAX);
+    	paneRight.setMinWidth(1280);
         paneControl.setMaxWidth(250);
-        
+        anim();
         ballPane.setPrefHeight(Y_MAX);
         ballPane.setMinWidth(X_MAX);
         ballPane.setLayoutX(0);
         ballPane.setLayoutY(0);   
-        ballPane.setClip(new Rectangle(X_MAX,Y_MAX));
+//        ballPane.setClip(new Rectangle(X_MAX,Y_MAX));
 //        fpsLabel.setLayoutX(260);
 //        fpsLabel.setLayoutY(0);
 //        
@@ -259,7 +260,7 @@ public class Main extends Application {
         spMiniMap.setPrefHeight(19*10);//The dimensions of the periphery are 19rows by 33 columns, (x10 para we can see what's actually happening)
         spMiniMap.setPrefWidth(33*10);
         spMiniMap.setLayoutY(paneRight.getHeight()-spMiniMap.getHeight());
-//        paneRight.getChildren().add(spMiniMap);
+        paneRight.getChildren().add(spMiniMap);
         pSprite = new Pane();
         pSprite.setBackground(new Background(new BackgroundImage (
         		bigSprite,
@@ -270,8 +271,8 @@ public class Main extends Application {
                         false,false,true,false
                 )))
 		);
-//        spMiniMap.getChildren().add(pSprite);
-//        pSprite.setMaxSize(30, 30);
+        spMiniMap.getChildren().add(pSprite);
+        pSprite.setMaxSize(30, 30);
         
 //        -------------------
         
@@ -290,8 +291,7 @@ public class Main extends Application {
         primaryStage.setTitle("Particle Physics Simulator");
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        paneRight.getChildren().add(ballPane);
+        
         btnDebug.setOnAction(event ->{
             //hide panel Control when debug is off,
         	//change position of button
@@ -314,10 +314,10 @@ public class Main extends Application {
                 	// - spExplorer's position will be adjusted to middle
                 	// - then paneRight.getWidth()/2 (midpoint) will be added to ballPane instead for it to move to midpoint-position
 
-//                	paneRight.setScaleX(4.f);
-//                	paneRight.setScaleY(4.f);
-//                	
-//                    paneExp.setMaxSize(3,3);
+                	paneRight.setScaleX(4.f);
+                	paneRight.setScaleY(4.f);
+                	
+                    paneExp.setMaxSize(3,3);
 
                     //TODO: within the box of the stackpane spExplorer,
                     //get the id / or element num of those and render them to a new box, scaling their x and y to the screen.
@@ -373,7 +373,7 @@ public class Main extends Application {
                         false,false,true,false
                 )))
 		);
-        spExplorer.setLayoutX(270);
+        spExplorer.setLayoutX(0);
         spExplorer.setLayoutY(0);
         spExplorer.setStyle(
                 "-fx-border-color: red;" + // Border color
@@ -385,33 +385,54 @@ public class Main extends Application {
                 "-fx-border-width: 1px;" // Border width
         );
         spExplorer.setPrefSize(X_MAX, Y_MAX); 
-        spExplorer.setVisible(hasExplorer);
-        paneExp.setMaxSize(50,50);
-
         spExplorer.getChildren().add(paneExp);
-//        paneRight.getChildren().add(spExplorer);
+        paneRight.getChildren().add(spExplorer);
+        spExplorer.setVisible(hasExplorer);
+        paneRight.getChildren().add(ballPane);
+        paneExp.setMaxSize(50,50);
         btnAddExplorer.setOnAction(event -> {
         	try {
         		double expX = Double.parseDouble(inputXexp.getText());
                 double expY = Double.parseDouble(inputYexp.getText());
         		hasExplorer=!hasExplorer;
         		spExplorer.setVisible(hasExplorer);
-        		paneExp.setVisible(hasExplorer);
         		if (hasExplorer){
-        			ballPane.relocate(expX, 720-expY);
-//                    ballPane.setLayoutX(expX);
-//                    ballPane.setLayoutX(expY);
-                    paneRight.setScaleX(1);
-                    paneRight.setScaleY(1);
-    	            notif.setText("Explorer spawned.");
 
+                    ballPane.setLayoutX(640-expX);
+                    ballPane.setLayoutX(360-expY);
+                    ballPane.setScaleX(39);
+                    ballPane.setScaleY(38);
+    	            notif.setText("Explorer spawned.");
+//                    spExplorer.setBorder(10,10,10,10);
+                  //                    spExplorer.setPrefSize(320, 180); //div 4 zoom
+//                    The dimensions of the periphery are 19 rows by 33 columns,
+//                    with the sprite rendered in the very center. 
+                    //wow super small
+//                    spExplorer.setLayoutX(expX);
+//                    spExplorer.setLayoutY(expY);
+
+//                    spExplorer.setLayoutX((paneRight.getWidth()/2)-(spExplorer.getWidth()/2));	//center it para zoomed again, 12
+//                    spExplorer.setLayoutY((paneRight.getHeight()/2)-spExplorer.getHeight()/2);
+                    
+                    //idk why but the middle is 435,240 (not same coordinates as balls yet TODO)
+                    
+//                    ballPane.setLayoutX((paneRight.getWidth()/2)+(spExplorer.getWidth()/2));
+//                    ballPane.setLayoutY((paneRight.getHeight()/2)+(spExplorer.getHeight()/2));
+//                    
+                    
+
+//            		ballPane.getChildren().add(explorer.getPane()); // THIS MAKES IT VISIBLE ON THE RIGHT PANE
+//            		ballPane.getChildren().add(paneExp); // THIS MAKES IT VISIBLE ON THE RIGHT PANE
+
+//            		btnAddExplorer.setDisable(true);
+            	
+//            		textTest.setText(System.getProperty("user.dir")+"\\src\\amongus.png");
+    	            //	CORRECT PATH!
+                    //file:///D:/Users/ghael/Documents/GitHub/Sites/MP/bouncy/BOUNCY/src/amongus.png
+    	            
     	            
             	}else {
-
-                    ballPane.relocate(0,0);
-//                    ballPane.setLayoutX(0);
-                    paneRight.setScaleX(1);
-                    paneRight.setScaleY(1);            		
+            		
             	}
         		
 	        } catch (NumberFormatException e) {
@@ -427,17 +448,10 @@ public class Main extends Application {
             if (hasExplorer)
 
         	{//DONE-could be better, make instead another animationtimer that checks if keys are being pressed or not
-
-                double moveY = ballPane.getLayoutY(),
-                		moveX = ballPane.getLayoutX(),
-                		halfSizX = ballPane.getWidth()/2,
-                		halfSizY = ballPane.getHeight()/2;
-                
         		switch(e.getCode())
         		{
         			case W:
-        				moveY++;
-//        				w_key.set(true);
+        				w_key.set(true);
     	                textTest.setText("W is pressed.");
     	                paneExp.setBackground(new Background(new BackgroundImage (
                 				bgImage,
@@ -450,7 +464,6 @@ public class Main extends Application {
                 		);
     	                break;
         			case S:
-        				moveY--;
         				paneExp.setBackground(new Background(new BackgroundImage (
                 				bgImageFlipped,
                 				BackgroundRepeat.NO_REPEAT,
@@ -464,8 +477,7 @@ public class Main extends Application {
     	                textTest.setText("S is pressed.");
     	                break;
         			case A:
-        				moveX--;
-//        				a_key.set(true);
+        				a_key.set(true);
     	                textTest.setText("A is pressed.");
     	                paneExp.setBackground(new Background(new BackgroundImage (
                 				bgImageFlipped,
@@ -478,8 +490,7 @@ public class Main extends Application {
                 		);
     	                break;
         			case D:
-        				moveX++;
-//        				d_key.set(true);
+        				d_key.set(true);
     	                textTest.setText("D is pressed.");
     	                paneExp.setBackground(new Background(new BackgroundImage (
                 				bgImage,
@@ -492,24 +503,54 @@ public class Main extends Application {
                 		);
     	                break;
         		}
-        		
-        		 if(moveX>halfSizX )
-                 	moveX = halfSizX ;
-                 if(moveX<-halfSizX )
-                 	moveX = -halfSizX ;
-                 if(moveY>halfSizY)
-                 	moveY = halfSizY ;
-                 if(moveY<-halfSizY )
-                 	moveY = -halfSizY;
-                 ballPane.setLayoutX(moveX);
-                 ballPane.setLayoutY(moveY);
-                 textTest.setText(
-	                		"\nYou are at (in px):\n"
-	                		+ "X: ["+(ballPane.getLayoutX())+"]\n"
-	                		+ "Y: ["+(ballPane.getLayoutY())+"]");
-//                 ballPane.relocate(halfSizX, halfSizY);
+//				if(e.getCode()==KeyCode.W) {
+//					w_key.set(true);
+//	                textTest.setText("W is pressed.");
+//	//                explorer.setLayoutX(explorer.getPane().getLayoutX() + 1);
+////	                paneExp.setLayoutY(paneExp.getLayoutY() - 10);//pixels per registered click idk
+//				}
+//				if(e.getCode()==KeyCode.S) {
+//					s_key.set(true);
+//	                textTest.setText("S is pressed.");
+////	                paneExp.setLayoutY(paneExp.getLayoutY() + 10);
+//				}
+//				if(e.getCode()==KeyCode.A) {
+//					a_key.set(true);
+//	                textTest.setText("A is pressed.");
+////	                paneExp.setLayoutX(paneExp.getLayoutX() - 10);
+//				}
+//				if(e.getCode()==KeyCode.D) {
+//					d_key.set(true);
+//	                textTest.setText("D is pressed.");
+////	                paneExp.setLayoutX(paneExp.getLayoutX() + 10);
+//				}
         	}
 		});
+        scene.setOnKeyReleased(e ->{
+//        	if (!isDebug && hasExplorer)  //NOTE: uncomment when done testing
+        	if (hasExplorer)
+        	{
+        		switch(e.getCode())
+        		{
+        			case W:
+        				w_key.set(false);
+    	                textTest.setText("W is pressed.");
+    	                break;
+        			case S:
+        				s_key.set(false);
+    	                textTest.setText("S is pressed.");
+    	                break;
+        			case A:
+        				a_key.set(false);
+    	                textTest.setText("A is pressed.");
+    	                break;
+        			case D:
+        				d_key.set(false);
+    	                textTest.setText("D is pressed.");
+    	                break;
+        		}
+        	}
+        });
         
         tabVelocity.setOnSelectionChanged(e -> {
             tabDistance.setText("Distance");
@@ -573,7 +614,7 @@ public class Main extends Application {
 
                 final int n = Integer.parseInt(inputCount.getText());
 
-                if (n > 0)
+                if (n >= 0)
                     addParticlesByAngle(n, startX, startY, startAngle, endAngle, velocity, ballPane);
 
             } catch (NumberFormatException e) {
@@ -597,7 +638,7 @@ public class Main extends Application {
                 notif.setText("Invalid input\n");
             }
         });
-        anim();
+
         System.nanoTime();
         lastFPSTime = System.nanoTime();
         new AnimationTimer() {
@@ -610,9 +651,36 @@ public class Main extends Application {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                double moveY = ballPane.getLayoutY(),moveX = ballPane.getLayoutX();
+                
+                if(w_key.get()) 
+                	moveY++;
 
                 
-               
+                if(s_key.get()) 
+                	moveY--;
+
+                
+                if(a_key.get()) 
+                	moveX++;
+                	
+
+                if(d_key.get()) 
+                	moveX--;
+                
+                double halfSizX = ballPane.getWidth()/2,
+                		halfSizY = ballPane.getHeight()/2;
+                
+                if(moveX>halfSizX )
+                	moveX = halfSizX ;
+                if(moveX<-halfSizX )
+                	moveX = -halfSizX ;
+                if(moveY>halfSizY)
+                	moveY = halfSizY ;
+                if(moveY<-halfSizY )
+                	moveY = -halfSizY;
+                ballPane.setLayoutX(moveX);
+                ballPane.setLayoutY(moveY);
                 
 //                textTest.setText("\nBounds of the periphery (in px):\nX: [%i,%i]\nY: [%i,%i]",
 //                		spExplorer.getLayoutX(),(paneRight.getWidth()-spExplorer.getWidth()),
@@ -627,6 +695,13 @@ public class Main extends Application {
 //	                		+ "Y: ["+spExplorer.getLayoutY()+","+(paneRight.getHeight()-spExplorer.getHeight())+"]");
 //                }
                 
+                if(hasExplorer)
+                {
+	                textTest.setText(
+	                		"\nYou are at (in px):\n"
+	                		+ "X: ["+(640-moveX)+"]\n"
+	                		+ "Y: ["+(360-moveY)+"]");
+                }
                 
                 
 
@@ -655,83 +730,8 @@ public class Main extends Application {
             }
 
         }.start();
-
-
     }
 
-	private void anim() {
-		Timeline tl = new Timeline();
-		tl.setCycleCount(Timeline.INDEFINITE);
-		tl.getKeyFrames()
-				.add(new KeyFrame(Duration.millis(16.6667),
-						new EventHandler<ActionEvent>() {
-						List<Node> circles = ballPane.getChildren().filtered(child->(child instanceof Circle));
-					
-							@Override
-							public void handle(ActionEvent t) {
-								// move the ball
-								circles.forEach(circle->{
-									double x = circle.getLayoutX(), y = circle.getLayoutY(),
-											dx =circle.getTranslateX(),dy = circle.getTranslateY(); 
-									
-    								if (x < 0 || x > X_MAX)
-    									circle.setTranslateX(-dx);
-    								if (y > Y_MAX || y < 0)
-    									circle.setTranslateY(-dy);
-    								circle.setLayoutX(x+circle.getTranslateX() );
-									circle.setLayoutY(y+circle.getTranslateY());
-//    								try {
-//										double[] coords = es.submit(new Callable<double[]>() {
-//
-//											@Override
-//											public double[] call() throws Exception {
-//												// TODO Auto-generated method stub
-//
-//			    								if (x < 0 || x > X_MAX)
-//			    									circle.setTranslateX(-dx);
-//			    								if (y > Y_MAX || y < 0)
-//			    									circle.setTranslateY(-dy);
-//			    								double [] arr = {x+circle.getTranslateX() ,y+circle.getTranslateY()};
-//												return arr;
-//											}
-//											
-//										}).get();
-//
-//										circle.setLayoutX(coords[0]);
-//										circle.setLayoutY(coords[1]);
-//									} catch (InterruptedException | ExecutionException e) {
-//										// TODO Auto-generated catch block
-//										e.printStackTrace();
-//									}
-
-    							
-    								
-								});
-								
-
-							}
-						}));
-		tl.play();
-		
-	}
-	private void addBall(double x, double y,double theta, double v ) {
-		
-		try {
-	        addBall(es.submit(new Callable<Particle>() {
-
-				@Override
-				public Particle call() throws Exception {
-					// TODO Auto-generated method stub
-					return new Particle(x,y,theta,v);
-				}
-				
-			}).get());
-
-		} catch (InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    }
     private void addBall(Particle p) {
         ball_buf.add(p);
     }
@@ -741,18 +741,53 @@ public class Main extends Application {
     }
 
     private synchronized List<Circle> balls() {
-
-            List<Circle> circles = ball_buf.parallelStream().map(Particle::draw)
-                    .collect(Collectors.toList());
+        
+            List<Circle> circles = ball_buf.parallelStream().map(Particle::draw).collect(Collectors.toList());
 
             return circles;
-
+        
     }
 
+    private static Circle getBall(Future<Circle> t) {
+        try {
+            return t.get();
+        } catch (InterruptedException | ExecutionException e) {
 
+            e.printStackTrace();
+        }
+        return null;
+    }
 
+private void anim() {
+	Timeline tl = new Timeline();
+	
+	tl.getKeyFrames()
+			.add(new KeyFrame(Duration.millis(16.6666666667),
+					new EventHandler<ActionEvent>() {
+				List<javafx.scene.Node> balls = ballPane.getChildren().filtered(node->(node instanceof Circle));
+						@Override
+						public void handle(ActionEvent t) {
+							// move the ball
+							balls.forEach(circle->{
+								double x = circle.getLayoutX(), y = circle.getLayoutY();
+								if(x < 0 ||x > X_MAX)
+									circle.setTranslateX(-circle.getTranslateX());
+								if (y > Y_MAX ||y < 0) 
+									circle.setTranslateY(-circle.getTranslateY());
+								if(circle.isVisible()) {
+									circle.setLayoutX(x + circle.getTranslateX());
+									circle.setLayoutY(y + circle.getTranslateY());
+								}
+							});
+							
+						}
+					}));
+	// this.tl = new Timeline();
 
+	tl.setCycleCount(Timeline.INDEFINITE);
+	tl.play();
 
+}
     private void initTabVelocity() {
         gpDistance.getChildren().clear();
         gpAngle.getChildren().clear();
@@ -792,17 +827,7 @@ public class Main extends Application {
         gpDistance.setMaxWidth(250);
         gpDistance.addRow(12, notif);
     }
-    public void collide(Circle circle) {
-    	double x = circle.getLayoutX(), y = circle.getLayoutY();
-    	if (x < 0 || x > X_MAX)
-    		circle.setTranslateX(-circle.getTranslateX());
-    	if (y > Y_MAX || y < 0)
-    		circle.setTranslateY(-circle.getTranslateY());
-    	if (circle.isVisible()) {
-    		circle.setLayoutX(x+circle.getTranslateX());
-    		circle.setLayoutY(y+circle.getTranslateY());
-    	}
-    }
+
     private void initTabAngle() {
         gpDistance.getChildren().clear();
         gpAngle.getChildren().clear();
@@ -834,7 +859,7 @@ public class Main extends Application {
         for (int i = 0; i < n; i++) {
             double xin = x, yin = y;
 
-            addBall(xin, yin, Math.toRadians(angle), velocity);
+            addBall(new Particle(xin, yin, Math.toRadians(angle), velocity));
             x += dx;
             y += dy;
         }
@@ -858,8 +883,7 @@ public class Main extends Application {
         double angleDiff = (endAngle - startAngle) / (n);
         double angle = startAngle;
         for (int i = 0; i < n; i++) {
-        	double theta = angle;
-            addBall(startX, startY, Math.toRadians(theta), velocity);
+            addBall(new Particle(startX, startY, Math.toRadians(angle), velocity));
             angle += angleDiff;
 
         }
@@ -873,7 +897,8 @@ public class Main extends Application {
         for (int i = 0; i < n; i++) {
 
             double velocity = v;
-            addBall(startX, startY, Math.toRadians(angle), velocity);
+
+            addBall(new Particle(startX, startY, Math.toRadians(angle), velocity));
 
             v += velocityDiff;
 

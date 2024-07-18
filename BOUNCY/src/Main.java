@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -162,7 +163,7 @@ public class Main extends Application {
         ballPane.setMinWidth(1280);
         ballPane.setLayoutX(0);
         ballPane.setLayoutY(0);   
-        //ballPane.setClip(this.spExplorer);
+//        ballPane.setClip(new Rectangle(1280,720));
 //        fpsLabel.setLayoutX(260);
 //        fpsLabel.setLayoutY(0);
 //        
@@ -267,7 +268,6 @@ public class Main extends Application {
         
 //        -------------------
         
-        paneRight.getChildren().add(ballPane);
         paneRight.setStyle(
                 "-fx-border-color: grey;" + // Border color
                 "-fx-border-width: 5px;" // Border width
@@ -354,44 +354,54 @@ public class Main extends Application {
         	
         });
         
-        
+
+		paneExp = new Pane();
+		paneExp.setBackground(new Background(new BackgroundImage (
+				bgImage,
+				BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                null, new BackgroundSize(
+                		BackgroundSize.AUTO,BackgroundSize.AUTO,
+                        false,false,true,false
+                )))
+		);
+        spExplorer.setLayoutX(0);
+        spExplorer.setLayoutY(0);
+        spExplorer.setStyle(
+                "-fx-border-color: red;" + // Border color
+                "-fx-border-width: 1px;" // Border width
+        );
+
+        spMiniMap.setStyle(
+                "-fx-border-color: green;" + // Border color
+                "-fx-border-width: 1px;" // Border width
+        );
+        spExplorer.setPrefSize(1280, 720); 
+        spExplorer.getChildren().add(paneExp);
+        paneRight.getChildren().add(spExplorer);
+        spExplorer.setVisible(hasExplorer);
+        paneRight.getChildren().add(ballPane);
+        paneExp.setMaxSize(50,50);
         btnAddExplorer.setOnAction(event -> {
         	try {
         		double expX = Double.parseDouble(inputXexp.getText());
                 double expY = Double.parseDouble(inputYexp.getText());
-        		
-                
-        		if (!hasExplorer){
-            		hasExplorer=true;
-            		paneExp = new Pane();
-                    paneExp.setBackground(new Background(new BackgroundImage (
-            				bgImage,
-            				BackgroundRepeat.NO_REPEAT,
-                            BackgroundRepeat.NO_REPEAT,
-                            null, new BackgroundSize(
-                            		BackgroundSize.AUTO,BackgroundSize.AUTO,
-                                    false,false,true,false
-                            )))
-            		);
-                    spExplorer.setLayoutX(expX);
-                    spExplorer.setLayoutY(expY);
-					
-//                    spExplorer.setBorder(10,10,10,10);
-                    spExplorer.setStyle(
-                            "-fx-border-color: red;" + // Border color
-                            "-fx-border-width: 1px;" // Border width
-                    );
+        		hasExplorer=!hasExplorer;
+        		spExplorer.setVisible(hasExplorer);
+        		if (hasExplorer){
 
-                    spMiniMap.setStyle(
-                            "-fx-border-color: green;" + // Border color
-                            "-fx-border-width: 1px;" // Border width
-                    );
-//                    spExplorer.setPrefSize(320, 180); //div 4 zoom
+                    ballPane.setLayoutX(640-expX);
+                    ballPane.setLayoutX(360-expY);
+                    ballPane.setScaleX(39);
+                    ballPane.setScaleY(38);
+    	            notif.setText("Explorer spawned.");
+//                    spExplorer.setBorder(10,10,10,10);
+                  //                    spExplorer.setPrefSize(320, 180); //div 4 zoom
 //                    The dimensions of the periphery are 19 rows by 33 columns,
 //                    with the sprite rendered in the very center. 
-                    spExplorer.setPrefSize(33, 19); //wow super small
-                    spExplorer.setLayoutX(expX);
-                    spExplorer.setLayoutY(expY);
+                    //wow super small
+//                    spExplorer.setLayoutX(expX);
+//                    spExplorer.setLayoutY(expY);
 
 //                    spExplorer.setLayoutX((paneRight.getWidth()/2)-(spExplorer.getWidth()/2));	//center it para zoomed again, 12
 //                    spExplorer.setLayoutY((paneRight.getHeight()/2)-spExplorer.getHeight()/2);
@@ -401,20 +411,20 @@ public class Main extends Application {
 //                    ballPane.setLayoutX((paneRight.getWidth()/2)+(spExplorer.getWidth()/2));
 //                    ballPane.setLayoutY((paneRight.getHeight()/2)+(spExplorer.getHeight()/2));
 //                    
-                    paneExp.setMaxSize(3,3);
+                    
 
 //            		ballPane.getChildren().add(explorer.getPane()); // THIS MAKES IT VISIBLE ON THE RIGHT PANE
 //            		ballPane.getChildren().add(paneExp); // THIS MAKES IT VISIBLE ON THE RIGHT PANE
 
-            		btnAddExplorer.setDisable(true);
-    	            notif.setText("Explorer spawned.");
+//            		btnAddExplorer.setDisable(true);
             	
 //            		textTest.setText(System.getProperty("user.dir")+"\\src\\amongus.png");
     	            //	CORRECT PATH!
                     //file:///D:/Users/ghael/Documents/GitHub/Sites/MP/bouncy/BOUNCY/src/amongus.png
     	            
-    	            spExplorer.getChildren().add(paneExp);
-    	            paneRight.getChildren().add(spExplorer);
+    	            
+            	}else {
+            		
             	}
         		
 	        } catch (NumberFormatException e) {
@@ -633,36 +643,36 @@ public class Main extends Application {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                double moveY = ballPane.getLayoutY(),moveX = ballPane.getLayoutX();
                 
-                if(w_key.get()) {
-//                	if (spExplorer.getLayoutY()>0){
-	                	spExplorer.setLayoutY(spExplorer.getLayoutY() - 1);
-//	                	ballPane.setLayoutY(ballPane.getLayoutY()+ 1);
-//                	}
+                if(w_key.get()) 
+                	moveY++;
 
-                }
-                if(s_key.get()) {
-//                	if (spExplorer.getLayoutY()<720-spExplorer.getHeight()) {
-		                spExplorer.setLayoutY(spExplorer.getLayoutY() + 1);
-//                	ballPane.setLayoutY(ballPane.getLayoutY()- 1);
+                
+                if(s_key.get()) 
+                	moveY--;
 
-//                	}
-                }
-                if(a_key.get()) {
-//                	if (spExplorer.getLayoutX()>=0) {
-//	                	camera.setLayoutX(camera.getLayoutX()+1);
-//                	ballPane.setLayoutX(ballPane.getLayoutX()+ 1);
+                
+                if(a_key.get()) 
+                	moveX++;
+                	
 
-		                spExplorer.setLayoutX(spExplorer.getLayoutX() - 1);//pixels per registered click idk
-//                	}
-                }
-                if(d_key.get()) {
-//                	if (spExplorer.getLayoutX()<1280-spExplorer.getWidth()) { //outer bounds
-//	                	camera.setLayoutX(camera.getLayoutX()-1);
-//                	ballPane.setLayoutX(ballPane.getLayoutX()- 1);
-		                spExplorer.setLayoutX(spExplorer.getLayoutX() + 1);//pixels per registered click idk
-//                	}
-                }
+                if(d_key.get()) 
+                	moveX--;
+                
+                double halfSizX = ballPane.getWidth()/2,
+                		halfSizY = ballPane.getHeight()/2;
+                
+                if(moveX>halfSizX )
+                	moveX = halfSizX ;
+                if(moveX<-halfSizX )
+                	moveX = -halfSizX ;
+                if(moveY>halfSizY)
+                	moveY = halfSizY ;
+                if(moveY<-halfSizY )
+                	moveY = -halfSizY;
+                ballPane.setLayoutX(moveX);
+                ballPane.setLayoutY(moveY);
                 
 //                textTest.setText("\nBounds of the periphery (in px):\nX: [%i,%i]\nY: [%i,%i]",
 //                		spExplorer.getLayoutX(),(paneRight.getWidth()-spExplorer.getWidth()),
@@ -679,10 +689,10 @@ public class Main extends Application {
                 
                 if(hasExplorer)
                 {
-	                textTest.setText(spExplorer.getLayoutX()+","+spExplorer.getLayoutY()+
-	                		"\nBounds of the periphery (in px):\n"
-	                		+ "X: ["+spExplorer.getLayoutX()+","+(spExplorer.getLayoutX()+spExplorer.getWidth())+"]\n"
-	                		+ "Y: ["+spExplorer.getLayoutY()+","+(spExplorer.getLayoutY()+spExplorer.getHeight())+"]");
+	                textTest.setText(
+	                		"\nYou are at (in px):\n"
+	                		+ "X: ["+(640-moveX)+"]\n"
+	                		+ "Y: ["+(360-moveY)+"]");
                 }
                 
                 
@@ -829,7 +839,7 @@ public class Main extends Application {
         for (int i = 0; i < n; i++) {
             double xin = x, yin = y;
 
-            addBall(new Particle(xin, yin, Math.toRadians(angle), velocity));
+            addBall(new Particle(xin, yin, Math.toRadians(angle), velocity,es));
             x += dx;
             y += dy;
         }
@@ -853,7 +863,7 @@ public class Main extends Application {
         double angleDiff = (endAngle - startAngle) / (n);
         double angle = startAngle;
         for (int i = 0; i < n; i++) {
-            addBall(new Particle(startX, startY, Math.toRadians(angle), velocity));
+            addBall(new Particle(startX, startY, Math.toRadians(angle), velocity,es));
             angle += angleDiff;
 
         }
@@ -868,7 +878,7 @@ public class Main extends Application {
 
             double velocity = v;
 
-            addBall(new Particle(startX, startY, Math.toRadians(angle), velocity));
+            addBall(new Particle(startX, startY, Math.toRadians(angle), velocity,es));
 
             v += velocityDiff;
 

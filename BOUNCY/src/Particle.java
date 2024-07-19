@@ -49,7 +49,7 @@ public class Particle implements Callable<Circle> {
 		circle.setLayoutY(this.y);
 		circle.setTranslateX(-ppu * Math.cos(theta));
 		circle.setTranslateY(-ppu * Math.sin(theta));
-
+		circle.managedProperty().bind(circle.visibleProperty());
 		return circle;
 	}
 

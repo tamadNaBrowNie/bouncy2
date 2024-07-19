@@ -11,7 +11,9 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -37,6 +39,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.concurrent.*;
+import javafx.geometry.BoundingBox;
 public class Main extends Application {
     private static final String prompt_n = "Number of Particles:";
     private static final String V_PX_S = "Velocity (px/s):";
@@ -545,13 +548,15 @@ public class Main extends Application {
         tl.getKeyFrames()
                 .add(new KeyFrame(Duration.millis(16.6666666667),
                         new EventHandler<ActionEvent>() {
-                			double centerX= ballPane.getLayoutX()/ ballPane.getScaleX()+ballPane.getWidth()*0.5,
-                					centerY=(ballPane.getLayoutY()/ ballPane.getScaleY())+ballPane.getHeight()*0.5,
-                					boundsY= ballPane.getHeight()/ballPane.getScaleY(),boundsX= 16,
-                					top = (centerY-boundsY)*ballPane.getScaleX(),
-                					bottom =(centerY+boundsY)*ballPane.getScaleX(),
-                					left =(centerX+boundsX)*ballPane.getScaleX(),
-                					right = (centerX-boundsX)*ballPane.getScaleX();  
+                		Bounds peri = paneRight.getBoundsInLocal();
+                		
+//                			double centerX= ballPane.getLayoutX()/ ballPane.getScaleX()+ballPane.getWidth()*0.5,
+//                					centerY=(ballPane.getLayoutY()/ ballPane.getScaleY())+ballPane.getHeight()*0.5,
+//                					boundsY= ballPane.getHeight()/ballPane.getScaleY(),boundsX= 16,
+//                					top = (centerY-boundsY)*ballPane.getScaleX(),
+//                					bottom =(centerY+boundsY)*ballPane.getScaleX(),
+//                					left =(centerX+boundsX)*ballPane.getScaleX(),
+//                					right = (centerX-boundsX)*ballPane.getScaleX();  
                 					
                             List<javafx.scene.Node> balls = ballPane.getChildren()
                                     .filtered(node -> (node instanceof Circle));
@@ -564,11 +569,11 @@ public class Main extends Application {
 //                            	left*= 0.5;
 //                            	right *= 0.5;
                                 balls.forEach(circle -> {
-                                    
+                                	
 //                                    Platform.runLater(()->{
                                     	double x = circle.getLayoutX(), y = circle.getLayoutY();
-                                        boolean isSeen = (hasExplorer)?((y<=top*0.5&&y>=bottom*0.5)):true;
-                                    	circle.setVisible(isSeen);
+                                        boolean isSeen = (hasExplorer)?peri.intersects(circle.getBoundsInParent()):true;
+//                                    	circle.setVisible(isSeen);
                                     if (x < 0 || x > X_MAX) 
                                         circle.setTranslateX(-circle.getTranslateX());
                                     

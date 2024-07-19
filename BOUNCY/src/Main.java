@@ -48,7 +48,12 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class Main extends Application {
-    private List<Particle> ball_buf = new ArrayList<Particle>();
+    private static final String prompt_n = "Number of Particles:";
+	private static final String V_PX_S = "Velocity (px/s):";
+	private static final String ADD_BY_ANGLE = "Add by Angle";
+	private static final String ADD_BY_VELOCITY = "Add by Velocity";
+	private static final String ADD_BY_DISTANCE = "Add by Distance";
+	private List<Particle> ball_buf = new ArrayList<Particle>();
     // private Canvas canvas= new Canvas(X_MAX, Y_MAX);;
     private Label fpsLabel = new Label("FPS: 0");;
     private long lastFPSTime = System.nanoTime();;
@@ -80,17 +85,17 @@ public class Main extends Application {
 
     private TextField inputStartVelocity = new TextField();
     private TextField inputEndVelocity = new TextField();
-    private Label labelVelocity = new Label("Velocity (px/s):");
+    private Label labelVelocity = new Label(V_PX_S);
     private TextField inputVelocity = new TextField();
     private Label labelAngle = new Label("Angle (degrees):");
     private TextField inputAngle = new TextField();
-    private Label labelCount = new Label("Number of Particles:");
+    private Label labelCount = new Label(prompt_n);
     private TextField inputCount = new TextField();
-
-    private Button btnAddByDistance = new Button("Add by Distance");
-    private Button btnAddByAngle = new Button("Add by Angle");
-    private Button btnAddByVelocity = new Button("Add by Velocity");
-    private Button btnAddExplorer = new Button("Add Explorer");
+    private final String MODE_BTN_TXT ="Switch mode";
+    private Button btnAddByDistance = new Button(ADD_BY_DISTANCE);
+    private Button btnAddByAngle = new Button(ADD_BY_ANGLE);
+    private Button btnAddByVelocity = new Button(ADD_BY_VELOCITY);
+    private Button btnAddExplorer = new Button(MODE_BTN_TXT	);
 
     private Button btnDebug = new Button("Debug Mode: ON");
 
@@ -106,7 +111,7 @@ public class Main extends Application {
     private GridPane gpExplorer = new GridPane();
 
     private TabPane paneTab = new TabPane();
-    private Tab tabDistance = new Tab("Add by Distance");
+    private Tab tabDistance = new Tab(ADD_BY_DISTANCE);
     private Tab tabAngle = new Tab("Angle");
     private Tab tabVelocity = new Tab("Velocity");
 
@@ -133,11 +138,11 @@ public class Main extends Application {
     Image bgImage = new Image(bgFront);
     String bgFlipped = new File(System.getProperty("user.dir")+"\\src\\amongusflipped.png").toURI().toString();
     Image bgImageFlipped = new Image(bgFlipped);
-    String mapImgFile = new File(System.getProperty("user.dir")+"\\src\\masp.jpg").toURI().toString();
+    String mapImgFile = new File(System.getProperty("user.dir")+"\\src\\map.jpg").toURI().toString();
     Image mapImg = new Image(mapImgFile);
     Pane pSprite = new Pane();
-    String bigSpriteFile = new File(System.getProperty("user.dir")+"\\src\\amongus.png").toURI().toString();
-    Image bigSprite = new Image(bigSpriteFile);
+//    String bigSpriteFile = new File(System.getProperty("user.dir")+"\\src\\amongus.png").toURI().toString();
+//    Image bigSprite = new Image(bigSpriteFile);
 
     private GridPane gpContainer = new GridPane();
     private GridPane paneLeft = new GridPane();
@@ -166,12 +171,16 @@ public class Main extends Application {
     	paneRight.setPrefHeight(Y_MAX);
     	paneRight.setMinWidth(1280);
         paneControl.setMaxWidth(250);
+        Rectangle clip = new Rectangle(X_MAX,Y_MAX);
+        clip.setLayoutX(0);
+        clip.setLayoutY(0);
+        paneRight.setClip(clip);
         anim();
         ballPane.setPrefHeight(Y_MAX);
         ballPane.setMinWidth(X_MAX);
         ballPane.setLayoutX(0);
-        ballPane.setLayoutY(0);   
-//        ballPane.setClip(new Rectangle(X_MAX,Y_MAX));
+        ballPane.setLayoutY(0);
+        
 //        fpsLabel.setLayoutX(260);
 //        fpsLabel.setLayoutY(0);
 //        
@@ -283,7 +292,7 @@ public class Main extends Application {
         
 //        camera.getChildren().addAll(ballPane, spExplorer);
 //        gpContainer.addRow(0, paneControl, separatorV, ballPane);
-        gpContainer.addRow(0, paneLeft, separatorV, paneRight);
+        gpContainer.addRow(0, paneLeft, separatorV, spExplorer,paneRight);
 //        paneContainer.getChildren().addAll(gpContainer, fpsLabel, textTest, btnDebug);
         paneContainer.getChildren().addAll(gpContainer, gpDebug);
 
@@ -327,22 +336,12 @@ public class Main extends Application {
                     notif.setText(notif.getText()+"ball %d at [%d,%d]");
 	            }
                 
-                //zoom in testing
-//                ballPane.setScaleX(2f);
-//            	ballPane.setScaleY(2f);
-            	//follow in animation timer
-                //try again: ball pane will be the one scaling and moving since i put it inside another container
-//                if(hasExplorer) {
-//                    ballPane.setScaleX(4f);
-//                	ballPane.setScaleY(4f);	
-//                }
+   
         	}
         	else {
             	btnDebug.setText("Developer Mode: ON");
             	gpContainer.getChildren().clear();
                 gpContainer.addRow(0, paneLeft, separatorV, paneRight);
-//                fpsLabel.setLayoutX(260);
-//                btnDebug.setLayoutX(250+10); //250 is size of control panel
                 gpDebug.setLayoutX(260);
 
                 isDebug=true;
@@ -351,13 +350,13 @@ public class Main extends Application {
                 
                 //zoom testing
                 
-                if(hasExplorer)
-                {
-                	paneRight.setScaleX(1.f);
-                	paneRight.setScaleY(1.f);
-	            	spExplorer.setMaxSize(320, 180);
-	                paneExp.setMaxSize(30,30);
-                }
+//                if(hasExplorer)
+//                {
+//                	paneRight.setScaleX(1.f);
+//                	paneRight.setScaleY(1.f);
+//	            	spExplorer.setMaxSize(320, 180);
+//	                paneExp.setMaxSize(30,30);
+//                }
         	}
         	
         });
@@ -381,10 +380,11 @@ public class Main extends Application {
         );
 
         spExplorer.setPrefSize(X_MAX, Y_MAX); 
+        paneRight.getChildren().add(ballPane);
         spExplorer.getChildren().add(paneExp);
         paneRight.getChildren().add(spExplorer);
         spExplorer.setVisible(hasExplorer);
-        paneRight.getChildren().add(ballPane);
+        
         paneExp.setMaxSize(50,50);
         btnAddExplorer.setOnAction(event -> {
         	try {
@@ -544,7 +544,7 @@ public class Main extends Application {
         tabVelocity.setOnSelectionChanged(e -> {
             tabDistance.setText("Distance");
             tabAngle.setText("Angle");
-            tabVelocity.setText("Add by Velocity");
+            tabVelocity.setText(ADD_BY_VELOCITY);
 
             gpDistance.getChildren().clear();
             gpAngle.getChildren().clear();
@@ -555,7 +555,7 @@ public class Main extends Application {
         });
 
         tabDistance.setOnSelectionChanged(e -> {
-            tabDistance.setText("Add by Distance");
+            tabDistance.setText(ADD_BY_DISTANCE);
             tabAngle.setText("Angle");
             tabVelocity.setText("Velocity");
 
@@ -568,7 +568,7 @@ public class Main extends Application {
 
         tabAngle.setOnSelectionChanged(e -> {
             tabDistance.setText("Distance");
-            tabAngle.setText("Add by Angle");
+            tabAngle.setText(ADD_BY_ANGLE);
             tabVelocity.setText("Velocity");
 
             initTabAngle();
@@ -645,22 +645,6 @@ public class Main extends Application {
             }
 
         }.start();
-    }
-
-    private void addBall(Particle p) {
-        ball_buf.add(p);
-    }
-
-    private void clrBall() {
-        ball_buf.clear();
-    }
-
-    private synchronized List<Circle> balls() {
-        
-            List<Circle> circles = ball_buf.parallelStream().map(Particle::draw).collect(Collectors.toList());
-
-            return circles;
-        
     }
 
     private static Circle getBall(Future<Circle> t) {
@@ -775,7 +759,7 @@ private void anim() {
         for (int i = 0; i < n; i++) {
             double xin = x, yin = y;
 
-            addBall(new Particle(xin, yin, Math.toRadians(angle), velocity));
+            ball_buf.add(new Particle(xin, yin, Math.toRadians(angle), velocity));
             x += dx;
             y += dy;
         }
@@ -787,8 +771,9 @@ private void anim() {
     private void drawBalls(Pane ballPane) {
         try {
             // ballPane.getChildren().addAll(sballs());
-            ballPane.getChildren().addAll(balls());
-            clrBall();
+        	  List<Circle> circles = ball_buf.parallelStream().map(Particle::draw).collect(Collectors.toList());
+            ballPane.getChildren().addAll(circles);
+            ball_buf.clear();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -799,7 +784,7 @@ private void anim() {
         double angleDiff = (endAngle - startAngle) / (n);
         double angle = startAngle;
         for (int i = 0; i < n; i++) {
-            addBall(new Particle(startX, startY, Math.toRadians(angle), velocity));
+            ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
             angle += angleDiff;
 
         }
@@ -814,7 +799,7 @@ private void anim() {
 
             double velocity = v;
 
-            addBall(new Particle(startX, startY, Math.toRadians(angle), velocity));
+            ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
 
             v += velocityDiff;
 

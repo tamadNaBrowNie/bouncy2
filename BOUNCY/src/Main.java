@@ -602,7 +602,6 @@ public class Main extends Application {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                cullParticles();
 
             }
 
@@ -753,32 +752,6 @@ private void anim() {
         drawBalls(paneBall);
     }
 
-    private void cullParticles() {
-        // Define the boundary
-        double minX = 0;
-        double maxX = X_MAX;
-        double minY = 0;
-        double maxY = Y_MAX;
-    
-        // Use an iterator to safely remove elements from the list while iterating
-        List<javafx.scene.Node> balls = ballPane.getChildren().filtered(node -> (node instanceof Circle));
-        List<javafx.scene.Node> toRemove = new ArrayList<>();
-    
-        for (javafx.scene.Node node : balls) {
-            Circle circle = (Circle) node;
-            double x = circle.getLayoutX();
-            double y = circle.getLayoutY();
-    
-            // Check if the particle is outside the boundary
-            if (x < minX || x > maxX || y < minY || y > maxY) {
-                toRemove.add(circle);
-            }
-        }
-    
-        // Remove culled particles
-        ballPane.getChildren().removeAll(toRemove);
-    }
-    
     private void addParticlesByVelocity(int n, double startX, double startY, double startVelocity, double endVelocity,
             double angle, Pane ballPane) {
         double velocityDiff = (endVelocity - startVelocity) / (n);

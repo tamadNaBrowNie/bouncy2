@@ -432,8 +432,8 @@ public class Main extends Application {
 
             textTest.setText(
                     "\nYou are at (in px):\n"
-                            + "X: [" + ((640 - moveX) / ballPane.getScaleX() + EX_LIM) + "]\n"
-                            + "Y: [" + ((360 - moveY) / ballPane.getScaleY() + EX_LIM) + "]");
+                            + "X: [" + (ballPane.getWidth()*0.5-(ballPane.getLayoutX()/ ballPane.getScaleX())) + "]\n"
+                            + "Y: [" + (ballPane.getHeight()*0.5-(ballPane.getLayoutY()/ ballPane.getScaleY()) ) + "]");
             
         });
         
@@ -557,6 +557,14 @@ public class Main extends Application {
         tl.getKeyFrames()
                 .add(new KeyFrame(Duration.millis(16.6666666667),
                         new EventHandler<ActionEvent>() {
+                			double centerX= ballPane.getWidth()*0.5-(ballPane.getLayoutX()/ ballPane.getScaleX()),
+                					centerY= ballPane.getHeight()*0.5-(ballPane.getLayoutY()/ ballPane.getScaleY()),
+                					boundsY= ballPane.getHeight()*0.053,boundsX= ballPane.getWidth()*0.0303,
+                					top = centerY-boundsY,
+                					bottom =centerY+boundsY,
+                					left =centerX+boundsX,
+                					right = centerX-boundsX;  
+                			
                             List<javafx.scene.Node> balls = ballPane.getChildren()
                                     .filtered(node -> (node instanceof Circle));
 
@@ -564,6 +572,7 @@ public class Main extends Application {
                             public void handle(ActionEvent t) {
                                 // move the ball
                                 balls.forEach(circle -> {
+                                	circle.setVisible(!hasExplorer);
                                     double x = circle.getLayoutX(), y = circle.getLayoutY();
                                     if (x < 0 || x > X_MAX) {
                                         circle.setTranslateX(-circle.getTranslateX());

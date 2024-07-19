@@ -1,4 +1,3 @@
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -9,8 +8,7 @@ import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
@@ -38,6 +36,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.concurrent.*;
 public class Main extends Application {
     private static final String prompt_n = "Number of Particles:";
     private static final String V_PX_S = "Velocity (px/s):";
@@ -142,9 +141,16 @@ public class Main extends Application {
 
     // private StackPane spMiniMap = new StackPane();
     private GridPane gpDebug = new GridPane();
-
+    private static ExecutorService es;
     public static void main(String[] args) {
+    	es = Executors.newFixedThreadPool(3);
         launch(args);
+        try {
+			es.shutdown();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     public void start(Stage primaryStage) {
@@ -251,7 +257,7 @@ public class Main extends Application {
 
         // camera.getChildren().addAll(ballPane, spExplorer);
         // gpContainer.addRow(0, paneControl, separatorV, ballPane);
-        gpContainer.addRow(0, paneLeft, separatorV, spExplorer, paneRight);
+        gpContainer.addRow(0, paneLeft, separatorV, paneRight);
         // paneContainer.getChildren().addAll(gpContainer, fpsLabel, textTest,
         // btnDebug);
         paneContainer.getChildren().addAll(gpContainer, gpDebug);
@@ -341,7 +347,9 @@ public class Main extends Application {
                             off_y = (expY >= Y_MAX) ? -EX_BOUND : (expY <= 0) ? EX_BOUND : 0f;
                     ballPane.setScaleX(38.34);
                     ballPane.setScaleY(38.34);
-
+//
+//                    ballPane.setScaleX(1);
+//                    ballPane.setScaleY(1);
                     expX = (640 - expX) * ballPane.getScaleX() + off_x;
                     expY = (expY - 360) * ballPane.getScaleY() + off_y;
                     ballPane.setLayoutX(expX);
@@ -541,50 +549,49 @@ public class Main extends Application {
         }.start();
     }
 
-    private static Circle getBall(Future<Circle> t) {
-        try {
-            return t.get();
-        } catch (InterruptedException | ExecutionException e) {
-
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     private void anim() {
         Timeline tl = new Timeline();
 
         tl.getKeyFrames()
                 .add(new KeyFrame(Duration.millis(16.6666666667),
                         new EventHandler<ActionEvent>() {
-                			double centerX= ballPane.getWidth()*0.5-(ballPane.getLayoutX()/ ballPane.getScaleX()),
-                					centerY= ballPane.getHeight()*0.5-(ballPane.getLayoutY()/ ballPane.getScaleY()),
-                					boundsY= ballPane.getHeight()*0.053,boundsX= ballPane.getWidth()*0.0303,
-                					top = centerY-boundsY,
-                					bottom =centerY+boundsY,
-                					left =centerX+boundsX,
-                					right = centerX-boundsX;  
-                			
+                			double centerX= ballPane.getLayoutX()/ ballPane.getScaleX()+ballPane.getWidth()*0.5,
+                					centerY=(ballPane.getLayoutY()/ ballPane.getScaleY())+ballPane.getHeight()*0.5,
+                					boundsY= ballPane.getHeight()/ballPane.getScaleY(),boundsX= 16,
+                					top = (centerY-boundsY)*ballPane.getScaleX(),
+                					bottom =(centerY+boundsY)*ballPane.getScaleX(),
+                					left =(centerX+boundsX)*ballPane.getScaleX(),
+                					right = (centerX-boundsX)*ballPane.getScaleX();  
+                					
                             List<javafx.scene.Node> balls = ballPane.getChildren()
                                     .filtered(node -> (node instanceof Circle));
 
                             @Override
                             public void handle(ActionEvent t) {
                                 // move the ball
+//                            	top *=0.5;
+//                            	bottom*=ballPane.getScaleY()/2;
+//                            	left*= 0.5;
+//                            	right *= 0.5;
                                 balls.forEach(circle -> {
-                                	circle.setVisible(!hasExplorer);
-                                    double x = circle.getLayoutX(), y = circle.getLayoutY();
-                                    if (x < 0 || x > X_MAX) {
+                                    
+//                                    Platform.runLater(()->{
+                                    	double x = circle.getLayoutX(), y = circle.getLayoutY();
+                                        boolean isSeen = (hasExplorer)?((y<=top*0.5&&y>=bottom*0.5)):true;
+                                    	circle.setVisible(isSeen);
+                                    if (x < 0 || x > X_MAX) 
                                         circle.setTranslateX(-circle.getTranslateX());
-                                    }
+                                    
                                     if (y > Y_MAX || y < 0)
                                         circle.setTranslateY(-circle.getTranslateY());
-                                    // if(circle.isVisible()) {
+                                    // if(circle.isVisible()) 
+    
                                     circle.setLayoutX(x + circle.getTranslateX());
                                     circle.setLayoutY(y + circle.getTranslateY());
+});
                                     // }
                                     // circle.relocate(x + circle.getTranslateX(),y + circle.getTranslateY())
-                                });
+//                                });
 
                             }
                         }));

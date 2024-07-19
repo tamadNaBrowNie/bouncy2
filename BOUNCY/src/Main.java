@@ -602,6 +602,7 @@ public class Main extends Application {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                
 
             }
 
@@ -618,38 +619,48 @@ public class Main extends Application {
         return null;
     }
 
-private void anim() {
-	Timeline tl = new Timeline();
-	
-	tl.getKeyFrames()
-			.add(new KeyFrame(Duration.millis(16.6666666667),
-					new EventHandler<ActionEvent>() {
-				List<javafx.scene.Node> balls = ballPane.getChildren().filtered(node->(node instanceof Circle));
-						@Override
-						public void handle(ActionEvent t) {
-							// move the ball
-							balls.forEach(circle->{
-								double x = circle.getLayoutX(), y = circle.getLayoutY();
-								if(x < 0 ||x > X_MAX) {
-										circle.setTranslateX(-circle.getTranslateX());
-								}
-								if (y > Y_MAX ||y < 0) 
-									circle.setTranslateY(-circle.getTranslateY());
-//								if(circle.isVisible()) {
-									circle.setLayoutX(x + circle.getTranslateX());
-									circle.setLayoutY(y + circle.getTranslateY());
-//								}
-//								circle.relocate(x + circle.getTranslateX(),y + circle.getTranslateY())
-							});
-							
-						}
-					}));
-	// this.tl = new Timeline();
-
-	tl.setCycleCount(Timeline.INDEFINITE);
-	tl.play();
-
-}
+    private void anim() {
+        Timeline tl = new Timeline();
+    
+        tl.getKeyFrames().add(new KeyFrame(Duration.millis(16.6666666667), new EventHandler<ActionEvent>() {
+            List<javafx.scene.Node> balls = ballPane.getChildren().filtered(node -> node instanceof Circle);
+    
+            @Override
+            public void handle(ActionEvent t) {
+                // Move the ball
+                balls.forEach(circle -> {
+                    double x = circle.getLayoutX();
+                    double y = circle.getLayoutY();
+                    double translateX = circle.getTranslateX();
+                    double translateY = circle.getTranslateY();
+    
+                    if (x + translateX < 0 || x + translateX > X_MAX) {
+                        circle.setTranslateX(-translateX);
+                    }
+                    if (y + translateY < 0 || y + translateY > Y_MAX) {
+                        circle.setTranslateY(-translateY);
+                    }
+    
+                    if (circle.isVisible()) {
+                        x += circle.getTranslateX();
+                        y += circle.getTranslateY();
+    
+                        // Update the layout only if the new position is within the visible bounds
+                        if (x >= 0 && x <= X_MAX && y >= 0 && y <= Y_MAX) {
+                            circle.setLayoutX(x);
+                            circle.setLayoutY(y);
+                        } else {
+                            // Hide the circle if it goes out of bounds
+                            circle.setVisible(false);
+                        }
+                    }
+                });
+            }
+        }));
+    
+        tl.setCycleCount(Timeline.INDEFINITE);
+        tl.play();
+    }
     private void initTabVelocity() {
         gpDistance.getChildren().clear();
         gpAngle.getChildren().clear();
@@ -720,16 +731,12 @@ private void anim() {
 
         for (int i = 0; i < n; i++) {
             double xin = x, yin = y;
-    
-            Particle particle = new Particle(xin, yin, Math.toRadians(angle), velocity);
-            if (particle.isVisible(0, X_MAX, 0, Y_MAX)) {
-                ball_buf.add(particle);
-            }
-    
+
+            ball_buf.add(new Particle(xin, yin, Math.toRadians(angle), velocity));
             x += dx;
             y += dy;
         }
-    
+
         drawBalls(ballPane);
 
     }
@@ -749,11 +756,9 @@ private void anim() {
         double angleDiff = (endAngle - startAngle) / (n);
         double angle = startAngle;
         for (int i = 0; i < n; i++) {
-            Particle particle = new Particle(startX, startY, Math.toRadians(angle), velocity);
-            if (particle.isVisible(0, X_MAX, 0, Y_MAX)) {
-                ball_buf.add(particle);
-            }
+            ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
             angle += angleDiff;
+
         }
         drawBalls(paneBall);
     }
@@ -765,10 +770,11 @@ private void anim() {
         for (int i = 0; i < n; i++) {
 
             double velocity = v;
-            if (particle.isVisible(0, X_MAX, 0, Y_MAX)) {
-                ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
-            }
+
+            ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
+
             v += velocityDiff;
+
         }
         drawBalls(ballPane);
     }

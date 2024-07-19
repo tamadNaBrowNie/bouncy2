@@ -169,23 +169,12 @@ public class Main extends Application {
         ballPane.setLayoutX(0);
         ballPane.setLayoutY(0);
 
-        // fpsLabel.setLayoutX(260);
-        // fpsLabel.setLayoutY(0);
-        //
-        // btnDebug.setLayoutX(260);
-        // btnDebug.setLayoutY(10);
-
-        // textTest.setLayoutX(260);
-        // textTest.setLayoutY(40);
-
         gpDebug.addRow(0, fpsLabel);
-        // gpDebug.addRow(1, btnDebug);
         gpDebug.addRow(1, textTest);
         gpDebug.addRow(2, notif);
 
         gpDebug.setLayoutX(260);
         gpDebug.setLayoutY(0);
-        // notif.setText(":)");
 
         gridPane.setAlignment(Pos.BASELINE_CENTER);
 
@@ -202,7 +191,7 @@ public class Main extends Application {
         paneTab.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
         paneTab.getTabs().addAll(tabDistance, tabAngle, tabVelocity);
-
+        paneTab.managedProperty().bind(paneTab.visibleProperty());
         // DISTANCE tab open by default
         initTabDist();
 
@@ -255,11 +244,7 @@ public class Main extends Application {
                         "-fx-border-width: 5px;" // Border width
         );
 
-        // camera.getChildren().addAll(ballPane, spExplorer);
-        // gpContainer.addRow(0, paneControl, separatorV, ballPane);
         gpContainer.addRow(0, paneLeft, separatorV, paneRight);
-        // paneContainer.getChildren().addAll(gpContainer, fpsLabel, textTest,
-        // btnDebug);
         paneContainer.getChildren().addAll(gpContainer, gpDebug);
 
         Scene scene = new Scene(paneContainer);
@@ -331,6 +316,7 @@ public class Main extends Application {
         paneRight.getChildren().add(spExplorer);
         spExplorer.setVisible(hasExplorer);
         paneExp.setMaxSize(200, 200);
+        
         btnAddExplorer.setOnAction(event -> {
 
             hasExplorer = !hasExplorer;
@@ -366,6 +352,7 @@ public class Main extends Application {
                 ballPane.relocate(0, 0);
 
             }
+            paneTab.setVisible(!hasExplorer);
             spExplorer.setVisible(hasExplorer);
 
         });

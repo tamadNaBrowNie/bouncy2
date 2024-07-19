@@ -154,7 +154,8 @@ public class Main extends Application {
     }
 
     public void start(Stage primaryStage) {
-
+//    	inputYexp.managedProperty().bind(inputYexp.visibleProperty());
+//    	inputXexp.managedProperty().bind(inputXexp.visibleProperty());
         paneRight.setLayoutX(270);
         paneRight.setPrefHeight(Y_MAX);
         paneRight.setMinWidth(1280);
@@ -352,6 +353,8 @@ public class Main extends Application {
                 ballPane.relocate(0, 0);
 
             }
+            inputXexp.setVisible(!hasExplorer);
+            inputYexp.setVisible(!hasExplorer);
             paneTab.setVisible(!hasExplorer);
             spExplorer.setVisible(hasExplorer);
 

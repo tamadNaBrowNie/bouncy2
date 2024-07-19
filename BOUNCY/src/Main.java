@@ -549,7 +549,7 @@ public class Main extends Application {
                 .add(new KeyFrame(Duration.millis(16.6666666667),
                         new EventHandler<ActionEvent>() {
                 		Bounds peri = paneRight.getBoundsInLocal();
-
+                		
 //                			double centerX= ballPane.getLayoutX()/ ballPane.getScaleX()+ballPane.getWidth()*0.5,
 //                					centerY=(ballPane.getLayoutY()/ ballPane.getScaleY())+ballPane.getHeight()*0.5,
 //                					boundsY= ballPane.getHeight()/ballPane.getScaleY(),boundsX= 16,
@@ -569,10 +569,10 @@ public class Main extends Application {
 //                            	left*= 0.5;
 //                            	right *= 0.5;
                                 balls.forEach(circle -> {
-                                    
+                                	
 //                                    Platform.runLater(()->{
                                     	double x = circle.getLayoutX(), y = circle.getLayoutY();
-                                        boolean isSeen = (hasExplorer)?paneRight.contains(paneRight.screenToLocal(new Point2D(x,y))):true;
+                                        boolean isSeen = (hasExplorer)?peri.intersects(circle.getBoundsInParent()):true;
 //                                    	circle.setVisible(isSeen);
                                     if (x < 0 || x > X_MAX) 
                                         circle.setTranslateX(-circle.getTranslateX());

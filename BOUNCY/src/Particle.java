@@ -18,6 +18,8 @@ public class Particle implements Callable<Circle> {
 		
 	}
 
+	
+
 	public Circle draw() {
 		try {
 			return call();
@@ -53,4 +55,21 @@ public class Particle implements Callable<Circle> {
 		
 		return circle;
 	}
+
+	public boolean isVisible(double minX, double maxX, double minY, double maxY) {
+        double r = circle.getRadius();
+        return (x - r >= minX) && (x + r <= maxX) && (y - r >= minY) && (y + r <= maxY);
+    }
+
+	public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public double getRadius() {
+        return circle.getRadius();
+    }
 }

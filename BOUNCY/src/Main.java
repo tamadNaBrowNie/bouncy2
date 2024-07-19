@@ -720,12 +720,16 @@ private void anim() {
 
         for (int i = 0; i < n; i++) {
             double xin = x, yin = y;
-
-            ball_buf.add(new Particle(xin, yin, Math.toRadians(angle), velocity));
+    
+            Particle particle = new Particle(xin, yin, Math.toRadians(angle), velocity);
+            if (particle.isVisible(0, X_MAX, 0, Y_MAX)) {
+                ball_buf.add(particle);
+            }
+    
             x += dx;
             y += dy;
         }
-
+    
         drawBalls(ballPane);
 
     }
@@ -745,9 +749,11 @@ private void anim() {
         double angleDiff = (endAngle - startAngle) / (n);
         double angle = startAngle;
         for (int i = 0; i < n; i++) {
-            ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
+            Particle particle = new Particle(startX, startY, Math.toRadians(angle), velocity);
+            if (particle.isVisible(0, X_MAX, 0, Y_MAX)) {
+                ball_buf.add(particle);
+            }
             angle += angleDiff;
-
         }
         drawBalls(paneBall);
     }
@@ -759,11 +765,10 @@ private void anim() {
         for (int i = 0; i < n; i++) {
 
             double velocity = v;
-
-            ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
-
+            if (particle.isVisible(0, X_MAX, 0, Y_MAX)) {
+                ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
+            }
             v += velocityDiff;
-
         }
         drawBalls(ballPane);
     }

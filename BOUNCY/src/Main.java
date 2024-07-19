@@ -1,19 +1,17 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
-import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -37,9 +35,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.util.concurrent.*;
-import javafx.geometry.BoundingBox;
 public class Main extends Application {
     private static final String prompt_n = "Number of Particles:";
     private static final String V_PX_S = "Velocity (px/s):";
@@ -563,7 +558,7 @@ public class Main extends Application {
 
                             @Override
                             public void handle(ActionEvent t) {
-                                // move the ball
+                                // move the ballv
 //                            	top *=0.5;
 //                            	bottom*=ballPane.getScaleY()/2;
 //                            	left*= 0.5;
@@ -572,8 +567,9 @@ public class Main extends Application {
                                 	
 //                                    Platform.runLater(()->{
                                     	double x = circle.getLayoutX(), y = circle.getLayoutY();
-                                        boolean isSeen = (hasExplorer)?peri.intersects(circle.getBoundsInParent()):true;
-//                                    	circle.setVisible(isSeen);
+                                        boolean isSeen = (hasExplorer)?peri.intersects(ballPane.localToParent(circle.getBoundsInParent())):true;
+                                    	circle.setVisible(isSeen);
+//                                    	ballPane.localToParent(circle.getBoundsInParent())
                                     if (x < 0 || x > X_MAX) 
                                         circle.setTranslateX(-circle.getTranslateX());
                                     

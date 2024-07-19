@@ -1,13 +1,10 @@
 import java.util.concurrent.Callable;
-
-import javafx.animation.Timeline;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 public class Particle implements Callable<Circle> {
 
-	private double x, y, v, theta,d;
-	private Timeline tl;
+	private double x, y, v, theta;
 	private Circle circle;
 	private final double X_MAX=1280, Y_MAX=720;
 	
@@ -36,18 +33,18 @@ public class Particle implements Callable<Circle> {
 		final double T= 0.0166666666667;
 		double ppu = v * T;
 		int r = 3;
-		this.d = r<<1;
+//		this.d = r<<1;
 		
 		this.circle = new Circle(r, Color.RED);
 		if (this.x > X_MAX) 
-			this.x = X_MAX - d;
-		if (this.x < 0)
-			this.x = d;
+			this.x = X_MAX;
+		else if (this.x < 0)
+			this.x = 0;
 		
 		if (this.y < 0)
-			this.y = d;
-		if (this.y > Y_MAX) 
-			this.x = Y_MAX - d;
+			this.y = 0;
+		else if (this.y > Y_MAX) 
+			this.x = Y_MAX;
 		circle.setLayoutX(this.x);
 		circle.setLayoutY(this.y);
 

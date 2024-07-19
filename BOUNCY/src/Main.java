@@ -2,22 +2,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import com.sun.corba.se.impl.orbutil.graph.Node;
-
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
@@ -42,8 +33,8 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -57,9 +48,9 @@ public class Main extends Application {
     // private Canvas canvas= new Canvas(X_MAX, Y_MAX);;
     private Label fpsLabel = new Label("FPS: 0");;
     private long lastFPSTime = System.nanoTime();;
-    private int frameCount = 0;
+//    private int frameCount = 0;
     private double fps = 0;
-    public static ExecutorService es;
+//    public static ExecutorService es;
     private boolean hasExplorer = false;
     private boolean isDebug = true; //show control panel initially
 
@@ -141,8 +132,6 @@ public class Main extends Application {
     String mapImgFile = new File(System.getProperty("user.dir")+"\\src\\map.jpg").toURI().toString();
     Image mapImg = new Image(mapImgFile);
     Pane pSprite = new Pane();
-//    String bigSpriteFile = new File(System.getProperty("user.dir")+"\\src\\amongus.png").toURI().toString();
-//    Image bigSprite = new Image(bigSpriteFile);
 
     private GridPane gpContainer = new GridPane();
     private GridPane paneLeft = new GridPane();
@@ -153,17 +142,12 @@ public class Main extends Application {
 	private BooleanProperty d_key = new SimpleBooleanProperty();
 //	private BooleanBinding keyPressed = s_key.or(a_key).or(w_key).or(d_key);
 
-	private StackPane spMiniMap = new StackPane();
+//	private StackPane spMiniMap = new StackPane();
 	private GridPane gpDebug = new GridPane();
 
     public static void main(String[] args) {
-        es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 3);
-        // es = ForkJoinPool.commonPool();
-        // es = Executors.newFixedThreadPool(2);
-        // es = Executors.newCachedThreadPool();
         launch(args);
-        es.shutdown();
-    }
+        }
 
     public void start(Stage primaryStage) {
 
@@ -394,7 +378,8 @@ public class Main extends Application {
                     
                     expX = (640-expX)*ballPane.getScaleX()+off_x;
                     expY =(expY-360)*ballPane.getScaleY() +off_y;
-        			ballPane.relocate(expX,expY );
+                    ballPane.setLayoutX(expX);
+                    ballPane.setLayoutY(expY);
    	            
             	}else {
             		ballPane.setScaleX(1);
@@ -417,7 +402,10 @@ public class Main extends Application {
         
         scene.setOnKeyPressed(e ->{
         	//if (!isDebug && hasExplorer) //NOTE: uncomment when done testing
+        	if(e.getCode() == KeyCode.E) {
 
+				btnAddExplorer.fire();
+        	}
         	if (hasExplorer)
 
         	{//DONE-could be better, make instead another animationtimer that checks if keys are being pressed or not
@@ -466,6 +454,7 @@ public class Main extends Application {
                                 )))
                 		);
     	                break;
+    	                default:break;
         		}
 
                 double halfSizX = ballPane.getWidth()*ballPane.getScaleX()*0.5,
@@ -484,36 +473,36 @@ public class Main extends Application {
 
                 textTest.setText(
                 		"\nYou are at (in px):\n"
-                		+ "X: ["+(640-moveX)+"]\n"
-                		+ "Y: ["+(360-moveY)+"]");
+                		+ "X: ["+((640-moveX)/ballPane.getScaleX()+EX_LIM)+"]\n"
+                		+ "Y: ["+((360-moveY)/ballPane.getScaleY()+EX_LIM)+"]");
         	}
 		});
-        scene.setOnKeyReleased(e ->{
-//        	if (!isDebug && hasExplorer)  //NOTE: uncomment when done testing
-        	if (hasExplorer)
-        	{
-        		switch(e.getCode())
-        		{
-        			case W:
-        				w_key.set(false);
-    	                textTest.setText("W is pressed.");
-    	                break;
-        			case S:
-        				s_key.set(false);
-    	                textTest.setText("S is pressed.");
-    	                break;
-        			case A:
-        				a_key.set(false);
-    	                textTest.setText("A is pressed.");
-    	                break;
-        			case D:
-        				d_key.set(false);
-    	                textTest.setText("D is pressed.");
-    	                break;
-        		}
-        	}
-        });
-        
+//        scene.setOnKeyReleased(e ->{
+////        	if (!isDebug && hasExplorer)  //NOTE: uncomment when done testing
+//        	if (hasExplorer)
+//        	{
+//        		switch(e.getCode())
+//        		{
+//        			case W:
+//        				w_key.set(false);
+//    	                textTest.setText("W is pressed.");
+//    	                break;
+//        			case S:
+//        				s_key.set(false);
+//    	                textTest.setText("S is pressed.");
+//    	                break;
+//        			case A:
+//        				a_key.set(false);
+//    	                textTest.setText("A is pressed.");
+//    	                break;
+//        			case D:
+//        				d_key.set(false);
+//    	                textTest.setText("D is pressed.");
+//    	                break;
+//        		}
+//        	}
+//        });
+//        
         tabVelocity.setOnSelectionChanged(e -> {
             tabDistance.setText("Distance");
             tabAngle.setText("Angle");
@@ -642,8 +631,9 @@ private void anim() {
 							// move the ball
 							balls.forEach(circle->{
 								double x = circle.getLayoutX(), y = circle.getLayoutY();
-								if(x < 0 ||x > X_MAX)
-									circle.setTranslateX(-circle.getTranslateX());
+								if(x < 0 ||x > X_MAX) {
+										circle.setTranslateX(-circle.getTranslateX());
+								}
 								if (y > Y_MAX ||y < 0) 
 									circle.setTranslateY(-circle.getTranslateY());
 //								if(circle.isVisible()) {
@@ -743,7 +733,6 @@ private void anim() {
 
     private void drawBalls(Pane ballPane) {
         try {
-            // ballPane.getChildren().addAll(sballs());
         	  List<Circle> circles = ball_buf.parallelStream().map(Particle::draw).collect(Collectors.toList());
             ballPane.getChildren().addAll(circles);
             ball_buf.clear();

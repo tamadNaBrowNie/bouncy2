@@ -35,26 +35,24 @@ public class Particle implements Callable<Circle> {
 	public Circle call() throws Exception {
 		final double T= 0.0166666666667;
 		double ppu = v * T;
-		int r = 1;
-		this.d = r*2;
+		int r = 3;
+		this.d = r<<1;
 		
 		this.circle = new Circle(r, Color.RED);
 		if (this.x > X_MAX) 
 			this.x = X_MAX - d;
-		else if (this.x < 0)
+		if (this.x < 0)
 			this.x = d;
 		
 		if (this.y < 0)
 			this.y = d;
-		else if (this.y > Y_MAX) 
+		if (this.y > Y_MAX) 
 			this.x = Y_MAX - d;
 		circle.setLayoutX(this.x);
 		circle.setLayoutY(this.y);
 
-		double dx = -ppu * Math.cos(theta);
-		double dy = -ppu * Math.sin(theta);
-		circle.setTranslateX(dx);
-		circle.setTranslateY(dy);
+		circle.setTranslateX(-ppu * Math.cos(theta));
+		circle.setTranslateY(-ppu * Math.sin(theta));
 		
 		return circle;
 	}

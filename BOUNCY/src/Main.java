@@ -48,7 +48,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class Main extends Application {
-    private static final String prompt_n = "Number of Particles:";
+	private static final String prompt_n = "Number of Particles:";
 	private static final String V_PX_S = "Velocity (px/s):";
 	private static final String ADD_BY_ANGLE = "Add by Angle";
 	private static final String ADD_BY_VELOCITY = "Add by Velocity";
@@ -265,11 +265,11 @@ public class Main extends Application {
         //this is going to show lang kunware na the balls that exist in the bounds of the
         // spExplorer is being stored perfectly. Then their layoutXY can be shown in place like, x10 kunware
         //so we can actually see it zoomed in
-        spMiniMap.setLayoutX(0);
-        spMiniMap.setPrefHeight(19*10);//The dimensions of the periphery are 19rows by 33 columns, (x10 para we can see what's actually happening)
-        spMiniMap.setPrefWidth(33*10);
-        spMiniMap.setLayoutY(paneRight.getHeight()-spMiniMap.getHeight());
-        paneRight.getChildren().add(spMiniMap);
+//        spMiniMap.setLayoutX(0);
+//        spMiniMap.setPrefHeight(19*10);//The dimensions of the periphery are 19rows by 33 columns, (x10 para we can see what's actually happening)
+//        spMiniMap.setPrefWidth(33*10);
+//        spMiniMap.setLayoutY(paneRight.getHeight()-spMiniMap.getHeight());
+//        paneRight.getChildren().add(spMiniMap);
 //        pSprite = new Pane();
 //        pSprite.setBackground(new Background(new BackgroundImage (
 //        		bigSprite,
@@ -302,17 +302,11 @@ public class Main extends Application {
         primaryStage.show();
         
         btnDebug.setOnAction(event ->{
-            //hide panel Control when debug is off,
-        	//change position of button
-        	//change text of button to Debug Mode: OFF
         	if (isDebug) {
             	btnDebug.setText("Developer Mode: OFF");
             	gpContainer.getChildren().clear();
                 gpContainer.addRow(0, paneRight);
                 isDebug=false;
-//                btnDebug.setLayoutX(10);
-//                fpsLabel.setLayoutX(10); //10 px from the width of the control panel
-//                fpsLabel.setLayoutY(0);
                 gpDebug.setLayoutX(10);
                 textTest.setText("Debug: "+isDebug);
                 primaryStage.setWidth(X_MAX);
@@ -347,20 +341,11 @@ public class Main extends Application {
                 isDebug=true;
                 textTest.setText("Debug: "+isDebug);
                 primaryStage.setWidth(X_MAX+250); //full screen size: X_MAX+250
-                
-                //zoom testing
-                
-//                if(hasExplorer)
-//                {
-//                	paneRight.setScaleX(1.f);
-//                	paneRight.setScaleY(1.f);
-//	            	spExplorer.setMaxSize(320, 180);
-//	                paneExp.setMaxSize(30,30);
-//                }
+
         	}
         	
         });
-        
+        btnDebug.setOnAction(null);
 
 		paneExp = new Pane();
 		paneExp.setBackground(new Background(new BackgroundImage (
@@ -384,59 +369,47 @@ public class Main extends Application {
         spExplorer.getChildren().add(paneExp);
         paneRight.getChildren().add(spExplorer);
         spExplorer.setVisible(hasExplorer);
-        
-        paneExp.setMaxSize(50,50);
+        final float EX_BOUND = 200f;
+                
+        paneExp.setMaxSize(200 ,200);
         btnAddExplorer.setOnAction(event -> {
+
+    		hasExplorer=!hasExplorer;
         	try {
-        		double expX = Double.parseDouble(inputXexp.getText());
-                double expY = Double.parseDouble(inputYexp.getText());
-        		hasExplorer=!hasExplorer;
-        		spExplorer.setVisible(hasExplorer);
         		if (hasExplorer){
-//                    ballPane.setLayoutX(expX);
-//                    ballPane.setLayoutX(720-expY);
+
+            		double expX = Double.parseDouble(inputXexp.getText());
+                    double expY = Double.parseDouble(inputYexp.getText());
+                    if(expX > X_MAX||expX<0||expY > Y_MAX||expY<0)
+        	           throw new NumberFormatException();
+                    
+
+                    double 
+                    off_x =
+                		(expX>=X_MAX)?EX_BOUND:(expX<=0)?-EX_BOUND:0f,
+            		off_y=
+                		(expY>=Y_MAX)?-EX_BOUND:(expY<=0)?EX_BOUND:0f;
                     ballPane.setScaleX(38);
                     ballPane.setScaleY(38);
                     
-        			ballPane.relocate((640-expX)*ballPane.getScaleX(), (expY-360)*ballPane.getScaleY() );
-    	            notif.setText("Explorer spawned.");
-//                    spExplorer.setBorder(10,10,10,10);
-                  //                    spExplorer.setPrefSize(320, 180); //div 4 zoom
-//                    The dimensions of the periphery are 19 rows by 33 columns,
-//                    with the sprite rendered in the very center. 
-                    //wow super small
-//                    spExplorer.setLayoutX(expX);
-//                    spExplorer.setLayoutY(expY);
-
-//                    spExplorer.setLayoutX((paneRight.getWidth()/2)-(spExplorer.getWidth()/2));	//center it para zoomed again, 12
-//                    spExplorer.setLayoutY((paneRight.getHeight()/2)-spExplorer.getHeight()/2);
-                    
-                    //idk why but the middle is 435,240 (not same coordinates as balls yet TODO)
-                    
-//                    ballPane.setLayoutX((paneRight.getWidth()/2)+(spExplorer.getWidth()/2));
-//                    ballPane.setLayoutY((paneRight.getHeight()/2)+(spExplorer.getHeight()/2));
-//                    
-                    
-
-//            		ballPane.getChildren().add(explorer.getPane()); // THIS MAKES IT VISIBLE ON THE RIGHT PANE
-//            		ballPane.getChildren().add(paneExp); // THIS MAKES IT VISIBLE ON THE RIGHT PANE
-
-//            		btnAddExplorer.setDisable(true);
-            	
-//            		textTest.setText(System.getProperty("user.dir")+"\\src\\amongus.png");
-    	            //	CORRECT PATH!
-                    //file:///D:/Users/ghael/Documents/GitHub/Sites/MP/bouncy/BOUNCY/src/amongus.png
-    	            
-    	            
+                    expX = (640-expX)*ballPane.getScaleX()+off_x;
+                    expY =(expY-360)*ballPane.getScaleY() +off_y;
+        			ballPane.relocate(expX,expY );
+   	            
             	}else {
-            		ballPane.relocate(0,0);
             		ballPane.setScaleX(1);
                     ballPane.setScaleY(1);
+            		ballPane.relocate(0,0);
+            		
             	}
         		
 	        } catch (NumberFormatException e) {
 	            notif.setText("Invalid Explorer coordinates.\n");
+	            hasExplorer = false;
 	        }
+
+
+    		spExplorer.setVisible(hasExplorer);
 
         	
         	
@@ -497,15 +470,15 @@ public class Main extends Application {
 
                 double halfSizX = ballPane.getWidth()*ballPane.getScaleX()*0.5,
                 		halfSizY = ballPane.getHeight()*ballPane.getScaleY()*0.5;
-                
-                if(moveX>halfSizX )
-                	moveX = halfSizX-38 ;
+                final double EX_LIM= ballPane.getScaleX()*2+EX_BOUND;
+                if(moveX>=halfSizX )
+                	moveX = halfSizX-EX_LIM;
                 if(moveX<-halfSizX )
-                	moveX = 38-halfSizX ;
+                	moveX = EX_LIM-halfSizX ;
                 if(moveY>halfSizY)
-                	moveY = halfSizY-38 ;
+                	moveY = halfSizY-EX_LIM;
                 if(moveY<-halfSizY )
-                	moveY = 38-halfSizY;
+                	moveY = EX_LIM-halfSizY;
                 ballPane.setLayoutX(moveX);
                 ballPane.setLayoutY(moveY);
 

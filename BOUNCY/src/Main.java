@@ -8,11 +8,13 @@ import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -134,7 +136,7 @@ public class Main extends Application {
     private final double EX_LIM = ballPane.getScaleX() * 2 + EX_BOUND;
     private GridPane gpContainer = new GridPane();
     private GridPane paneLeft = new GridPane();
-
+    
     // private BooleanBinding keyPressed = s_key.or(a_key).or(w_key).or(d_key);
 
     // private StackPane spMiniMap = new StackPane();
@@ -327,7 +329,8 @@ public class Main extends Application {
                     double expY = Double.parseDouble(inputYexp.getText());
                     if (expX > X_MAX || expX < 0 || expY > Y_MAX || expY < 0)
                         throw new NumberFormatException();
-
+//                    cen_X= expX;
+//                    cen_Y= Y_MAX-expY;
                     double off_x = (expX >= X_MAX) ? EX_BOUND : (expX <= 0) ? -EX_BOUND : 0f,
                             off_y = (expY >= Y_MAX) ? -EX_BOUND : (expY <= 0) ? EX_BOUND : 0f;
                     ballPane.setScaleX(38.34);
@@ -335,8 +338,8 @@ public class Main extends Application {
 //
 //                    ballPane.setScaleX(1);
 //                    ballPane.setScaleY(1);
-                    expX = (640 - expX) * ballPane.getScaleX() + off_x;
-                    expY = (expY - 360) * ballPane.getScaleY() + off_y;
+                    expX = (ballPane.getWidth()*0.5 - expX) * ballPane.getScaleX() + off_x;
+                    expY = (expY - ballPane.getHeight()*0.5) * ballPane.getScaleY() + off_y;
                     ballPane.setLayoutX(expX);
                     ballPane.setLayoutY(expY);	
 	
@@ -372,20 +375,18 @@ public class Main extends Application {
             switch (e.getCode()) {
                 case W:
                     moveY += dy;
-
+                    
                     // w_key.set(true);
                     // textTest.setText("W is pressed.");
 
                     break;
                 case S:
                     moveY -= dy;
-
                     // s_key.set(true);
                     // textTest.setText("S is pressed.");
                     break;
                 case A:
                     moveX += dx;
-
                     // a_key.set(true);
 
                     paneExp.setBackground(new Background(new BackgroundImage(
@@ -398,8 +399,6 @@ public class Main extends Application {
                     break;
                 case D:
                     moveX -= dx;
-
-                    // d_key.set(true);
                     paneExp.setBackground(new Background(new BackgroundImage(
                             bgImage,
                             BackgroundRepeat.NO_REPEAT,
@@ -537,56 +536,71 @@ public class Main extends Application {
         }.start();
     }
 
-    private void anim() {
-        Timeline tl = new Timeline();
 
+    private void anim() {
+    	Timeline tl = new Timeline();
         tl.getKeyFrames()
                 .add(new KeyFrame(Duration.millis(16.6666666667),
                         new EventHandler<ActionEvent>() {
-                		Bounds peri = paneRight.getBoundsInLocal();
                 		
-//                			double centerX= ballPane.getLayoutX()/ ballPane.getScaleX()+ballPane.getWidth()*0.5,
-//                					centerY=(ballPane.getLayoutY()/ ballPane.getScaleY())+ballPane.getHeight()*0.5,
-//                					boundsY= ballPane.getHeight()/ballPane.getScaleY(),boundsX= 16,
-//                					top = (centerY-boundsY)*ballPane.getScaleX(),
-//                					bottom =(centerY+boundsY)*ballPane.getScaleX(),
-//                					left =(centerX+boundsX)*ballPane.getScaleX(),
-//                					right = (centerX-boundsX)*ballPane.getScaleX();  
+
                 					
-                            List<javafx.scene.Node> balls = ballPane.getChildren()
-                                    .filtered(node -> (node instanceof Circle));
 
                             @Override
                             public void handle(ActionEvent t) {
-                                // move the ballv
-//                            	top *=0.5;
-//                            	bottom*=ballPane.getScaleY()/2;
-//                            	left*= 0.5;
-//                            	right *= 0.5;
-                                balls.forEach(circle -> {
-                                	
-//                                    Platform.runLater(()->{
-                                    	double x = circle.getLayoutX(), y = circle.getLayoutY();
-                                        boolean isSeen = (hasExplorer)?peri.intersects(ballPane.localToParent(circle.getBoundsInParent())):true;
-                                    	circle.setVisible(isSeen);
-//                                    	ballPane.localToParent(circle.getBoundsInParent())
-                                    if (x < 0 || x > X_MAX) 
-                                        circle.setTranslateX(-circle.getTranslateX());
-                                    
-                                    if (y > Y_MAX || y < 0)
-                                        circle.setTranslateY(-circle.getTranslateY());
-                                    // if(circle.isVisible()) 
-    
-                                    circle.setLayoutX(x + circle.getTranslateX());
-                                    circle.setLayoutY(y + circle.getTranslateY());
-});
-                                    // }
-                                    // circle.relocate(x + circle.getTranslateX(),y + circle.getTranslateY())
-//                                });
+//                            	
+                                FilteredList<Node> balls = ballPane.getChildren()
+                                        .filtered(node -> (node instanceof Circle));
+            					double 	
+            					w=0,
+            					h=0,
+            					s_x=0,
+            					s_y=0;
+            					if(hasExplorer) {
+	            					w=ballPane.getWidth()*0.5;
+	            					h=ballPane.getHeight()*0.5;
+	            					s_x= 1/ballPane.getScaleX();
+	    							s_y= 1/ballPane.getScaleY();      
 
+//            					System.out.println(cen_X);
+            					}
+            					double Y_off = (hasExplorer)?h*s_y:0,
+    							X_off = (hasExplorer)?w*s_x:0,
+    							cen_X =(hasExplorer)?w-ballPane.getLayoutX()*s_x:0,
+            					cen_Y=(hasExplorer)?h-ballPane.getLayoutY()*s_y:0;
+            					es.submit(()->
+		            					{
+		                					double	
+		                					top = cen_Y+Y_off+1,
+		                					bottom =cen_Y-Y_off-1,
+		                					left =cen_X-X_off,
+		                					right = cen_X+X_off;	
+		            						Platform.runLater(()->
+			            					balls.forEach(
+			        							circle -> {
+			                                	
+				                                	double x = circle.getLayoutX(), y = circle.getLayoutY();
+				                                	
+				                                    boolean isSeen = (hasExplorer)?left<= x&& right>=x&&top>=y && bottom <=y:true;
+				                                	circle.setVisible(isSeen);
+					                                if (x < 0 || x > X_MAX) 
+					                                    circle.setTranslateX(-circle.getTranslateX());
+					                                
+					                                if (y > Y_MAX || y < 0)
+					                                    circle.setTranslateY(-circle.getTranslateY());
+					                                // if(circle.isVisible()) 
+					
+					                                circle.setLayoutX(x + circle.getTranslateX());
+					                                circle.setLayoutY(y + circle.getTranslateY());
+				            					}
+	            							)
+		            					);}
+        							);
+            					
                             }
-                        }));
-        // this.tl = new Timeline();
+                        }
+            		)
+            		);
 
         tl.setCycleCount(Timeline.INDEFINITE);
         tl.play();

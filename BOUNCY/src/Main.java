@@ -120,18 +120,7 @@ public class Main extends Application {
     private Label labelStartEndVelocity = new Label("Starting and Ending Velocity:");
     private Label labelStartEndAngle = new Label("Starting and Ending Angle:");
     private Label labelConstXY = new Label("Spawn Point (X,Y):");
-
-    private Pane paneExp = new Pane();
-    // private Explorer explorer;
-    private StackPane spExplorer = new StackPane();
-    // private Pane camera = new StackPane();//making this stack pane is a bag idea
-    String bgFront = ".\\amongus.png";
-    Image bgImage = new Image(bgFront);
-    String bgFlipped = ".\\amongusflipped.png";
-    Image bgImageFlipped = new Image(bgFlipped);
-    String mapImgFile = ".\\map.jpg";
-    Image mapImg = new Image(mapImgFile);
-    Pane pSprite = new Pane();
+    
 
     private final float EX_BOUND = 200f;
     private final double EX_LIM = ballPane.getScaleX() * 2 + EX_BOUND;
@@ -230,6 +219,14 @@ public class Main extends Application {
                         "-fx-border-width: 1px;" // Border width
         );
 
+        // private Pane camera = new StackPane();//making this stack pane is a bag idea
+        String bgFront = ".\\amongus.png";
+        Image bgImage = new Image(bgFront);
+        String bgFlipped = ".\\amongusflipped.png";
+        Image bgImageFlipped = new Image(bgFlipped);
+        String mapImgFile = ".\\map.jpg";
+        Image mapImg = new Image(mapImgFile);
+        Pane pSprite = new Pane();
         ballPane.setBackground(new Background(new BackgroundImage(
                 mapImg,
                 BackgroundRepeat.NO_REPEAT,
@@ -255,62 +252,44 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        paneExp = new Pane();
-        paneExp.setBackground(new Background(new BackgroundImage(
-                bgImage,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                null, new BackgroundSize(
-                        BackgroundSize.AUTO, BackgroundSize.AUTO,
-                        false, false, true, false))));
+        // private Explorer explorer;
+
+//        This is when we add the ballPane to screen
+        paneRight.getChildren().add(ballPane);
+        
+//      Holds the sprite
+        StackPane spExplorer = new StackPane();
+
+//      The sprite
+      Pane paneExp = new Pane();
+//Image of sprite
+      paneExp.setBackground(new Background(new BackgroundImage(
+              bgImage,
+              BackgroundRepeat.NO_REPEAT,
+              BackgroundRepeat.NO_REPEAT,
+              null, new BackgroundSize(
+                      BackgroundSize.AUTO, BackgroundSize.AUTO,
+                      false, false, true, false))));
+        spExplorer.getChildren().add(paneExp);
+        
         spExplorer.setLayoutX(58);
         spExplorer.setLayoutY(0);
         
-
         spExplorer.setPrefSize(X_MAX, Y_MAX);
-        paneRight.getChildren().add(ballPane);
-        anims.start();
-        spExplorer.getChildren().add(paneExp);
+        paneExp.setMaxSize(200, 200);
         paneRight.getChildren().add(spExplorer);
         spExplorer.setVisible(hasExplorer);
-        paneExp.setMaxSize(200, 200);
+        
+
+        
+        
+        anims.start();
         
         btnAddExplorer.setOnAction(event -> {
         	synchronized(this.Lock){
             hasExplorer = !hasExplorer;
-            if (hasExplorer) {
-	            try {
-	               
-
-                    double expX = Double.parseDouble(inputXexp.getText());
-                    double expY = Double.parseDouble(inputYexp.getText());
-                    if (expX > X_MAX || expX < 0 || expY > Y_MAX || expY < 0)
-                        throw new NumberFormatException();
-//                    cen_X= expX;
-//                    cen_Y= Y_MAX-expY;
-                    double off_x = (expX >= X_MAX) ? EX_BOUND : (expX <= 0) ? -EX_BOUND : 0f,
-                            off_y = (expY >= Y_MAX) ? -EX_BOUND : (expY <= 0) ? EX_BOUND : 0f;
-                    ballPane.setScaleX(38.34);
-                    ballPane.setScaleY(38.34);
-//
-//                    ballPane.setScaleX(1);
-//                    ballPane.setScaleY(1);
-                    expX = (ballPane.getWidth()*0.5 - expX) * ballPane.getScaleX() + off_x;
-                    expY = (expY - ballPane.getHeight()*0.5) * ballPane.getScaleY() + off_y;
-                    ballPane.setLayoutX(expX);
-                    ballPane.setLayoutY(expY);	
-	
-	            } catch (NumberFormatException e) {
-	                notif.setText("Invalid Explorer coordinates.\n");
-	                hasExplorer = false;
-	
-	            } 
-            }else {
-                ballPane.setScaleX(1);
-                ballPane.setScaleY(1);
-                ballPane.relocate(0, 0);
-
-            }
+            
+            changeMode();
             inputXexp.setVisible(!hasExplorer);
             inputYexp.setVisible(!hasExplorer);
             paneTab.setVisible(!hasExplorer);
@@ -333,56 +312,38 @@ public class Main extends Application {
 				        null, new BackgroundSize(
 				                BackgroundSize.AUTO, BackgroundSize.AUTO,
 				                false, false, true, false)));
+		
         scene.setOnKeyPressed(e -> {
-            // if (!isDebug && hasExplorer) //NOTE: uncomment when done testing
         	 switch (e.getCode()) {
         	 case E:btnAddExplorer.fire();break;
         	 case ESCAPE:primaryStage.close();break;
         	 default:break;
         	 }
-        	 if (!hasExplorer)
-            	return;
+        	 if (!hasExplorer)return;
 
-            double moveY = ballPane.getLayoutY(), moveX = ballPane.getLayoutX();
-            double dx = ballPane.getScaleX(), dy = ballPane.getScaleY();
+            double moveY = ballPane.getLayoutY(), moveX = ballPane.getLayoutX(),
+            		dx = ballPane.getScaleX(), dy = ballPane.getScaleY();
             switch (e.getCode()) {
-                case W:
-                    moveY += dy;
-                    break;
-                case S:
-                    moveY -= dy;
-                    break;
-                case A:
-                    moveX += dx;
+                case W:moveY += dy;break;
+                case S:moveY -= dy;break;
+                case A:moveX += dx;
 				paneExp.setBackground(flipSprite);
                     break;
-                case D:
-                    moveX -= dx;
+                case D:moveX -= dx;
 				paneExp.setBackground(sprite);
                     break;
-                default:
-                    break;
+                default: break;
             }
 
             double halfSizX = ballPane.getWidth() * ballPane.getScaleX() * 0.5,
                     halfSizY = ballPane.getHeight() * ballPane.getScaleY() * 0.5;
             
-            if (moveX >= halfSizX)
-                moveX = halfSizX - EX_LIM;
-            if (moveX < -halfSizX)
-                moveX = EX_LIM - halfSizX;
-            if (moveY > halfSizY)
-                moveY = halfSizY - EX_LIM;
-            if (moveY < -halfSizY)
-                moveY = EX_LIM - halfSizY;
+            if (moveX >= halfSizX) moveX = halfSizX - EX_LIM;
+            if (moveX < -halfSizX) moveX = EX_LIM - halfSizX;
+            if (moveY > halfSizY) moveY = halfSizY - EX_LIM;
+            if (moveY < -halfSizY) moveY = EX_LIM - halfSizY;
             ballPane.setLayoutX(moveX);
-            ballPane.setLayoutY(moveY);
-
-            textTest.setText(
-                    "\nYou are at (in px):\n"
-                            + "X: [" + (ballPane.getWidth()*0.5-(ballPane.getLayoutX()/ ballPane.getScaleX())) + "]\n"
-                            + "Y: [" + (ballPane.getHeight()*0.5-(ballPane.getLayoutY()/ ballPane.getScaleY()) ) + "]");
-            
+            ballPane.setLayoutY(moveY);         
         });
         
         tabVelocity.setOnSelectionChanged(e -> {
@@ -478,6 +439,11 @@ public class Main extends Application {
             public void handle(long now) {
 
                 fps++;
+
+                textTest.setText(
+                        "\nYou are at (in px):\n"
+                                + "X: [" + (ballPane.getWidth()*0.5-(ballPane.getLayoutX()/ ballPane.getScaleX())) + "]\n"
+                                + "Y: [" + (ballPane.getHeight()*0.5-(ballPane.getLayoutY()/ ballPane.getScaleY()) ) + "]");
                 try {
                     update(now);
                 } catch (Exception e) {
@@ -489,64 +455,90 @@ public class Main extends Application {
         }.start();
     }
 
+	private void changeMode() {
+		if (!hasExplorer) {
+			ballPane.setScaleX(1);
+		    ballPane.setScaleY(1);
+		    ballPane.relocate(0, 0);
+		    return;    
+		}
+	    try {       
+	        double expX = Double.parseDouble(inputXexp.getText());
+	        double expY = Double.parseDouble(inputYexp.getText());
+	        if (expX > X_MAX || expX < 0 || expY > Y_MAX || expY < 0)
+	            throw new NumberFormatException();
+	        double off_x = (expX >= X_MAX) ? EX_BOUND : (expX <= 0) ? -EX_BOUND : 0f,
+	                off_y = (expY >= Y_MAX) ? -EX_BOUND : (expY <= 0) ? EX_BOUND : 0f;
+	        ballPane.setScaleX(38.34);
+	        ballPane.setScaleY(38.34);
+
+	        expX = (ballPane.getWidth()*0.5 - expX) * ballPane.getScaleX() + off_x;
+	        expY = (expY - ballPane.getHeight()*0.5) * ballPane.getScaleY() + off_y;
+	        ballPane.setLayoutX(expX);
+	        ballPane.setLayoutY(expY);	
+
+	    } catch (NumberFormatException e) {
+	        notif.setText("Invalid Explorer coordinates.\n");
+	        hasExplorer = false;
+	    } 
+	}
+	
+
 
     private void anim() {
     	Timeline tl = new Timeline();
         tl.getKeyFrames()
-                .add(new KeyFrame(Duration.millis(16.6666666667),
-                        new EventHandler<ActionEvent>() {
-                		
-
-                					
-
-                            @Override
-                            public void handle(ActionEvent t) {
-            					try {
-									es.submit(()->Platform.runLater(()->check_vis(ballPane.getChildren()
-	                                        .filtered(node -> (node instanceof Circle))))).get();
-								} catch (InterruptedException | ExecutionException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-            					
-                            }
-
-							private void check_vis(List<Node> balls) {
-								double 	
-								w=0,
-								h=0,
-								s_x=0,
-								s_y=0,Y_off = 0,X_off= 0,cen_X = 0,cen_Y=0;
-								
-								if(hasExplorer) {
-									w=ballPane.getWidth()*0.5;
-									h=ballPane.getHeight()*0.5;
-									s_x= 1/ballPane.getScaleX();
-									s_y= 1/ballPane.getScaleY();      
-
-									Y_off = h*s_y;
-									X_off = w*s_x;
-
-									cen_X =w-ballPane.getLayoutX()*s_x;
-									cen_Y=h-ballPane.getLayoutY()*s_y;
-									
-
-								}
-								mov_balls(balls, Y_off, X_off, cen_X,cen_Y);
+            .add(new KeyFrame(Duration.millis(16.6666666667),
+                    new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent t) {
+        					try {
+								es.submit(()->
+								Platform.runLater(()->
+								check_vis(ballPane.getChildren()
+                                        .filtered(node -> (node instanceof Circle))))).get();
+							} catch (InterruptedException | ExecutionException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
+        					
+                        }
 
-							private void mov_balls(List<Node> balls, double Y_off, double X_off, double cen_X,double cen_Y) {
+						private void check_vis(List<Node> balls) {
+							double 	
+							w=0,
+							h=0,
+							s_x=0,
+							s_y=0,Y_off = 0,X_off= 0,cen_X = 0,cen_Y=0;
+							
+							if(hasExplorer) {
+								w=ballPane.getWidth()*0.5;
+								h=ballPane.getHeight()*0.5;
+								s_x= 1/ballPane.getScaleX();
+								s_y= 1/ballPane.getScaleY();      
+
+								Y_off = h*s_y;
+								X_off = w*s_x;
+
+								cen_X =w-ballPane.getLayoutX()*s_x;
+								cen_Y=h-ballPane.getLayoutY()*s_y;
 								
-		            			
-								balls.forEach(
-									circle -> {
-								    	mov_ball(Y_off, X_off, cen_X, cen_Y, circle);
-									}
-								);
 
 							}
+							mov_balls(balls, Y_off, X_off, cen_X,cen_Y);
+						}
 
-							private void mov_ball(double Y_off, double X_off, double cen_X, double cen_Y, Node circle) {
+						private void mov_balls(List<Node> balls, double Y_off,
+								double X_off, double cen_X,double cen_Y) 
+						{
+							balls.forEach(
+								circle -> mov_ball(Y_off, X_off, cen_X, cen_Y, circle)
+							);
+
+						}
+
+							private void mov_ball(double Y_off, double X_off, 
+									double cen_X, double cen_Y, Node circle) {
 								double x = circle.getLayoutX(), y = circle.getLayoutY();
 								double top,bottom,left,right;
 								top=bottom=left=right=0;
@@ -555,14 +547,14 @@ public class Main extends Application {
 								left =cen_X-X_off;
 								right = cen_X+X_off;	
 								
-								boolean isSeen = (hasExplorer)?left<= x&& right>=x&&top>=y && bottom <=y:true;
+								boolean isSeen = (hasExplorer)?
+										left<= x&& right>=x&&top>=y && bottom <=y:true;
 								circle.setVisible(isSeen);
 								if (x < 0 || x > X_MAX) 
-								    circle.setTranslateX(-circle.getTranslateX());
+									circle.setTranslateX(-circle.getTranslateX());
 								
 								if (y > Y_MAX || y < 0)
 								    circle.setTranslateY(-circle.getTranslateY());
-
 
 								circle.setLayoutX(x + circle.getTranslateX());
 								circle.setLayoutY(y + circle.getTranslateY());
@@ -657,12 +649,11 @@ public class Main extends Application {
     private Object Lock = new Object();
     private void drawBalls(Pane ballPane) {
         try {
-            List<Circle> circles = ball_buf.parallelStream().map(Particle::draw).collect(Collectors.toList());
-            synchronized(Lock) {
-            	Lock.wait(17);
+            List<Circle> circles = ball_buf.parallelStream()
+            		.map(Particle::draw)
+            		.collect(Collectors.toList());
             	ballPane.getChildren().addAll(circles);
-            	Lock.notifyAll();
-            }
+
             ball_buf.clear();
         } catch (Exception e) {
             e.printStackTrace();

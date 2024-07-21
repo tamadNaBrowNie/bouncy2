@@ -2,7 +2,7 @@ import java.util.concurrent.Callable;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
-public class Particle implements Callable<Circle> {
+public class Particle {
 
 	private double x, y, v, theta;
 	private Circle circle;
@@ -19,17 +19,6 @@ public class Particle implements Callable<Circle> {
 	}
 
 	public Circle draw() {
-		try {
-			return call();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	@Override
-	public Circle call() throws Exception {
 		final double T = 0.0166666666667;
 		double ppu = v * T;
 		int r = 3;
@@ -51,7 +40,9 @@ public class Particle implements Callable<Circle> {
 		circle.setTranslateY(-ppu * Math.sin(theta));
 		circle.managedProperty().bind(circle.visibleProperty());
 		return circle;
+		
 	}
+
 
 	// public boolean isVisible(double minX, double maxX, double minY, double maxY)
 	// {

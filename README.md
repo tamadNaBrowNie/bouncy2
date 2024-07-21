@@ -15,4 +15,5 @@ DEMO VIDEO: [https://drive.google.com/file/d/1yxdbIFTXnD6hJwBhKlFrFCfu71CpvGeO/v
 - The particles will spawn as red Circles in the pane on the right with an area of 1280,720.
 - There is an FPS counter on the top right of the right pane indicating the program's frame rate.
 - On the Left side, there are 2 new input boxes and a button. Put the x and y coordinates respectively of where you want to spawn as an explorer and press the button or 'E' to enter exploration.
-- Move with 'WASD'. Press 'E' or the button to go back to Debug mode. While exploring, adding particles is disabled. 
+- Move with 'WASD'. Press 'E' or the button to go back to Debug mode. While exploring, adding particles is disabled.
+- Jars are in the DEMO folder. They require Java 8 or at least JavaFX 8 to run.

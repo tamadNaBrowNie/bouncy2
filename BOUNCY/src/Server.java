@@ -28,11 +28,10 @@ import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-public class Main2 extends Application {
+public class Server extends Application {
     private static final String prompt_n = "Number of Particles:";
     private static final String V_PX_S = "Velocity (px/s):";
     private static final String ADD_BY_ANGLE = "Add by Angle";
@@ -51,7 +50,7 @@ public class Main2 extends Application {
 
     private Pane paneRight = new Pane();
 
-    private Pane paneControl = new Pane();
+//    private Pane paneControl = new Pane();
 
     private GridPane gridPane = new GridPane();
 
@@ -137,7 +136,7 @@ public class Main2 extends Application {
         paneRight.setLayoutX(270);
         paneRight.setPrefHeight(Y_MAX);
         paneRight.setMinWidth(1280);
-        paneControl.setMaxWidth(250);
+//        paneControl.setMaxWidth(250);
         Rectangle clip = new Rectangle(X_MAX, Y_MAX);
         clip.setLayoutX(0);
         clip.setLayoutY(0);
@@ -206,23 +205,38 @@ public class Main2 extends Application {
                         "-fx-border-width: 1px;" // Border width
         );
 
-        // private Pane camera = new StackPane();//making this stack pane is a bag idea
-        String bgFront = ".\\amongus.png";
-        Image bgImage = new Image(bgFront);
-        String bgFlipped = ".\\amongusflipped.png";
-        Image bgImageFlipped = new Image(bgFlipped);
+//        // private Pane camera = new StackPane();//making this stack pane is a bag idea
+//        String bgFront = ".\\amongus.png";
+//        Image bgImage = new Image(bgFront);
+//        String bgFlipped = ".\\amongusflipped.png";
+//        Image bgImageFlipped = new Image(bgFlipped);
         String mapImgFile = ".\\map.jpg";
         Image mapImg = new Image(mapImgFile);
-        Pane pSprite = new Pane();
-        ballPane.setBackground(new Background(new BackgroundImage(
-                mapImg,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                null, new BackgroundSize(
-                        BackgroundSize.AUTO, BackgroundSize.AUTO,
-                        false, false, true, false))));
-
-        pSprite.setMaxSize(30, 30);
+//        Pane pSprite = new Pane();
+//        ballPane.setStyle(
+//        		
+//        		"-fx-background-image:map.jpg "
+//        		
+//        		);
+//        BackgroundSize siz = new BackgroundSize(
+//                BackgroundSize.AUTO, BackgroundSize.AUTO,
+//                false, false, true, false);
+//        BackgroundImage bgI = new BackgroundImage(
+//                mapImg,
+//                BackgroundRepeat.NO_REPEAT,
+//                BackgroundRepeat.NO_REPEAT,
+//                null, siz);
+//        ballPane.setBackground(new Background(bgI));
+        ballPane.setStyle(
+                "-fx-border-color: blue;" + // Border color
+                        "-fx-border-width: 3px;"
+                        +         "-fx-background-image:url('map.jpg');"
+                        + "-fx-background-repeat: no-repeat;");
+//                        + " -fx-background-size: contain;"
+//                        + " -fx-background-position: center center;"); // Border width
+        
+//
+//        pSprite.setMaxSize(30, 30);
 
         // -------------------
 
@@ -467,19 +481,9 @@ public class Main2 extends Application {
 //	}
 	private void makeFrame() {
 		try {
-//			es.submit(()->
-//			Platform.runLater(()->
-//			check_vis(ballPane.getChildren()
-//                    .filtered(node -> (node instanceof Circle))))).get();
 			es.submit(()->
 				Platform.runLater(()->
-					ballPane.getChildren()
-				      .filtered(node -> 
-				      	(node instanceof Circle)
-				      )
-				      .forEach(circle ->
-				      	mov_ball(circle)
-		    		  )
+					mov_balls()
 				)
 			).get();
 		} catch (InterruptedException | ExecutionException e) {
@@ -487,90 +491,39 @@ public class Main2 extends Application {
 		}
 	}
 
-//	private void check_vis(List<Node> balls) {
-//		double 	
-//		w=0,
-//		h=0,
-//		s_x=0,
-//		s_y=0,Y_off = 0,X_off= 0,cen_X = 0,cen_Y=0;
-//		
-//		if(hasExplorer) {
-//			w=ballPane.getWidth()*0.5;
-//			h=ballPane.getHeight()*0.5;
-//			s_x= 1.0/ballPane.getScaleX();
-//			s_y= 1.0/ballPane.getScaleY();      
-//
-//			Y_off = h*s_y;
-//			X_off = w*s_x;
-//
-//			cen_X =w-ballPane.getLayoutX()*s_x;
-//			cen_Y=h-ballPane.getLayoutY()*s_y;
-//			
-//
-//		}
-//		mov_balls(balls, Y_off, X_off, cen_X,cen_Y);
-//	}
-//
-//	private void mov_balls(List<Node> balls, double Y_off,
-//			double X_off, double cen_X,double cen_Y) 
-//	{
-//		
-//		balls.forEach(
-//			circle -> mov_ball(Y_off, X_off, cen_X, cen_Y, circle)
-//		);
-//
-//	}
-//
-//		private void mov_ball(
-//			double Y_off, double X_off, 
-//			double cen_X, double cen_Y,
-//			Node circle ) {
-//			
-////			double top = cen_Y+Y_off+1,
-////			bottom =cen_Y-Y_off-1,
-////			left =cen_X-X_off,
-////			right = cen_X+X_off;	
-////			boolean isSeen =true;
-////			isSeen  =(hasExplorer)?left<= x&& right>=x&&top>=y && bottom <=y:true;
-//			boolean isSeen =true;
-//			double x = circle.getLayoutX(), 
-//					y = circle.getLayoutY(),
-//					dx = circle.getTranslateX(),
-//					dy =  circle.getTranslateY();
-//					
-//
-//			circle.setVisible(isSeen);
-//			
-//			if (x <= 0 || x >= X_MAX) 
-//				circle.setTranslateX(-dx);
-//			circle.setLayoutX(x + circle.getTranslateX());
-//			if (y >= Y_MAX || y <= 0)
-//				circle.setTranslateY(-dy);
-//			circle.setLayoutY(y + circle.getTranslateY());
-//		
-//		}
-//		
-		private void mov_ball(Node circle) {
-			boolean isSeen =true;
-			double x_0 = circle.getLayoutX(), 
-					y_0 = circle.getLayoutY(),
-					dx = circle.getTranslateX(),
-					dy =  circle.getTranslateY(),
-					x_f = x_0+dx,
-					y_f = y_0+dy;
-					
+private void mov_balls() {
+	List<Node> balls = ballPane.getChildren()
+			  .filtered(node -> 
+			  	(node instanceof Circle)
+			  );
+	
+	  balls.forEach(circle ->
+	  	mov_ball(circle)
+	  );
+}
 
-			circle.setVisible(isSeen);
+private void mov_ball(Node circle) {
+	boolean isSeen =true;
+	double x_0 = circle.getLayoutX(), 
+			y_0 = circle.getLayoutY(),
+			dx = circle.getTranslateX(),
+			dy =  circle.getTranslateY(),
+			x_f = x_0+dx,
+			y_f = y_0+dy;
 			
-			if (x_f <= 0 || x_f >= X_MAX) 
-				circle.setTranslateX(-dx);
-			
-			circle.setLayoutX(x_0 + circle.getTranslateX());
-			if (y_f >= Y_MAX || y_f <= 0)
-				circle.setTranslateY(-dy);
-			circle.setLayoutY(y_0 + circle.getTranslateY());
-		
-		}
+
+	circle.setVisible(isSeen);
+	
+	if (x_f <= 0 || x_f >= X_MAX) 
+		circle.setTranslateX(-dx);
+	
+circle.setLayoutX(x_0		 + circle.getTranslateX());
+	if (y_f >= Y_MAX || y_f <= 0)
+		circle.setTranslateY(-dy);
+	circle.setLayoutY(y_0 + circle.getTranslateY());
+//	circle.relocate(0,0);
+
+}
 
 
 

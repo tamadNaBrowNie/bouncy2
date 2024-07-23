@@ -53,7 +53,7 @@ public class Main extends Application {
 
     private Pane paneRight = new Pane();
 
-    private Pane paneControl = new Pane();
+//    private Pane paneControl = new Pane();
 
     private GridPane gridPane = new GridPane();
 
@@ -73,11 +73,12 @@ public class Main extends Application {
     private TextField inputAngle = new TextField();
     private Label labelCount = new Label(prompt_n);
     private TextField inputCount = new TextField();
-    private final String MODE_BTN_TXT = "Switch mode";
+    private final String ENTRY_TXT = "Join";
+    private final String LEAVE_TXT = "LEAVE";
     private Button btnAddByDistance = new Button(ADD_BY_DISTANCE);
     private Button btnAddByAngle = new Button(ADD_BY_ANGLE);
     private Button btnAddByVelocity = new Button(ADD_BY_VELOCITY);
-    private Button btnAddExplorer = new Button(MODE_BTN_TXT);
+    private Button btnAddExplorer = new Button(ENTRY_TXT);
 
 
     private GridPane gpDistance = new GridPane();
@@ -143,12 +144,12 @@ public class Main extends Application {
         paneRight.setLayoutX(270);
         paneRight.setPrefHeight(Y_MAX);
         paneRight.setMinWidth(1280);
-        paneControl.setMaxWidth(250);
+//        paneControl.setMaxWidth(250);
         Rectangle clip = new Rectangle(X_MAX, Y_MAX);
         clip.setLayoutX(0);
         clip.setLayoutY(0);
         paneRight.setClip(clip);
-
+        paneRight.setVisible(hasExplorer);
         ballPane.setPrefHeight(Y_MAX);
         ballPane.setMinWidth(X_MAX);
         ballPane.setLayoutX(0);
@@ -175,10 +176,11 @@ public class Main extends Application {
 
         paneTab.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
-        paneTab.getTabs().addAll(tabDistance, tabAngle, tabVelocity);
+//        paneTab.getTabs().addAll(tabDistance, tabAngle, tabVelocity);
         paneTab.managedProperty().bind(paneTab.visibleProperty());
+        paneTab.setVisible(false);
         // DISTANCE tab open by default
-        initTabDist();
+//        initTabDist();
 
         gpStartXY.addRow(0, inputStartX, inputStartY);
         gpStartEndVelocity.addRow(0, inputStartVelocity, inputEndVelocity);
@@ -204,8 +206,9 @@ public class Main extends Application {
         gpExplorer.addRow(2, btnAddExplorer);
         gpExplorer.setMaxWidth(250);
 
-        paneLeft.addRow(0, paneTab);
-        paneLeft.addRow(1, gpExplorer);
+//        paneLeft.addRow(0, paneTab);
+//        paneLeft.addRow(1, gpExplorer);
+        paneLeft.addRow(0, gpExplorer);
         ballPane.setStyle(
                 // "-fx-background-color: white;"+
                 "-fx-border-color: blue;" + // Border color
@@ -217,17 +220,15 @@ public class Main extends Application {
         Image bgImage = new Image(bgFront);
         String bgFlipped = ".\\amongusflipped.png";
         Image bgImageFlipped = new Image(bgFlipped);
-        String mapImgFile = ".\\map.jpg";
-        Image mapImg = new Image(mapImgFile);
         Pane pSprite = new Pane();
-        ballPane.setBackground(new Background(new BackgroundImage(
-                mapImg,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                null, new BackgroundSize(
-                        BackgroundSize.AUTO, BackgroundSize.AUTO,
-                        false, false, true, false))));
-
+        ballPane.setStyle(
+                "-fx-border-color: blue;" + // Border color
+                        "-fx-border-width: 3px;"
+                        +         "-fx-background-image:url('map.jpg');"
+                        + "-fx-background-repeat: no-repeat;"
+                        + " -fx-background-size: cover;"
+                        + " -fx-background-position: center center;"); // Border width
+        
         pSprite.setMaxSize(30, 30);
 
         // -------------------
@@ -252,17 +253,26 @@ public class Main extends Application {
         
 //      Holds the sprite
         StackPane spExplorer = new StackPane();
-
+        BackgroundImage flipSprite = new BackgroundImage(
+		        bgImageFlipped,
+		        BackgroundRepeat.NO_REPEAT,
+		        BackgroundRepeat.NO_REPEAT,
+		        null, new BackgroundSize(
+		                BackgroundSize.AUTO, BackgroundSize.AUTO,
+		                false, false, true, false)),
+				sprite = new BackgroundImage(
+				        bgImage,
+				        BackgroundRepeat.NO_REPEAT,
+				        BackgroundRepeat.NO_REPEAT,
+				        null, new BackgroundSize(
+				                BackgroundSize.AUTO, BackgroundSize.AUTO,
+				                false, false, true, false));
+		Background bgSprite= new Background(sprite),
+				bgFlip =new Background(flipSprite);
 //      The sprite
       Pane paneExp = new Pane();
 //Image of sprite
-      paneExp.setBackground(new Background(new BackgroundImage(
-              bgImage,
-              BackgroundRepeat.NO_REPEAT,
-              BackgroundRepeat.NO_REPEAT,
-              null, new BackgroundSize(
-                      BackgroundSize.AUTO, BackgroundSize.AUTO,
-                      false, false, true, false))));
+      	paneExp.setBackground(bgSprite);
         spExplorer.getChildren().add(paneExp);
         
         spExplorer.setLayoutX(58);
@@ -271,43 +281,26 @@ public class Main extends Application {
         spExplorer.setPrefSize(X_MAX, Y_MAX);
         paneExp.setMaxSize(200, 200);
         paneRight.getChildren().add(spExplorer);
-        spExplorer.setVisible(hasExplorer);
-        
+        spExplorer.setVisible(true);
+        gpDebug.setVisible(false);
 
         
         
         btnAddExplorer.setOnAction(event -> {
-        	synchronized(this.Lock){
-            hasExplorer = !hasExplorer;
+    		changeMode();
             
-            changeMode();
-            inputXexp.setVisible(!hasExplorer);
-            inputYexp.setVisible(!hasExplorer);
-            paneTab.setVisible(!hasExplorer);
-            spExplorer.setVisible(hasExplorer);
-            Lock.notifyAll();
-        };
-        });
-
-		Background flipSprite = new Background(new BackgroundImage(
-		        bgImageFlipped,
-		        BackgroundRepeat.NO_REPEAT,
-		        BackgroundRepeat.NO_REPEAT,
-		        null, new BackgroundSize(
-		                BackgroundSize.AUTO, BackgroundSize.AUTO,
-		                false, false, true, false))),
-				sprite = new Background(new BackgroundImage(
-				        bgImage,
-				        BackgroundRepeat.NO_REPEAT,
-				        BackgroundRepeat.NO_REPEAT,
-				        null, new BackgroundSize(
-				                BackgroundSize.AUTO, BackgroundSize.AUTO,
-				                false, false, true, false)));
+        })
+    ;
+//        btnAddExplorer.setOnAction(null);
 		
         scene.setOnKeyPressed(e -> {
         	 switch (e.getCode()) {
-        	 case E:btnAddExplorer.fire();break;
-        	 case ESCAPE:primaryStage.close();break;
+        	 case E:
+        		btnAddExplorer.fire();
+    	 		break;
+        	 case ESCAPE:
+    		 	primaryStage.close();
+        	 	break;		
         	 default:break;
         	 }
         	 if (!hasExplorer)return;
@@ -315,14 +308,17 @@ public class Main extends Application {
             double moveY = ballPane.getLayoutY(), moveX = ballPane.getLayoutX(),
             		dx = ballPane.getScaleX(), dy = ballPane.getScaleY();
             switch (e.getCode()) {
-                case W:moveY += dy;break;
-                case S:moveY -= dy;break;
+                case W:moveY += dy;
+                	break;
+                case S:moveY -= dy;
+            		break;
                 case A:moveX += dx;
-				paneExp.setBackground(flipSprite);
+					paneExp.setBackground(bgFlip);
                     break;
                 case D:moveX -= dx;
-				paneExp.setBackground(sprite);
+					paneExp.setBackground(bgSprite);
                     break;
+
                 default: break;
             }
 
@@ -330,11 +326,12 @@ public class Main extends Application {
                     halfSizY = ballPane.getHeight() * ballPane.getScaleY() * 0.5;
             
             if (moveX >= halfSizX) moveX = halfSizX - EX_LIM;
-            if (moveX < -halfSizX) moveX = EX_LIM - halfSizX;
-            if (moveY > halfSizY) moveY = halfSizY - EX_LIM;
-            if (moveY < -halfSizY) moveY = EX_LIM - halfSizY;
-            ballPane.setLayoutX(moveX);
-            ballPane.setLayoutY(moveY);         
+            if (moveX <= -halfSizX) moveX = EX_LIM - halfSizX;
+            if (moveY >= halfSizY) moveY = halfSizY - EX_LIM;
+            if (moveY <= -halfSizY) moveY = EX_LIM - halfSizY;
+//            ballPane.setLayoutX(moveX);
+//            ballPane.setLayoutY(moveY);
+            ballPane.relocate(moveX, moveY);
         });
         
         tabVelocity.setOnSelectionChanged(e -> {
@@ -449,6 +446,14 @@ public class Main extends Application {
     }
 
 	private void changeMode() {
+		hasExplorer = !hasExplorer;
+
+        inputXexp.setVisible(!hasExplorer);
+        inputYexp.setVisible(!hasExplorer);
+        paneTab.setVisible(!hasExplorer);
+        paneRight.setVisible(hasExplorer);
+        gpDebug.setVisible(hasExplorer);
+		btnAddExplorer.setText((hasExplorer)?LEAVE_TXT:ENTRY_TXT);
 		if (!hasExplorer) {
 			ballPane.setScaleX(1);
 		    ballPane.setScaleY(1);

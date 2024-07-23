@@ -1,4 +1,3 @@
-import java.util.concurrent.Callable;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
@@ -19,20 +18,20 @@ public class Particle {
 	}
 
 	public Circle draw() {
+		int r = 12;
+		
+		this.circle = new Circle(r, Color.RED);
 		final double T = 0.0166666666667;
 		double ppu = v * T;
-		int r = 3;
-		// this.d = r<<1;
 
-		this.circle = new Circle(r, Color.RED);
 		if (this.x > X_MAX)
 			this.x = X_MAX;
-		else if (this.x < 0)
+		if (this.x < 0)
 			this.x = 0;
 
 		if (this.y < 0)
 			this.y = 0;
-		else if (this.y > Y_MAX)
+		if (this.y > Y_MAX)
 			this.x = Y_MAX;
 		circle.setLayoutX(this.x);
 		circle.setLayoutY(this.y);
@@ -44,22 +43,5 @@ public class Particle {
 	}
 
 
-	// public boolean isVisible(double minX, double maxX, double minY, double maxY)
-	// {
-	// double r = circle.getRadius();
-	// return (x - r >= minX) && (x + r <= maxX) && (y - r >= minY) && (y + r <=
-	// maxY);
-	// }
 
-	// public double getX() {
-	// return x;
-	// }
-
-	// public double getY() {
-	// return y;
-	// }
-
-	// public double getRadius() {
-	// return circle.getRadius();
-	// }
 }

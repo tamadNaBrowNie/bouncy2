@@ -6,13 +6,8 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.collections.transformation.FilteredList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -26,7 +21,6 @@ import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundRepeat;
@@ -37,7 +31,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 public class Main extends Application {
     private static final String prompt_n = "Number of Particles:";
     private static final String V_PX_S = "Velocity (px/s):";
@@ -52,7 +45,6 @@ public class Main extends Application {
     private double fps = 0;
     // public static ExecutorService es;
     private boolean hasExplorer = false;
-    private boolean isDebug = true; // show control panel initially
 
     private final double X_MAX = 1280, Y_MAX = 720;
     private Pane paneContainer = new Pane();
@@ -67,8 +59,7 @@ public class Main extends Application {
 
     private TextField inputStartX = new TextField();
     private TextField inputStartY = new TextField();
-    private TextField inputXexp = new TextField();
-    private TextField inputYexp = new TextField();
+    
     private TextField inputEndX = new TextField();
     private TextField inputEndY = new TextField();
     private TextField inputStartAngle = new TextField();
@@ -88,7 +79,6 @@ public class Main extends Application {
     private Button btnAddByVelocity = new Button(ADD_BY_VELOCITY);
     private Button btnAddExplorer = new Button(MODE_BTN_TXT);
 
-    private Button btnDebug = new Button("Debug Mode: ON");
 
     private GridPane gpDistance = new GridPane();
     private GridPane gpVelocity = new GridPane();
@@ -99,6 +89,10 @@ public class Main extends Application {
     private GridPane gpStartEndVelocity = new GridPane();
     private GridPane gpStartEndAngle = new GridPane();
 
+//    Exp stuff?
+    private Label labelXYexp = new Label("Spawn Explorer on (X,Y):");
+    private TextField inputXexp = new TextField();
+    private TextField inputYexp = new TextField();
     private GridPane gpExplorer = new GridPane();
 
     private TabPane paneTab = new TabPane();
@@ -115,7 +109,7 @@ public class Main extends Application {
     private Label textTest = new Label("");
 
     private Label labelStartXY = new Label("Starting Points (X,Y):");
-    private Label labelXYexp = new Label("Spawn Explorer on (X,Y):");
+    
     private Label labelEndXY = new Label("End Points (X,Y):");
     private Label labelStartEndVelocity = new Label("Starting and Ending Velocity:");
     private Label labelStartEndAngle = new Label("Starting and Ending Angle:");
@@ -154,8 +148,7 @@ public class Main extends Application {
         clip.setLayoutX(0);
         clip.setLayoutY(0);
         paneRight.setClip(clip);
-        Thread anims = new Thread(()->anim());
-        
+
         ballPane.setPrefHeight(Y_MAX);
         ballPane.setMinWidth(X_MAX);
         ballPane.setLayoutX(0);
@@ -282,8 +275,6 @@ public class Main extends Application {
         
 
         
-        
-        anims.start();
         
         btnAddExplorer.setOnAction(event -> {
         	synchronized(this.Lock){
@@ -434,12 +425,12 @@ public class Main extends Application {
 
         System.nanoTime();
         lastFPSTime = System.nanoTime();
-        new AnimationTimer() {
+        AnimationTimer ticer = 	new AnimationTimer() {
             @Override
             public void handle(long now) {
-
+            	
                 fps++;
-
+                makeFrame();
                 textTest.setText(
                         "\nYou are at (in px):\n"
                                 + "X: [" + (ballPane.getWidth()*0.5-(ballPane.getLayoutX()/ ballPane.getScaleX())) + "]\n"
@@ -452,7 +443,9 @@ public class Main extends Application {
 
             }
 
-        }.start();
+        };
+        Thread anims = new Thread(()->ticer.start());
+        anims.start();
     }
 
 	private void changeMode() {
@@ -482,91 +475,84 @@ public class Main extends Application {
 	        hasExplorer = false;
 	    } 
 	}
-	
+	private void makeFrame() {
+		try {
+			es.submit(()->
+			
+			check_vis(ballPane.getChildren()
+                    .filtered(node -> (node instanceof Circle)))).get();
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void check_vis(List<Node> balls) {
+		double 	
+		w=0,
+		h=0,
+		s_x=0,
+		s_y=0,Y_off = 0,X_off= 0,cen_X = 0,cen_Y=0;
+		
+		if(hasExplorer) {
+			w=ballPane.getWidth()*0.5;
+			h=ballPane.getHeight()*0.5;
+			s_x= 1.0/ballPane.getScaleX();
+			s_y= 1.0/ballPane.getScaleY();      
+
+			Y_off = h*s_y;
+			X_off = w*s_x;
+
+			cen_X =w-ballPane.getLayoutX()*s_x;
+			cen_Y=h-ballPane.getLayoutY()*s_y;
+			
+
+		}
+		mov_balls(balls, Y_off, X_off, cen_X,cen_Y);
+	}
+
+	private void mov_balls(List<Node> balls, double Y_off,
+			double X_off, double cen_X,double cen_Y) 
+	{Platform.runLater(()->
+		balls.forEach(
+			circle -> mov_ball(Y_off, X_off, cen_X, cen_Y, circle)
+		));
+
+	}
+
+		private void mov_ball(
+			double Y_off, double X_off, 
+			double cen_X, double cen_Y,
+			Node circle ) {
+			double x = circle.getLayoutX(), 
+					y = circle.getLayoutY(),
+					dx = circle.getTranslateX(),
+					dy =  circle.getTranslateY(),
+					top,bottom,left,right;
+			top = cen_Y+Y_off+1;
+			bottom =cen_Y-Y_off-1;
+			left =cen_X-X_off;
+			right = cen_X+X_off;	
+			
+			boolean isSeen = (hasExplorer)?
+					left<= x&& right>=x&&top>=y && bottom <=y:true;
+			circle.setVisible(isSeen);
+			if (dx !=0f)
+			{
+				if (x <= 0 || x >= X_MAX) 
+					circle.setTranslateX(-dx);
+				circle.setLayoutX(x + circle.getTranslateX());
+			}
+			if(dy != 0f)
+			{
+				if (y >= Y_MAX || y <= 0)
+					circle.setTranslateY(-dy);
+				circle.setLayoutY(y + circle.getTranslateY());
+			}
+		}
 
 
-    private void anim() {
-    	Timeline tl = new Timeline();
-        tl.getKeyFrames()
-            .add(new KeyFrame(Duration.millis(16.6666666667),
-                    new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent t) {
-        					try {
-								es.submit(()->
-								Platform.runLater(()->
-								check_vis(ballPane.getChildren()
-                                        .filtered(node -> (node instanceof Circle))))).get();
-							} catch (InterruptedException | ExecutionException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-        					
-                        }
 
-						private void check_vis(List<Node> balls) {
-							double 	
-							w=0,
-							h=0,
-							s_x=0,
-							s_y=0,Y_off = 0,X_off= 0,cen_X = 0,cen_Y=0;
-							
-							if(hasExplorer) {
-								w=ballPane.getWidth()*0.5;
-								h=ballPane.getHeight()*0.5;
-								s_x= 1/ballPane.getScaleX();
-								s_y= 1/ballPane.getScaleY();      
-
-								Y_off = h*s_y;
-								X_off = w*s_x;
-
-								cen_X =w-ballPane.getLayoutX()*s_x;
-								cen_Y=h-ballPane.getLayoutY()*s_y;
-								
-
-							}
-							mov_balls(balls, Y_off, X_off, cen_X,cen_Y);
-						}
-
-						private void mov_balls(List<Node> balls, double Y_off,
-								double X_off, double cen_X,double cen_Y) 
-						{
-							balls.forEach(
-								circle -> mov_ball(Y_off, X_off, cen_X, cen_Y, circle)
-							);
-
-						}
-
-							private void mov_ball(double Y_off, double X_off, 
-									double cen_X, double cen_Y, Node circle) {
-								double x = circle.getLayoutX(), y = circle.getLayoutY();
-								double top,bottom,left,right;
-								top=bottom=left=right=0;
-								top = cen_Y+Y_off+1;
-								bottom =cen_Y-Y_off-1;
-								left =cen_X-X_off;
-								right = cen_X+X_off;	
-								
-								boolean isSeen = (hasExplorer)?
-										left<= x&& right>=x&&top>=y && bottom <=y:true;
-								circle.setVisible(isSeen);
-								if (x < 0 || x > X_MAX) 
-									circle.setTranslateX(-circle.getTranslateX());
-								
-								if (y > Y_MAX || y < 0)
-								    circle.setTranslateY(-circle.getTranslateY());
-
-								circle.setLayoutX(x + circle.getTranslateX());
-								circle.setLayoutY(y + circle.getTranslateY());
-							}
-                        }
-            		)
-            		);
-
-        tl.setCycleCount(Timeline.INDEFINITE);
-        tl.play();
-
-    }
 
     private void initTabVelocity() {
         gpDistance.getChildren().clear();
@@ -679,7 +665,7 @@ public class Main extends Application {
         for (int i = 0; i < n; i++) {
 
             double velocity = v;
-
+            
             ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
 
             v += velocityDiff;

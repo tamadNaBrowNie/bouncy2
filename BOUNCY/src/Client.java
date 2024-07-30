@@ -1,4 +1,7 @@
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -79,7 +82,7 @@ public class Client extends Application {
 //    private Button btnAddByDistance = new Button(ADD_BY_DISTANCE);
 //    private Button btnAddByAngle = new Button(ADD_BY_ANGLE);
 //    private Button btnAddByVelocity = new Button(ADD_BY_VELOCITY);
-
+	private Server_Interface server = null;
 	private final String ENTRY_TXT = "Join";
 	private final String LEAVE_TXT = "LEAVE";
 	private Button btnAddExplorer = new Button(ENTRY_TXT);
@@ -112,12 +115,12 @@ public class Client extends Application {
 	private Label notif = new Label("");
 	private Label textTest = new Label("");
 
-	private Label labelStartXY = new Label("Starting Points (X,Y):");
-
-	private Label labelEndXY = new Label("End Points (X,Y):");
-	private Label labelStartEndVelocity = new Label("Starting and Ending Velocity:");
-	private Label labelStartEndAngle = new Label("Starting and Ending Angle:");
-	private Label labelConstXY = new Label("Spawn Point (X,Y):");
+//	private Label labelStartXY = new Label("Starting Points (X,Y):");
+//
+//	private Label labelEndXY = new Label("End Points (X,Y):");
+//	private Label labelStartEndVelocity = new Label("Starting and Ending Velocity:");
+//	private Label labelStartEndAngle = new Label("Starting and Ending Angle:");
+//	private Label labelConstXY = new Label("Spawn Point (X,Y):");
 
 	private final float EX_BOUND = 5.2164841f;
 
@@ -257,8 +260,8 @@ public class Client extends Application {
 //		BackgroundImage flipSprite = new BackgroundImage(bgImageFlipped, BackgroundRepeat.NO_REPEAT,
 //				BackgroundRepeat.NO_REPEAT, null,
 //				new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)),
-		BackgroundImage sprite = new BackgroundImage(bgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, null,
-						new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
+		BackgroundImage sprite = new BackgroundImage(bgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+				null, new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
 		Background bgSprite = new Background(sprite);
 //				, bgFlip = new Background(flipSprite);
 //      The sprite
@@ -274,7 +277,7 @@ public class Client extends Application {
 		paneExp.setMaxSize(200, 200);
 		paneRight.getChildren().add(spExplorer);
 		spExplorer.setVisible(true);
-		gpDebug.setVisible(false);
+//		gpDebug.setVisible(false);
 
 		btnAddExplorer.setOnAction(event -> {
 			changeMode();
@@ -288,7 +291,7 @@ public class Client extends Application {
 				btnAddExplorer.fire();
 				break;
 			case ESCAPE:
-				
+
 				primaryStage.close();
 				break;
 			default:
@@ -297,27 +300,28 @@ public class Client extends Application {
 			if (!hasExplorer)
 				return;
 
-			double moveY = ballPane.getLayoutY(), moveX = ballPane.getLayoutX(), dx = ballPane.getScaleX(),
-					dy = ballPane.getScaleY(), facing = paneExp.getScaleX();
+			double dx = ballPane.getScaleX(), dy = ballPane.getScaleY(), facing = paneExp.getScaleX();
 			switch (e.getCode()) {
 			case W:
-				moveY += dy;
-				my_Y--;
-				break;
-			case S:
-				moveY -= dy;
+//				moveY += dy;
 				my_Y++;
 				break;
+			case S:
+//				moveY -= dy;
+				my_Y--;
+				break;
 			case A:
-				moveX += dx;
+//				moveX += dx;
 				my_X--;
 //				paneExp.setBackground(bgFlip);
-				if(facing > 0) paneExp.setScaleX(-facing);
+				if (facing > 0)
+					paneExp.setScaleX(-facing);
 				break;
 			case D:
-				moveX -= dx;
+//				moveX -= dx;
 				my_X++;
-				if(facing < 0) paneExp.setScaleX(-facing);
+				if (facing < 0)
+					paneExp.setScaleX(-facing);
 //				paneExp.setBackground(bgSprite);
 				break;
 
@@ -325,62 +329,68 @@ public class Client extends Application {
 				break;
 			}
 			final double EX_LIM = (2 + EX_BOUND);
-			double halfSizX = X_MAX *dx* 0.5, halfSizY = ballPane.getHeight() *dy* 0.5;
+			double halfSizX = X_MAX * 0.5, halfSizY = Y_MAX * 0.5;
 
-			if (moveX >= halfSizX) {
-				moveX = (halfSizX - EX_LIM*dx);
-				my_X = EX_LIM;
-			}
-			if (moveX <= -halfSizX) {
-				moveX = (EX_LIM*dx - halfSizX);
+			if (my_X >= X_MAX - EX_BOUND) {
+
+//				moveX = (EX_LIM*dx - halfSizX);
 				my_X = X_MAX - EX_LIM;
 			}
-			if (moveY >= halfSizY) {
-				moveY = (halfSizY - EX_LIM*dy);
+			if (my_X <= EX_BOUND) {
+//				moveX = (halfSizX - EX_LIM*dx);
+				my_X = EX_LIM;
+			}
+			if (my_Y >= Y_MAX - EX_BOUND) {
+
+				my_Y = Y_MAX - EX_LIM;
+//				moveY = (EX_LIM - halfSizY*dy);
+
+			}
+			if (my_Y <= EX_BOUND) {
+//				moveY = (halfSizY - EX_LIM*dy);
 				my_Y = EX_LIM;
 			}
-			if (moveY <= -halfSizY) {
-				moveY = (EX_LIM - halfSizY*dy);
-				my_Y = Y_MAX - EX_LIM;
-			}
 
-//            ballPane.setLayoutX(moveX);
-//            ballPane.setLayoutY(moveY);
-			ballPane.relocate(moveX, moveY);
+			ballPane.setLayoutX((halfSizX - my_X) * dx);
+			ballPane.setLayoutY((my_Y - halfSizY) * dy);
+//			ballPane.relocate(moveX, moveY);
 		});
 		System.nanoTime();
 		lastFPSTime = System.nanoTime();
+
 		AnimationTimer ticer = new AnimationTimer() {
 			boolean clear = true;
+
 			@Override
-			
+
 			public void handle(long now) {
-				clear ^=true;
+				clear ^= true;
 				boolean isClear = clear;
-				Server_Interface server = null;
 				fps++;
-				
-				Platform.runLater(()->{
-					if(isClear) {
+
+				Server_Interface foo = (hasExplorer)?server:null;
+				Platform.runLater(() -> {
+					if (isClear) {
 						ballPane.getChildren().clear();
 						return;
-					}else if(server == null) {
+					} else if (foo== null) {
 						return;
 					}
 					try {
-						server.updateServer(my_X, my_Y, null, paneExp.getScaleX()>0);
+						foo.updateServer(my_X, my_Y, null, paneExp.getScaleX() > 0);
 						makeFrame();
 					} catch (RemoteException | InterruptedException | ExecutionException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-						
-						
-					
+
 				});
-				
+
 //				Platform.runLater(null);
-				textTest.setText("\nYou are at (in px):\n" + "X: [" + my_X + "]\n" + "Y: [" + (720 - my_Y) + "]");
+				String msg = "\nYou are at (in px):\n" + "X: [" + my_X + "]\n" + "Y: [" + my_Y + "]";
+				
+				textTest.setText((hasExplorer)?msg:"");
+				
 				try {
 					update(now);
 				} catch (Exception e) {
@@ -397,19 +407,30 @@ public class Client extends Application {
 	private void changeMode() {
 		hasExplorer = !hasExplorer;
 
-		inputXexp.setVisible(!hasExplorer);
-		inputYexp.setVisible(!hasExplorer);
-		paneTab.setVisible(!hasExplorer);
-		paneRight.setVisible(hasExplorer);
-		gpDebug.setVisible(hasExplorer);
-		btnAddExplorer.setText((hasExplorer) ? LEAVE_TXT : ENTRY_TXT);
 		if (!hasExplorer) {
 			ballPane.setScaleX(1);
 			ballPane.setScaleY(1);
 			ballPane.relocate(0, 0);
-			return;
+			my_X = 0;
+			my_Y=0;
+
+		} else {
+			explore();
 		}
+		inputXexp.setVisible(!hasExplorer);
+		inputYexp.setVisible(!hasExplorer);
+		paneTab.setVisible(!hasExplorer);
+		paneRight.setVisible(hasExplorer);
+//		gpDebug.setVisible(hasExplorer);
+
+		btnAddExplorer.setText((hasExplorer) ? LEAVE_TXT : ENTRY_TXT);
+
+	}
+
+	private void explore() {
 		try {
+
+			notif.setText("");
 			double ex_X = Double.parseDouble(inputXexp.getText());
 			double ex_Y = Double.parseDouble(inputYexp.getText());
 			if (ex_X > X_MAX || ex_X < 0 || ex_Y > Y_MAX || ex_Y < 0)
@@ -424,6 +445,14 @@ public class Client extends Application {
 			ex_Y = (my_Y - ballPane.getHeight() * 0.5) * ballPane.getScaleY();
 			ballPane.setLayoutX(ex_X);
 			ballPane.setLayoutY(ex_Y);
+			Registry registry;
+			try {
+				registry = LocateRegistry.getRegistry();
+				this.server = (Server_Interface) registry.lookup("");
+			} catch (RemoteException | NotBoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	 
 
 		} catch (NumberFormatException e) {
 			notif.setText("Invalid Explorer coordinates.\n");
@@ -489,7 +518,7 @@ public class Client extends Application {
 //		}
 //	}
 
-	private void drawBalls(List<Node> nodes,Pane ballPane) {
+	private void drawBalls(List<Node> nodes, Pane ballPane) {
 		try {
 //			List<Circle> circles = ball_buf.parallelStream().map(Particle::draw).collect(Collectors.toList());
 			ballPane.getChildren().clear();

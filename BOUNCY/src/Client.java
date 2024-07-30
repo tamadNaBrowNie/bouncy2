@@ -223,8 +223,8 @@ public class Client extends Application {
 		// private Pane camera = new StackPane();//making this stack pane is a bag idea
 		String bgFront = ".\\amongus.png";
 		Image bgImage = new Image(bgFront);
-		String bgFlipped = ".\\amongusflipped.png";
-		Image bgImageFlipped = new Image(bgFlipped);
+//		String bgFlipped = ".\\amongusflipped.png";
+//		Image bgImageFlipped = new Image(bgFlipped);
 		Pane pSprite = new Pane();
 		ballPane.setStyle("-fx-border-color: blue;" + // Border color
 				"-fx-border-width: 3px;" + "-fx-background-image:url('map.jpg');" + "-fx-background-repeat: no-repeat;"
@@ -253,12 +253,13 @@ public class Client extends Application {
 
 //      Holds the sprite
 		StackPane spExplorer = new StackPane();
-		BackgroundImage flipSprite = new BackgroundImage(bgImageFlipped, BackgroundRepeat.NO_REPEAT,
-				BackgroundRepeat.NO_REPEAT, null,
-				new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)),
-				sprite = new BackgroundImage(bgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, null,
+//		BackgroundImage flipSprite = new BackgroundImage(bgImageFlipped, BackgroundRepeat.NO_REPEAT,
+//				BackgroundRepeat.NO_REPEAT, null,
+//				new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)),
+		BackgroundImage sprite = new BackgroundImage(bgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, null,
 						new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
-		Background bgSprite = new Background(sprite), bgFlip = new Background(flipSprite);
+		Background bgSprite = new Background(sprite);
+//				, bgFlip = new Background(flipSprite);
 //      The sprite
 		Pane paneExp = new Pane();
 //Image of sprite
@@ -295,7 +296,7 @@ public class Client extends Application {
 				return;
 
 			double moveY = ballPane.getLayoutY(), moveX = ballPane.getLayoutX(), dx = ballPane.getScaleX(),
-					dy = ballPane.getScaleY();
+					dy = ballPane.getScaleY(), facing = paneExp.getScaleX();
 			switch (e.getCode()) {
 			case W:
 				moveY += dy;
@@ -308,12 +309,14 @@ public class Client extends Application {
 			case A:
 				moveX += dx;
 				my_X--;
-				paneExp.setBackground(bgFlip);
+//				paneExp.setBackground(bgFlip);
+				if(facing > 0) paneExp.setScaleX(-facing);
 				break;
 			case D:
 				moveX -= dx;
 				my_X++;
-				paneExp.setBackground(bgSprite);
+				if(facing < 0) paneExp.setScaleX(-facing);
+//				paneExp.setBackground(bgSprite);
 				break;
 
 			default:

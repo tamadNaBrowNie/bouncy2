@@ -1,3 +1,4 @@
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -38,7 +39,7 @@ public class Client extends Application {
 //    private static final String ADD_BY_ANGLE = "Add by Angle";
 //    private static final String ADD_BY_VELOCITY = "Add by Velocity";
 //    private static final String ADD_BY_DISTANCE = "Add by Distance";
-	private List<Particle> ball_buf = new ArrayList<Particle>();
+//	private List<Particle> ball_buf = new ArrayList<Particle>();
 	// private Canvas canvas= new Canvas(X_MAX, Y_MAX);;
 	private Label fpsLabel = new Label("FPS: 0");;
 	private long lastFPSTime = System.nanoTime();;
@@ -287,6 +288,7 @@ public class Client extends Application {
 				btnAddExplorer.fire();
 				break;
 			case ESCAPE:
+				
 				primaryStage.close();
 				break;
 			default:
@@ -349,11 +351,35 @@ public class Client extends Application {
 		System.nanoTime();
 		lastFPSTime = System.nanoTime();
 		AnimationTimer ticer = new AnimationTimer() {
+			boolean clear = true;
 			@Override
+			
 			public void handle(long now) {
-
+				clear ^=true;
+				boolean isClear = clear;
+				Server_Interface server = null;
 				fps++;
-				makeFrame();
+				
+				Platform.runLater(()->{
+					if(isClear) {
+						ballPane.getChildren().clear();
+						return;
+					}else if(server == null) {
+						return;
+					}
+					try {
+						server.updateServer(my_X, my_Y, null, paneExp.getScaleX()>0);
+						makeFrame();
+					} catch (RemoteException | InterruptedException | ExecutionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+						
+						
+					
+				});
+				
+//				Platform.runLater(null);
 				textTest.setText("\nYou are at (in px):\n" + "X: [" + my_X + "]\n" + "Y: [" + (720 - my_Y) + "]");
 				try {
 					update(now);

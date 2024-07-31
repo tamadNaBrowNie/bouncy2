@@ -41,8 +41,10 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 public class Client extends Application {
-private static final double SIZ_OTHER = 4.99;
-private static final int RAD = 12;
+	private static final double DY = 38.34;
+	private static final double DX = 38.34;
+	private static final double SIZ_OTHER = 4.99;
+	private static final int RAD = 12;
 //    private static final String prompt_n = "Number of Particles:";
 //    private static final String V_PX_S = "Velocity (px/s):";
 //    private static final String ADD_BY_ANGLE = "Add by Angle";
@@ -141,36 +143,28 @@ private static final int RAD = 12;
 	private static Registry registry;
 
 	public static void main(String[] args) {
-		try {
-			registry = LocateRegistry.getRegistry();
-
-			launch(args);
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		launch(args);
 	}
-	private ReentrantReadWriteLock serverLock = new ReentrantReadWriteLock(), expLock= new ReentrantReadWriteLock();
+
+	private ReentrantReadWriteLock serverLock = new ReentrantReadWriteLock(), expLock = new ReentrantReadWriteLock();
 
 //    client coords.
 	private double my_X = 0, my_Y = 0;
 	private String uName = "";
 	private Background bgSprite;
-	@Override 
-	public void init() throws Exception{
+
+	@Override
+	public void init() throws Exception {
 		es = Executors.newFixedThreadPool(3);
-		
-//    	inputYexp.managedProperty().bind(inputYexp.visibleProperty());
-//    	inputXexp.managedProperty().bind(inputXexp.visibleProperty());
+
 		paneRight.setLayoutX(270);
 		paneRight.setPrefHeight(Y_MAX);
 		paneRight.setMinWidth(1280);
-//        paneControl.setMaxWidth(250);
 		Rectangle clip = new Rectangle(X_MAX, Y_MAX);
 		clip.setLayoutX(0);
 		clip.setLayoutY(0);
 		paneRight.setClip(clip);
-		paneRight.setVisible(isExploring());
+		paneRight.setVisible(hasExplorer);
 		ballPane.setPrefHeight(Y_MAX);
 		ballPane.setMinWidth(X_MAX);
 		ballPane.setLayoutX(0);
@@ -191,23 +185,8 @@ private static final int RAD = 12;
 
 		gridPane.setMaxWidth(250);
 
-//        btnAddByDistance.setPrefWidth(250);
-//        btnAddByVelocity.setPrefWidth(250);
-//        btnAddByAngle.setPrefWidth(250);
-
 		paneTab.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
-
-//        paneTab.getTabs().addAll(tabDistance, tabAngle, tabVelocity);
 		paneTab.managedProperty().bind(paneTab.visibleProperty());
-		paneTab.setVisible(false);
-		// DISTANCE tab open by default
-//        initTabDist();
-
-//        gpStartXY.addRow(0, inputStartX, inputStartY);
-//        gpStartEndVelocity.addRow(0, inputStartVelocity, inputEndVelocity);
-//        gpEndXY.addRow(0, inputEndX, inputEndY);
-//        gpStartEndAngle.addRow(0, inputStartAngle, inputEndAngle);
-
 		gpStartEndVelocity.setMaxWidth(250);
 		gpStartEndAngle.setMaxWidth(250);
 		gpStartXY.setMaxWidth(250);
@@ -216,10 +195,7 @@ private static final int RAD = 12;
 		gpDistance.setMaxWidth(250);
 		gpAngle.setMaxWidth(250);
 		tabVelocity.setContent(gpVelocity);
-//        tabDistance.setContent(gpDistance);
 		tabAngle.setContent(gpAngle);
-
-		// paneControl.getChildren().add(gpControls);
 
 		gpExplorer.addRow(0, labelXYexp);
 		gpExplorer.addRow(1, inputXexp);
@@ -227,28 +203,19 @@ private static final int RAD = 12;
 		gpExplorer.addRow(2, btnAddExplorer);
 		gpExplorer.setMaxWidth(250);
 
-//        paneLeft.addRow(0, paneTab);
-//        paneLeft.addRow(1, gpExplorer);
 		paneLeft.addRow(0, gpExplorer);
-		ballPane.setStyle(
-				// "-fx-background-color: white;"+
-				"-fx-border-color: blue;" + // Border color
-						"-fx-border-width: 1px;" // Border width
+		ballPane.setStyle("-fx-border-color: blue;" + // Border color
+				"-fx-border-width: 1px;" // Border width
 		);
 
-		// private Pane camera = new StackPane();//making this stack pane is a bag idea
 		String bgFront = ".\\amongus.png";
 		Image bgImage = new Image(bgFront);
-//		String bgFlipped = ".\\amongusflipped.png";
-//		Image bgImageFlipped = new Image(bgFlipped);
 		Pane pSprite = new Pane();
 		ballPane.setStyle("-fx-border-color: blue;" + // Border color
 				"-fx-border-width: 3px;" + "-fx-background-image:url('map.jpg');" + "-fx-background-repeat: no-repeat;"
 				+ " -fx-background-size: cover;" + " -fx-background-position: center center;"); // Border width
 
 		pSprite.setMaxSize(30, 30);
-
-		// -------------------
 
 		paneRight.setStyle("-fx-border-color: grey;" + // Border color
 				"-fx-border-width: 5px;" // Border width
@@ -257,24 +224,15 @@ private static final int RAD = 12;
 		gpContainer.addRow(0, paneLeft, separatorV, paneRight);
 		paneContainer.getChildren().addAll(gpContainer, gpDebug);
 
-		
-		// private Explorer explorer;
-
 //        This is when we add the ballPane to screen
 		paneRight.getChildren().add(ballPane);
 
 //      Holds the sprite
 		StackPane spExplorer = new StackPane();
-//		BackgroundImage flipSprite = new BackgroundImage(bgImageFlipped, BackgroundRepeat.NO_REPEAT,
-//				BackgroundRepeat.NO_REPEAT, null,
-//				new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)),
+
 		BackgroundImage sprite = new BackgroundImage(bgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
 				null, new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
 		bgSprite = new Background(sprite);
-//				, bgFlip = new Background(flipSprite);
-//      The sprite
-		
-//Image of sprite
 		paneExp.setBackground(bgSprite);
 		spExplorer.getChildren().add(paneExp);
 
@@ -285,30 +243,27 @@ private static final int RAD = 12;
 		paneExp.setMaxSize(200, 200);
 		paneRight.getChildren().add(spExplorer);
 		spExplorer.setVisible(true);
-//		gpDebug.setVisible(false);
 
 		btnAddExplorer.setOnAction(event -> {
-			
-				try {
-					btnAddExplorer.setDisable(true);
-					changeMode();
-				} catch (RemoteException e) {
-					// TODO Auto-generated catch block
 
-					if (e instanceof ConnectException)
+			try {
+				btnAddExplorer.setDisable(true);
+				changeMode();
+			} catch (RemoteException e) {
+
+				if (e instanceof ConnectException)
 					notif.setText("Server unreachable");
 
-					btnAddExplorer.setDisable(false);
-				}
+				btnAddExplorer.setDisable(false);
+			}
 
-			
 		});
 		super.init();
 
 	}
+
 	@Override
 	public void start(Stage primaryStage) {
-	//        btnAddExplorer.setOnAction(null);
 		Scene scene = new Scene(paneContainer);
 		primaryStage.setTitle("Particle Physics Simulator");
 		primaryStage.setScene(scene);
@@ -320,69 +275,62 @@ private static final int RAD = 12;
 				btnAddExplorer.fire();
 				break;
 			case ESCAPE:
-				
+
 				Platform.exit();
 				break;
 			default:
 				break;
 			}
-			if (!isExploring())
+			expLock.readLock().lock();
+			if (hasExplorer) {
+				expLock.readLock().unlock();
 				return;
-
-			double dx = ballPane.getScaleX(), dy = ballPane.getScaleY(), facing = paneExp.getScaleX();
+			}
+			expLock.readLock().unlock();
+			double facing = paneExp.getScaleX();
 			switch (e.getCode()) {
 			case W:
-//				moveY += dy;
 				my_Y++;
 				break;
 			case S:
-//				moveY -= dy;
 				my_Y--;
 				break;
 			case A:
-//				moveX += dx;
 				my_X--;
-//				paneExp.setBackground(bgFlip);
 				if (facing > 0)
 					paneExp.setScaleX(-facing);
 				break;
 			case D:
-//				moveX -= dx;
 				my_X++;
 				if (facing < 0)
 					paneExp.setScaleX(-facing);
-//				paneExp.setBackground(bgSprite);
 				break;
 
 			default:
 				break;
 			}
-			final double EX_LIM = (2 + EX_BOUND);
+			final double EX_LIM = 2 + EX_BOUND;
 			double halfSizX = X_MAX * 0.5, halfSizY = Y_MAX * 0.5;
 
 			if (my_X >= X_MAX - EX_BOUND) {
 
-//				moveX = (EX_LIM*dx - halfSizX);
 				my_X = X_MAX - EX_LIM;
 			}
 			if (my_X <= EX_BOUND) {
-//				moveX = (halfSizX - EX_LIM*dx);
 				my_X = EX_LIM;
 			}
 			if (my_Y >= Y_MAX - EX_BOUND) {
 
 				my_Y = Y_MAX - EX_LIM;
-//				moveY = (EX_LIM - halfSizY*dy);
-
 			}
 			if (my_Y <= EX_BOUND) {
-//				moveY = (halfSizY - EX_LIM*dy);
+
 				my_Y = EX_LIM;
 			}
 
-			ballPane.setLayoutX((halfSizX - my_X) * dx);
-			ballPane.setLayoutY((my_Y - halfSizY) * dy);
-//			ballPane.relocate(moveX, moveY);
+			ballPane.setLayoutX((halfSizX - my_X) * DX);
+			ballPane.setLayoutY((my_Y - halfSizY) * DY);
+
 		});
 		System.nanoTime();
 		lastFPSTime = System.nanoTime();
@@ -393,47 +341,42 @@ private static final int RAD = 12;
 			@Override
 
 			public void handle(long now) {
+//				fast negate
 				clear ^= true;
-				boolean isClear = clear;
 				fps++;
-
-				Server_Interface foo = (isExploring()) ? getServer() : null;
-
-				if (isClear) {
+				expLock.readLock().lock();
+				Server_Interface server = getServer();
+				expLock.readLock().unlock();
+				if (clear) {
 					Platform.runLater(() -> {
 						ballPane.getChildren().clear();
 					});
 					return;
-				} else if (foo == null) {
+				} else if (server == null) {
 					return;
 				}
 				try {
-					List<Entity> ents = foo.updateServer(my_X, my_Y, null, paneExp.getScaleX() > 0);
-					
-					es.submit(() -> 
-						Platform.runLater(() -> {
-							List<Node> nodes = ents.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
-							drawBalls(nodes, ballPane);
-							makeFrame();
-						})
-						
+					List<Entity> ents = server.updateServer(my_X, my_Y, null, paneExp.getScaleX() > 0);
+
+					es.submit(() -> Platform.runLater(() -> {
+						List<Node> nodes = ents.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
+						drawBalls(nodes, ballPane);
+						makeFrame();
+					})
+
 					);
 
-				} catch ( InterruptedException | ExecutionException e) {
-					// TODO Auto-generated catch block
+				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
-				}catch (RemoteException e) {
-					// TODO Auto-generated catch block
+				} catch (RemoteException e) {
 
 					if (e instanceof ConnectException)
-					notif.setText("Server unreachable");
+						notif.setText("Server unreachable");
 				}
 
-
-//				Platform.runLater(null);
 				String msg = "\nYou are at (in px):\n" + "X: [" + my_X + "]\n" + "Y: [" + my_Y + "]";
 
-				notif.setText((isExploring()) ? msg : "");
+				notif.setText((hasExplorer) ? msg : "");
 
 				try {
 					update(now);
@@ -447,75 +390,70 @@ private static final int RAD = 12;
 		Thread anims = new Thread(() -> ticer.start());
 		anims.start();
 	}
-	
+
 	private Node toNode(Entity ent) {
 		Node entity = null;
 		switch (ent.getType()) {
 		case BALL:
 			entity = new Circle(RAD, Paint.valueOf("Red"));
-			
+
 //			entity.setLayoutY(ent.getY());
 			break;
 		case EXP:
 			entity = new Pane();
 			// Image of sprite
 			((Region) entity).setBackground(bgSprite);
-			((Region) entity).setMaxSize(SIZ_OTHER,SIZ_OTHER);
-//					paneRight.getChildren().add(spExplorer);
+			((Region) entity).setMaxSize(SIZ_OTHER, SIZ_OTHER);
 
-//			entity = new Circle(1,Paint.valueOf("Red"));
 			break;
 		default:
 			break;
 
 		}
-		if (entity != null){
+		if (entity != null) {
 			entity.relocate(ent.getX(), ent.getY());
 		}
 		return entity;
 	}
 
 	@Override
-	public void stop() {
-		if(es !=  null)
+	public void stop() throws Exception {
+
+		leaveGame(uName);
+		if (es != null)
 			es.shutdown();
-		if ( !uName.isEmpty() && getServer() != null )
-			leaveGame(uName);
-		
-		try {
-			super.stop();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		super.stop();
 
 	}
 
 	private void leaveGame(String uName) {
+		Server_Interface server = getServer();
+		if (uName.isEmpty())
+			return;
 		try {
+			if (server == null)
+				throw new RemoteException();
+			server.leaveGame(uName);
 
-			getServer().leaveGame(uName);
-
-		}catch (RemoteException e) {
-			// TODO Auto-generated catch block
+		} catch (RemoteException e) {
 
 			if (e instanceof ConnectException)
-			notif.setText("Server unreachable");
+				notif.setText("Server unreachable");
 		}
 
 	}
 
 	private void changeMode() throws RemoteException {
 
-		
-		setExploring(!isExploring());
+		setExploring(!hasExplorer);
 
-		if (!isExploring()) {
+		if (!hasExplorer) {
 			ballPane.setScaleX(1);
 			ballPane.setScaleY(1);
 			ballPane.relocate(0, 0);
 			if (getServer() != null) {
 				getServer().leaveGame(uName);
+				setServer(null);
 			}
 			my_X = 0;
 			my_Y = 0;
@@ -523,14 +461,14 @@ private static final int RAD = 12;
 		} else {
 			explore();
 		}
-		inputXexp.setVisible(!isExploring());
-		inputYexp.setVisible(!isExploring());
-		paneTab.setVisible(!isExploring());
-		paneRight.setVisible(isExploring());
-//		gpDebug.setVisible(hasExplorer);
+		expLock.readLock().lock();
+		inputXexp.setVisible(!hasExplorer);
+		inputYexp.setVisible(!hasExplorer);
+		paneTab.setVisible(!hasExplorer);
+		paneRight.setVisible(hasExplorer);
 		btnAddExplorer.setDisable(false);
-		btnAddExplorer.setText((isExploring()) ? LEAVE_TXT : ENTRY_TXT);
-
+		btnAddExplorer.setText((hasExplorer) ? LEAVE_TXT : ENTRY_TXT);
+		expLock.readLock().unlock();
 	}
 
 	private void explore() throws AccessException, RemoteException {
@@ -543,21 +481,31 @@ private static final int RAD = 12;
 				throw new NumberFormatException();
 			double off_x = (ex_X >= X_MAX) ? EX_BOUND : (ex_X <= 0) ? -EX_BOUND : 0f,
 					off_y = (ex_Y >= Y_MAX) ? -EX_BOUND : (ex_Y <= 0) ? EX_BOUND : 0f;
-			ballPane.setScaleX(38.34);
-			ballPane.setScaleY(38.34);
+			ballPane.setScaleX(DX);
+			ballPane.setScaleY(DY);
 			my_X = ex_X -= off_x;
 			my_Y = ex_Y += off_y;
-			ex_X = (ballPane.getWidth() * 0.5 - my_X) * ballPane.getScaleX();
-			ex_Y = (my_Y - ballPane.getHeight() * 0.5) * ballPane.getScaleY();
+			ex_X = (ballPane.getWidth() * 0.5 - my_X) * DX;
+			ex_Y = (my_Y - ballPane.getHeight() * 0.5) * DY;
 			ballPane.setLayoutX(ex_X);
 			ballPane.setLayoutY(ex_Y);
-//			Registry registry = null;
+			
 			try {
-					if(registry == null) 
+				synchronized (this) {
+					int PORT_NUM = 1099;
+//					INPUT PORT NUMBER ALSO
+					registry = LocateRegistry.getRegistry("PUT THE IP/URL HERE", PORT_NUM);
+					if (registry == null)
 						throw new NotBoundException("No registry");
-					this.setServer((Server_Interface) registry.lookup(""));
-			} catch ( NotBoundException e) {
-				// TODO Auto-generated catch block
+					setServer((Server_Interface) registry.lookup("PUT THE SERVER/SERVICE NAME HERE"));
+				}
+				serverLock.readLock().lock();
+				Server_Interface server = getServer();
+				serverLock.readLock().unlock();
+				if(server == null)
+					throw new NotBoundException("Server not found");
+				server.joinGame(my_X, my_Y, uName);
+			} catch (NotBoundException e) {
 				e.printStackTrace();
 				notif.setText(e.getMessage());
 			}
@@ -574,7 +522,6 @@ private static final int RAD = 12;
 
 			check_vis(ballPane.getChildren())).get();
 		} catch (InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -593,38 +540,15 @@ private static final int RAD = 12;
 		cen_X = w - ballPane.getLayoutX() * s_x;
 		cen_Y = h - ballPane.getLayoutY() * s_y;
 
-		Platform.runLater(() -> balls.forEach(circle -> mov_ball(Y_off, X_off, cen_X, cen_Y, circle)));
+		Platform.runLater(() -> {
+			expLock.readLock().lock();
+			balls.forEach(circle -> mov_ball(Y_off, X_off, cen_X, cen_Y, circle));
+			expLock.readLock().unlock();
+		});
+
 //		drawBalls();
 //		mov_balls(balls, Y_off, X_off, cen_X,cen_Y);
 	}
-
-	private void mov_ball(double Y_off, double X_off, double cen_X, double cen_Y, Node circle) {
-		double x = circle.getLayoutX(), y = circle.getLayoutY(),
-//					dx = circle.getTranslateX(),
-//					dy =  circle.getTranslateY(),
-				top, bottom, left, right;
-		top = cen_Y + Y_off;
-		bottom = cen_Y - Y_off;
-		left = cen_X - X_off;
-		right = cen_X + X_off;
-
-		boolean isSeen = left <= x && right >= x && top >= y && bottom <= y;
-		circle.setVisible(isExploring() && isSeen);
-//			hit_check(circle, x, y, dx, dy);
-	}
-
-//	private void hit_check(Node circle, double x, double y, double dx, double dy) {
-//		if (dx != 0f) {
-//			if (x <= 0 || x >= X_MAX)
-//				circle.setTranslateX(-dx);
-//			circle.setLayoutX(x + circle.getTranslateX());
-//		}
-//		if (dy != 0f) {
-//			if (y >= Y_MAX || y <= 0)
-//				circle.setTranslateY(-dy);
-//			circle.setLayoutY(y + circle.getTranslateY());
-//		}
-//	}
 
 	private void drawBalls(List<Node> nodes, Pane ballPane) {
 		try {
@@ -652,35 +576,59 @@ private static final int RAD = 12;
 
 	}
 
-	 private Server_Interface getServer() {
-		 
-		 Server_Interface server = null;
-		 serverLock.readLock().lock();
-			 server = this.server;
-		 serverLock.readLock().unlock();
+	private Server_Interface getServer() {
+
+		Server_Interface server = null;
+		serverLock.readLock().lock();
+		server = this.server;
+		serverLock.readLock().unlock();
 		return server;
 	}
 
-	 private void setServer(Server_Interface server) {
-		serverLock.writeLock().lock();	
+	private void setServer(Server_Interface server) {
+		serverLock.writeLock().lock();
 		this.server = server;
 		serverLock.writeLock().unlock();
 	}
-	private synchronized boolean isExploring() {
-		boolean truth = false;
-		expLock.readLock().lock();
-		truth = hasExplorer;
-		expLock.readLock().unlock();
-		return truth;
-	}
-	private synchronized void setExploring(boolean hasExplorer) {
-		expLock.writeLock().lock();	
+
+	private void setExploring(boolean hasExplorer) {
+		expLock.writeLock().lock();
 		this.hasExplorer = hasExplorer;
 		expLock.writeLock().unlock();
 	}
-	
+
+	private void mov_ball(double Y_off, double X_off, double cen_X, double cen_Y, Node circle) {
+		double x = circle.getLayoutX(), y = circle.getLayoutY(), top, bottom, left, right;
+		top = cen_Y + Y_off;
+		bottom = cen_Y - Y_off;
+		left = cen_X - X_off;
+		right = cen_X + X_off;
+
+		boolean isSeen = left <= x && right >= x && top >= y && bottom <= y;
+
+		circle.setVisible(hasExplorer && isSeen);
+
+	}
 
 }
+
+// double dx = circle.getTranslateX(),
+//		dy =  circle.getTranslateY();
+//		hit_check(circle, x, y, dx, dy);
+//	}
+
+//	private void hit_check(Node circle, double x, double y, double dx, double dy) {
+//		if (dx != 0f) {
+//			if (x <= 0 || x >= X_MAX)
+//				circle.setTranslateX(-dx);
+//			circle.setLayoutX(x + circle.getTranslateX());
+//		}
+//		if (dy != 0f) {
+//			if (y >= Y_MAX || y <= 0)
+//				circle.setTranslateY(-dy);
+//			circle.setLayoutY(y + circle.getTranslateY());
+//		}
+//	}
 
 //        tabVelocity.setOnSelectionChanged(e -> {
 //            tabDistance.setText("Distance");

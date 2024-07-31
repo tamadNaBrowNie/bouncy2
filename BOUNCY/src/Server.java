@@ -1,3 +1,6 @@
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
@@ -140,6 +143,7 @@ public class Server extends Application {
     public static void main(String[] args) {
 //    	HashMap<String,Integer> map = new HashMap<String,Integer>();
     	es = Executors.newFixedThreadPool(3);
+    	System.setProperty("java.rmi.server.hostname", "192.168.1.1");  
     	Server_Interface worker = new Server_Interface() {
 			private List<Entity> getBalls(Bounds box) throws RemoteException, InterruptedException, ExecutionException {
 //				List <Entity> entities = new ArrayList<Entity>();
@@ -253,10 +257,14 @@ public class Server extends Application {
 		try {
 //			Naming.rebind("rmi://localhost:5000/game", worker);
 			LocateRegistry.createRegistry(1099);
-			UnicastRemoteObject.exportObject(worker,429);
+			Remote obj = UnicastRemoteObject.exportObject(worker,429);
+			Naming.rebind("Server", obj);
 //
 //            Naming.rebind("rmi://localhost:1099/master", worker);
 		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}        launch(args);

@@ -259,7 +259,7 @@ public class Server extends Application {
 		try {
 //			Naming.rebind("rmi://localhost:5000/game", worker);
 			LocateRegistry.createRegistry(PORT_IN);
-			Remote obj = UnicastRemoteObject.exportObject(worker,PORT_OUT);
+			Remote obj = UnicastRemoteObject.exportObject(worker,0);
 			Naming.rebind("Server", obj);
 //
 //            Naming.rebind("rmi://localhost:1099/master", worker);

@@ -66,32 +66,10 @@ public class Client extends Application {
 
 	private Pane paneRight = new Pane();
 
-//    private Pane paneControl = new Pane();
-
 	private GridPane gridPane = new GridPane();
 
-//    private TextField inputStartX = new TextField();
-//    private TextField inputStartY = new TextField();
-//    
-//    private TextField inputEndX = new TextField();
-//    private TextField inputEndY = new TextField();
-//    private TextField inputStartAngle = new TextField();
-//    private TextField inputEndAngle = new TextField();
-//
-//    private TextField inputStartVelocity = new TextField();
-//    private TextField inputEndVelocity = new TextField();
-//    private Label labelVelocity = new Label(V_PX_S);
-//    private TextField inputVelocity = new TextField();
-//    private Label labelAngle = new Label("Angle (degrees):");
-//    private TextField inputAngle = new TextField();
-//    private Label labelCount = new Label(prompt_n);
-//    private TextField inputCount = new TextField();
-//
-//    private Button btnAddByDistance = new Button(ADD_BY_DISTANCE);
-//    private Button btnAddByAngle = new Button(ADD_BY_ANGLE);
-//    private Button btnAddByVelocity = new Button(ADD_BY_VELOCITY);
 	private Server_Interface server = null;
-	private final String ENTRY_TXT = "Join";
+	private final String ENTRY_TXT = "BECOME AN EXPLORER";
 	private final String LEAVE_TXT = "LEAVE";
 	private Button btnAddExplorer = new Button(ENTRY_TXT);
 
@@ -105,30 +83,23 @@ public class Client extends Application {
 	private GridPane gpStartEndAngle = new GridPane();
 
 //    Exp stuff?
-	private Label labelXYexp = new Label("Spawn Explorer on (X,Y):");
+
+	private Label labelXYexp = new Label("Spawn Explorer on (X,Y) Coordinates:");
 	private TextField inputXexp = new TextField();
 	private TextField inputYexp = new TextField();
-	private GridPane gpExplorer = new GridPane();
+	private GridPane gpExplorerXY = new GridPane(); // this is for the XY textfields ONLY
 
-	private TabPane paneTab = new TabPane();
-//    private Tab tabDistance = new Tab(ADD_BY_DISTANCE);
-	private Tab tabAngle = new Tab("Angle");
-	private Tab tabVelocity = new Tab("Velocity");
+	private Label labelPort = new Label("Input Port Number:");
+	private TextField inputPort = new TextField();
+	
+	private GridPane gpExplorer = new GridPane();
 
 	private TextArea tester = new TextArea("(Test) Balls rn:\n");
 
-//	private Separator separator1 = new Separator();
 	private Separator separatorV = new Separator();
 
-	private Label notif = new Label("");
+	private Label notif = new Label("ERROR GO HERE");
 	private Label textTest = new Label("");
-
-//	private Label labelStartXY = new Label("Starting Points (X,Y):");
-//
-//	private Label labelEndXY = new Label("End Points (X,Y):");
-//	private Label labelStartEndVelocity = new Label("Starting and Ending Velocity:");
-//	private Label labelStartEndAngle = new Label("Starting and Ending Angle:");
-//	private Label labelConstXY = new Label("Spawn Point (X,Y):");
 
 	private final float EX_BOUND = 5.2164841f;
 
@@ -171,8 +142,8 @@ public class Client extends Application {
 		ballPane.setLayoutY(0);
 
 		gpDebug.addRow(0, fpsLabel);
-		gpDebug.addRow(1, textTest);
-		gpDebug.addRow(2, notif);
+//		gpDebug.addRow(1, textTest);
+//		gpDebug.addRow(2, notif);
 
 		gpDebug.setLayoutX(260);
 		gpDebug.setLayoutY(0);
@@ -185,8 +156,6 @@ public class Client extends Application {
 
 		gridPane.setMaxWidth(250);
 
-		paneTab.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
-		paneTab.managedProperty().bind(paneTab.visibleProperty());
 		gpStartEndVelocity.setMaxWidth(250);
 		gpStartEndAngle.setMaxWidth(250);
 		gpStartXY.setMaxWidth(250);
@@ -194,16 +163,32 @@ public class Client extends Application {
 		gpVelocity.setMaxWidth(250);
 		gpDistance.setMaxWidth(250);
 		gpAngle.setMaxWidth(250);
-		tabVelocity.setContent(gpVelocity);
-		tabAngle.setContent(gpAngle);
 
-		gpExplorer.addRow(0, labelXYexp);
-		gpExplorer.addRow(1, inputXexp);
-		gpExplorer.addRow(1, inputYexp);
-		gpExplorer.addRow(2, btnAddExplorer);
+		//will look like
+		/**
+		 * Input Server IP Number:(?) need pa ba
+		 * Input Port Number:
+		 * [            ]
+		 * Spawn Explorer on (X,Y) coordinates:
+		 * [     ][     ]
+		 * Join Server btn
+		 */
+
+		//All tha can be seen:
+		//can remove all else na UI elems
+		gpExplorer.addRow(0, labelPort);
+		gpExplorer.addRow(1, inputPort);
+		gpExplorer.addRow(2, labelXYexp);
+		gpExplorerXY.addRow(1, inputXexp);
+		gpExplorerXY.addRow(1, inputYexp);
+		gpExplorer.addRow(3, gpExplorerXY);
+		gpExplorer.addRow(4, btnAddExplorer);
+		gpExplorer.addRow(5, notif);
+		gpExplorer.addRow(6, textTest);
 		gpExplorer.setMaxWidth(250);
 
 		paneLeft.addRow(0, gpExplorer);
+		
 		ballPane.setStyle("-fx-border-color: blue;" + // Border color
 				"-fx-border-width: 1px;" // Border width
 		);
@@ -245,8 +230,8 @@ public class Client extends Application {
 		spExplorer.setVisible(true);
 
 		btnAddExplorer.setOnAction(event -> {
-
 			try {
+				notif.setText("Going to "+inputPort.getText());
 				btnAddExplorer.setDisable(true);
 				changeMode();
 			} catch (RemoteException e) {
@@ -443,10 +428,11 @@ public class Client extends Application {
 
 	}
 
+	//probs here
 	private void changeMode() throws RemoteException {
 
 		setExploring(!hasExplorer);
-
+		
 		if (!hasExplorer) {
 			ballPane.setScaleX(1);
 			ballPane.setScaleY(1);
@@ -464,7 +450,6 @@ public class Client extends Application {
 		expLock.readLock().lock();
 		inputXexp.setVisible(!hasExplorer);
 		inputYexp.setVisible(!hasExplorer);
-		paneTab.setVisible(!hasExplorer);
 		paneRight.setVisible(hasExplorer);
 		btnAddExplorer.setDisable(false);
 		btnAddExplorer.setText((hasExplorer) ? LEAVE_TXT : ENTRY_TXT);
@@ -492,7 +477,8 @@ public class Client extends Application {
 			
 			try {
 				synchronized (this) {
-					int PORT_NUM = 1099;
+					int PORT_NUM = Integer.parseInt(inputPort.getText());;
+//					int PORT_NUM = 1099;
 //					INPUT PORT NUMBER ALSO
 					registry = LocateRegistry.getRegistry("PUT THE IP/URL HERE", PORT_NUM);
 					if (registry == null)
@@ -611,214 +597,3 @@ public class Client extends Application {
 	}
 
 }
-
-// double dx = circle.getTranslateX(),
-//		dy =  circle.getTranslateY();
-//		hit_check(circle, x, y, dx, dy);
-//	}
-
-//	private void hit_check(Node circle, double x, double y, double dx, double dy) {
-//		if (dx != 0f) {
-//			if (x <= 0 || x >= X_MAX)
-//				circle.setTranslateX(-dx);
-//			circle.setLayoutX(x + circle.getTranslateX());
-//		}
-//		if (dy != 0f) {
-//			if (y >= Y_MAX || y <= 0)
-//				circle.setTranslateY(-dy);
-//			circle.setLayoutY(y + circle.getTranslateY());
-//		}
-//	}
-
-//        tabVelocity.setOnSelectionChanged(e -> {
-//            tabDistance.setText("Distance");
-//            tabAngle.setText("Angle");
-//            tabVelocity.setText(ADD_BY_VELOCITY);
-//
-//            gpDistance.getChildren().clear();
-//            gpAngle.getChildren().clear();
-//            gpVelocity.getChildren().clear();
-//            initTabVelocity();
-//            gpVelocity.setMaxWidth(250);
-//
-//        });
-//
-//        tabDistance.setOnSelectionChanged(e -> {
-//            tabDistance.setText(ADD_BY_DISTANCE);
-//            tabAngle.setText("Angle");
-//            tabVelocity.setText("Velocity");
-//
-//            gpDistance.getChildren().clear();
-//            gpAngle.getChildren().clear();
-//            gpVelocity.getChildren().clear();
-//
-//            initTabDist();
-//        });
-//
-//        tabAngle.setOnSelectionChanged(e -> {
-//            tabDistance.setText("Distance");
-//            tabAngle.setText(ADD_BY_ANGLE);
-//            tabVelocity.setText("Velocity");
-//
-//            initTabAngle();
-//        });
-//
-//        btnAddByDistance.setOnAction(event -> {
-//            try {
-//                double startX = Double.parseDouble(inputStartX.getText());
-//                double startY = Double.parseDouble(inputStartY.getText());
-//                double endX = Double.parseDouble(inputEndX.getText());
-//                double endY = Double.parseDouble(inputEndY.getText());
-//                double velocity = Double.parseDouble(inputVelocity.getText());
-//                double angle = Double.parseDouble(inputAngle.getText());
-//                int n = Integer.parseInt(inputCount.getText());
-//
-//                if (n > 0)
-//                    addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, ballPane);
-//            } catch (NumberFormatException e) {
-//                notif.setText("Invalid input\n");
-//            }
-//            ;
-//        });
-//
-//        btnAddByAngle.setOnAction(event -> {
-//            try {
-//                final double startX = Double.parseDouble(inputStartX.getText());
-//                final double startY = Double.parseDouble(inputStartY.getText());
-//                final double startAngle = Double.parseDouble(inputStartAngle.getText());
-//                final double endAngle = Double.parseDouble(inputEndAngle.getText());
-//                final double velocity = Double.parseDouble(inputVelocity.getText());
-//
-//                final int n = Integer.parseInt(inputCount.getText());
-//
-//                if (n >= 0)
-//                    addParticlesByAngle(n, startX, startY, startAngle, endAngle, velocity, ballPane);
-//
-//            } catch (NumberFormatException e) {
-//                notif.setText("Invalid input\n");
-//            }
-//        });
-//
-//        btnAddByVelocity.setOnAction(event -> {
-//            try {
-//                final double startX = Double.parseDouble(inputStartX.getText());
-//                final double startY = Double.parseDouble(inputStartY.getText());
-//                final double startVelocity = Double.parseDouble(inputStartVelocity.getText());
-//                final double endVelocity = Double.parseDouble(inputEndVelocity.getText());
-//                final double angle = Double.parseDouble(inputAngle.getText());
-//
-//                final int n = Integer.parseInt(inputCount.getText());
-//
-//                if (n > 0)
-//                    addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle, ballPane);
-//            } catch (NumberFormatException e) {
-//                notif.setText("Invalid input\n");
-//            }
-//        });
-
-//    private void initTabVelocity() {
-//        gpDistance.getChildren().clear();
-//        gpAngle.getChildren().clear();
-//        gpVelocity.getChildren().clear();
-//
-//        gpVelocity.addRow(0, labelConstXY);
-//        gpVelocity.addRow(1, gpStartXY);
-//        gpVelocity.addRow(2, labelStartEndVelocity);
-//        gpVelocity.addRow(3, gpStartEndVelocity);
-//        gpVelocity.addRow(4, labelAngle);
-//        gpVelocity.addRow(5, inputAngle);
-//        gpVelocity.addRow(6, separator1);
-//        gpVelocity.addRow(7, labelCount);
-//        gpVelocity.addRow(8, inputCount);
-//        gpVelocity.addRow(9, btnAddByVelocity);
-//        gpVelocity.setMaxWidth(250);
-//        gpVelocity.addRow(10, notif);
-//    }
-//
-//    private void initTabDist() {
-//        gpDistance.getChildren().clear();
-//        gpAngle.getChildren().clear();
-//        gpVelocity.getChildren().clear();
-//
-//        gpDistance.addRow(0, labelStartXY);
-//        gpDistance.addRow(1, gpStartXY);
-//        gpDistance.addRow(2, labelEndXY);
-//        gpDistance.addRow(3, gpEndXY);
-//        gpDistance.addRow(4, labelVelocity);
-//        gpDistance.addRow(5, inputVelocity);
-//        gpDistance.addRow(6, labelAngle);
-//        gpDistance.addRow(7, inputAngle);
-//        gpDistance.addRow(8, separator1);
-//        gpDistance.addRow(9, labelCount);
-//        gpDistance.addRow(10, inputCount);
-//        gpDistance.addRow(11, btnAddByDistance);
-//        gpDistance.setMaxWidth(250);
-//        gpDistance.addRow(12, notif);
-//    }
-//
-//    private void initTabAngle() {
-//        gpDistance.getChildren().clear();
-//        gpAngle.getChildren().clear();
-//        gpVelocity.getChildren().clear();
-//
-//        gpAngle.addRow(0, labelConstXY);
-//        gpAngle.addRow(1, gpStartXY);
-//        gpAngle.addRow(2, labelStartEndAngle);
-//        gpAngle.addRow(3, gpStartEndAngle);
-//        gpAngle.addRow(4, labelVelocity);
-//        gpAngle.addRow(5, inputVelocity);
-//        gpAngle.addRow(6, separator1);
-//        gpAngle.addRow(7, labelCount);
-//        gpAngle.addRow(8, inputCount);
-//        gpAngle.addRow(9, btnAddByAngle);
-//        gpAngle.setMaxWidth(250);
-//        gpAngle.addRow(10, notif);
-//
-//    }
-//    private void addParticlesByAngle(int n, double startX, double startY, double startAngle, double endAngle,
-//    double velocity, Pane paneBall) {
-//    double angleDiff = (endAngle - startAngle) / (n);
-//    double angle = startAngle;
-//    for (int i = 0; i < n; i++) {
-//        ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
-//        angle += angleDiff;
-//
-//    }
-//    drawBalls(paneBall);
-//}
-//
-//private void addParticlesByVelocity(int n, double startX, double startY, double startVelocity, double endVelocity,
-//        double angle, Pane ballPane) {
-//    double velocityDiff = (endVelocity - startVelocity) / (n);
-//    double v = startVelocity;
-//    for (int i = 0; i < n; i++) {
-//
-//        double velocity = v;
-//        
-//        ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
-//
-//        v += velocityDiff;
-//
-//    }
-//    drawBalls(ballPane);
-//}
-
-//    private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity,
-//            double angle, Pane ballPane) {
-//        double dx = (endX - startX) / (n);
-//        double dy = (endY - startY) / (n);
-//        double x = startX;
-//        double y = startY;
-//
-//        for (int i = 0; i < n; i++) {
-//            double xin = x, yin = y;
-//
-//            ball_buf.add(new Particle(xin, yin, Math.toRadians(angle), velocity));
-//            x += dx;
-//            y += dy;
-//        }
-//
-//        drawBalls(ballPane);
-//
-//    }
-//    private Object Lock = new Object();

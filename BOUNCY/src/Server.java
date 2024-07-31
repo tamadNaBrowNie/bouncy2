@@ -42,7 +42,9 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 public class Server extends Application {
-    private static final String prompt_n = "Number of Particles:";
+    private static final int PORT_IN = 1099;
+	private static final int PORT_OUT = 429;
+	private static final String prompt_n = "Number of Particles:";
     private static final String V_PX_S = "Velocity (px/s):";
     private static final String ADD_BY_ANGLE = "Add by Angle";
     private static final String ADD_BY_VELOCITY = "Add by Velocity";
@@ -256,8 +258,8 @@ public class Server extends Application {
 		};
 		try {
 //			Naming.rebind("rmi://localhost:5000/game", worker);
-			LocateRegistry.createRegistry(1099);
-			Remote obj = UnicastRemoteObject.exportObject(worker,429);
+			LocateRegistry.createRegistry(PORT_IN);
+			Remote obj = UnicastRemoteObject.exportObject(worker,PORT_OUT);
 			Naming.rebind("Server", obj);
 //
 //            Naming.rebind("rmi://localhost:1099/master", worker);

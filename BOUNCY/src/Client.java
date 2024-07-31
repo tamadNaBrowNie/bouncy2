@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import javafx.animation.AnimationTimer;
@@ -131,31 +132,34 @@ private static final int RAD = 12;
 
 	private GridPane gpContainer = new GridPane();
 	private GridPane paneLeft = new GridPane();
-
+	private Pane paneExp = new Pane();
 	// private BooleanBinding keyPressed = s_key.or(a_key).or(w_key).or(d_key);
 
 	// private StackPane spMiniMap = new StackPane();
 	private GridPane gpDebug = new GridPane();
-	private static ExecutorService es;
+	private static ExecutorService es = null;
+	private static Registry registry;
 
 	public static void main(String[] args) {
-		es = Executors.newFixedThreadPool(3);
-		launch(args);
 		try {
-			es.shutdown();
-		} catch (Exception e) {
+			registry = LocateRegistry.getRegistry();
+
+			launch(args);
+		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+	private ReentrantReadWriteLock serverLock = new ReentrantReadWriteLock(), expLock= new ReentrantReadWriteLock();
 
 //    client coords.
 	private double my_X = 0, my_Y = 0;
 	private String uName = "";
 	private Background bgSprite;
-
-	@Override
-	public void start(Stage primaryStage) {
+	@Override 
+	public void init() throws Exception{
+		es = Executors.newFixedThreadPool(3);
+		
 //    	inputYexp.managedProperty().bind(inputYexp.visibleProperty());
 //    	inputXexp.managedProperty().bind(inputXexp.visibleProperty());
 		paneRight.setLayoutX(270);
@@ -166,7 +170,7 @@ private static final int RAD = 12;
 		clip.setLayoutX(0);
 		clip.setLayoutY(0);
 		paneRight.setClip(clip);
-		paneRight.setVisible(hasExplorer);
+		paneRight.setVisible(isExploring());
 		ballPane.setPrefHeight(Y_MAX);
 		ballPane.setMinWidth(X_MAX);
 		ballPane.setLayoutX(0);
@@ -253,11 +257,7 @@ private static final int RAD = 12;
 		gpContainer.addRow(0, paneLeft, separatorV, paneRight);
 		paneContainer.getChildren().addAll(gpContainer, gpDebug);
 
-		Scene scene = new Scene(paneContainer);
-		primaryStage.setTitle("Particle Physics Simulator");
-		primaryStage.setScene(scene);
-		primaryStage.show();
-
+		
 		// private Explorer explorer;
 
 //        This is when we add the ballPane to screen
@@ -273,7 +273,7 @@ private static final int RAD = 12;
 		bgSprite = new Background(sprite);
 //				, bgFlip = new Background(flipSprite);
 //      The sprite
-		Pane paneExp = new Pane();
+		
 //Image of sprite
 		paneExp.setBackground(bgSprite);
 		spExplorer.getChildren().add(paneExp);
@@ -290,17 +290,29 @@ private static final int RAD = 12;
 		btnAddExplorer.setOnAction(event -> {
 			
 				try {
+					btnAddExplorer.setDisable(true);
 					changeMode();
 				} catch (RemoteException e) {
 					// TODO Auto-generated catch block
 
-					if (e instanceof ConnectException);
+					if (e instanceof ConnectException)
 					notif.setText("Server unreachable");
+
+					btnAddExplorer.setDisable(false);
 				}
 
 			
 		});
-//        btnAddExplorer.setOnAction(null);
+		super.init();
+
+	}
+	@Override
+	public void start(Stage primaryStage) {
+	//        btnAddExplorer.setOnAction(null);
+		Scene scene = new Scene(paneContainer);
+		primaryStage.setTitle("Particle Physics Simulator");
+		primaryStage.setScene(scene);
+		primaryStage.show();
 
 		scene.setOnKeyPressed(e -> {
 			switch (e.getCode()) {
@@ -314,7 +326,7 @@ private static final int RAD = 12;
 			default:
 				break;
 			}
-			if (!hasExplorer)
+			if (!isExploring())
 				return;
 
 			double dx = ballPane.getScaleX(), dy = ballPane.getScaleY(), facing = paneExp.getScaleX();
@@ -385,7 +397,7 @@ private static final int RAD = 12;
 				boolean isClear = clear;
 				fps++;
 
-				Server_Interface foo = (hasExplorer) ? getServer() : null;
+				Server_Interface foo = (isExploring()) ? getServer() : null;
 
 				if (isClear) {
 					Platform.runLater(() -> {
@@ -413,7 +425,7 @@ private static final int RAD = 12;
 				}catch (RemoteException e) {
 					// TODO Auto-generated catch block
 
-					if (e instanceof ConnectException);
+					if (e instanceof ConnectException)
 					notif.setText("Server unreachable");
 				}
 
@@ -421,7 +433,7 @@ private static final int RAD = 12;
 //				Platform.runLater(null);
 				String msg = "\nYou are at (in px):\n" + "X: [" + my_X + "]\n" + "Y: [" + my_Y + "]";
 
-				textTest.setText((hasExplorer) ? msg : "");
+				notif.setText((isExploring()) ? msg : "");
 
 				try {
 					update(now);
@@ -465,12 +477,11 @@ private static final int RAD = 12;
 
 	@Override
 	public void stop() {
-		if (hasExplorer && !uName.isEmpty() && getServer() != null)
-
-		{
+		if(es !=  null)
+			es.shutdown();
+		if ( !uName.isEmpty() && getServer() != null )
 			leaveGame(uName);
-		}
-
+		
 		try {
 			super.stop();
 		} catch (Exception e) {
@@ -488,16 +499,18 @@ private static final int RAD = 12;
 		}catch (RemoteException e) {
 			// TODO Auto-generated catch block
 
-			if (e instanceof ConnectException);
+			if (e instanceof ConnectException)
 			notif.setText("Server unreachable");
 		}
 
 	}
 
 	private void changeMode() throws RemoteException {
-		hasExplorer = !hasExplorer;
 
-		if (!hasExplorer) {
+		
+		setExploring(!isExploring());
+
+		if (!isExploring()) {
 			ballPane.setScaleX(1);
 			ballPane.setScaleY(1);
 			ballPane.relocate(0, 0);
@@ -510,20 +523,20 @@ private static final int RAD = 12;
 		} else {
 			explore();
 		}
-		inputXexp.setVisible(!hasExplorer);
-		inputYexp.setVisible(!hasExplorer);
-		paneTab.setVisible(!hasExplorer);
-		paneRight.setVisible(hasExplorer);
+		inputXexp.setVisible(!isExploring());
+		inputYexp.setVisible(!isExploring());
+		paneTab.setVisible(!isExploring());
+		paneRight.setVisible(isExploring());
 //		gpDebug.setVisible(hasExplorer);
-
-		btnAddExplorer.setText((hasExplorer) ? LEAVE_TXT : ENTRY_TXT);
+		btnAddExplorer.setDisable(false);
+		btnAddExplorer.setText((isExploring()) ? LEAVE_TXT : ENTRY_TXT);
 
 	}
 
 	private void explore() throws AccessException, RemoteException {
 		try {
 
-//			notif.setText("");
+			notif.setText("");
 			double ex_X = Double.parseDouble(inputXexp.getText());
 			double ex_Y = Double.parseDouble(inputYexp.getText());
 			if (ex_X > X_MAX || ex_X < 0 || ex_Y > Y_MAX || ex_Y < 0)
@@ -538,18 +551,20 @@ private static final int RAD = 12;
 			ex_Y = (my_Y - ballPane.getHeight() * 0.5) * ballPane.getScaleY();
 			ballPane.setLayoutX(ex_X);
 			ballPane.setLayoutY(ex_Y);
-			Registry registry;
+//			Registry registry = null;
 			try {
-				registry = LocateRegistry.getRegistry();
-				this.setServer((Server_Interface) registry.lookup(""));
+					if(registry == null) 
+						throw new NotBoundException("No registry");
+					this.setServer((Server_Interface) registry.lookup(""));
 			} catch ( NotBoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				notif.setText(e.getMessage());
 			}
 
 		} catch (NumberFormatException e) {
 			notif.setText("Invalid Explorer coordinates.\n");
-			hasExplorer = false;
+			setExploring(false);
 		}
 	}
 
@@ -594,7 +609,7 @@ private static final int RAD = 12;
 		right = cen_X + X_off;
 
 		boolean isSeen = left <= x && right >= x && top >= y && bottom <= y;
-		circle.setVisible(hasExplorer && isSeen);
+		circle.setVisible(isExploring() && isSeen);
 //			hit_check(circle, x, y, dx, dy);
 	}
 
@@ -637,13 +652,33 @@ private static final int RAD = 12;
 
 	}
 
-	private Server_Interface getServer() {
+	 private Server_Interface getServer() {
+		 
+		 Server_Interface server = null;
+		 serverLock.readLock().lock();
+			 server = this.server;
+		 serverLock.readLock().unlock();
 		return server;
 	}
 
-	private void setServer(Server_Interface server) {
+	 private void setServer(Server_Interface server) {
+		serverLock.writeLock().lock();	
 		this.server = server;
+		serverLock.writeLock().unlock();
 	}
+	private synchronized boolean isExploring() {
+		boolean truth = false;
+		expLock.readLock().lock();
+		truth = hasExplorer;
+		expLock.readLock().unlock();
+		return truth;
+	}
+	private synchronized void setExploring(boolean hasExplorer) {
+		expLock.writeLock().lock();	
+		this.hasExplorer = hasExplorer;
+		expLock.writeLock().unlock();
+	}
+	
 
 }
 

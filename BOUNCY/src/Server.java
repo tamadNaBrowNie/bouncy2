@@ -193,6 +193,8 @@ public class Server extends Application {
 					@Override
 					public Boolean call() throws Exception {
 						// TODO Auto-generated method stub
+						if(name == null) return null;
+						else if (name.isEmpty()) return null;
 						return ballPane.getChildren().removeIf(node->node.getId().equalsIgnoreCase(name));
 					}});
 				try {

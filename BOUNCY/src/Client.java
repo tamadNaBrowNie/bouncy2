@@ -1,3 +1,5 @@
+import java.rmi.AccessException;
+import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -286,13 +288,17 @@ private static final int RAD = 12;
 //		gpDebug.setVisible(false);
 
 		btnAddExplorer.setOnAction(event -> {
-			try {
-				changeMode();
-			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
+				try {
+					changeMode();
+				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
 
+					if (e instanceof ConnectException);
+					notif.setText("Server unreachable");
+				}
+
+			
 		});
 //        btnAddExplorer.setOnAction(null);
 
@@ -302,8 +308,8 @@ private static final int RAD = 12;
 				btnAddExplorer.fire();
 				break;
 			case ESCAPE:
-
-				primaryStage.close();
+				
+				Platform.exit();
 				break;
 			default:
 				break;
@@ -379,7 +385,7 @@ private static final int RAD = 12;
 				boolean isClear = clear;
 				fps++;
 
-				Server_Interface foo = (hasExplorer) ? server : null;
+				Server_Interface foo = (hasExplorer) ? getServer() : null;
 
 				if (isClear) {
 					Platform.runLater(() -> {
@@ -401,10 +407,16 @@ private static final int RAD = 12;
 						
 					);
 
-				} catch (RemoteException | InterruptedException | ExecutionException e) {
+				} catch ( InterruptedException | ExecutionException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				}catch (RemoteException e) {
+					// TODO Auto-generated catch block
+
+					if (e instanceof ConnectException);
+					notif.setText("Server unreachable");
 				}
+
 
 //				Platform.runLater(null);
 				String msg = "\nYou are at (in px):\n" + "X: [" + my_X + "]\n" + "Y: [" + my_Y + "]";
@@ -423,7 +435,7 @@ private static final int RAD = 12;
 		Thread anims = new Thread(() -> ticer.start());
 		anims.start();
 	}
-
+	
 	private Node toNode(Entity ent) {
 		Node entity = null;
 		switch (ent.getType()) {
@@ -453,17 +465,10 @@ private static final int RAD = 12;
 
 	@Override
 	public void stop() {
-		if (hasExplorer && !uName.isEmpty() && server != null)
+		if (hasExplorer && !uName.isEmpty() && getServer() != null)
 
 		{
-			try {
-
-				server.leaveGame(uName);
-
-			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			leaveGame(uName);
 		}
 
 		try {
@@ -475,6 +480,20 @@ private static final int RAD = 12;
 
 	}
 
+	private void leaveGame(String uName) {
+		try {
+
+			getServer().leaveGame(uName);
+
+		}catch (RemoteException e) {
+			// TODO Auto-generated catch block
+
+			if (e instanceof ConnectException);
+			notif.setText("Server unreachable");
+		}
+
+	}
+
 	private void changeMode() throws RemoteException {
 		hasExplorer = !hasExplorer;
 
@@ -482,8 +501,8 @@ private static final int RAD = 12;
 			ballPane.setScaleX(1);
 			ballPane.setScaleY(1);
 			ballPane.relocate(0, 0);
-			if (server != null) {
-				server.leaveGame(uName);
+			if (getServer() != null) {
+				getServer().leaveGame(uName);
 			}
 			my_X = 0;
 			my_Y = 0;
@@ -501,10 +520,10 @@ private static final int RAD = 12;
 
 	}
 
-	private void explore() {
+	private void explore() throws AccessException, RemoteException {
 		try {
 
-			notif.setText("");
+//			notif.setText("");
 			double ex_X = Double.parseDouble(inputXexp.getText());
 			double ex_Y = Double.parseDouble(inputYexp.getText());
 			if (ex_X > X_MAX || ex_X < 0 || ex_Y > Y_MAX || ex_Y < 0)
@@ -522,8 +541,8 @@ private static final int RAD = 12;
 			Registry registry;
 			try {
 				registry = LocateRegistry.getRegistry();
-				this.server = (Server_Interface) registry.lookup("");
-			} catch (RemoteException | NotBoundException e) {
+				this.setServer((Server_Interface) registry.lookup(""));
+			} catch ( NotBoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -616,6 +635,14 @@ private static final int RAD = 12;
 		lastFPSTime = now;
 		fps = 0;
 
+	}
+
+	private Server_Interface getServer() {
+		return server;
+	}
+
+	private void setServer(Server_Interface server) {
+		this.server = server;
 	}
 
 }

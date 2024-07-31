@@ -448,7 +448,7 @@ public class Server extends Application {
 		
         scene.setOnKeyPressed(e -> {
         	 if(e.getCode()== KeyCode.ESCAPE) 
-        		 primaryStage.close();	
+        		 Platform.exit();
         	}
         );
 //        	 if (!hasExplorer)return;

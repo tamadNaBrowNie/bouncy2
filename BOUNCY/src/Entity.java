@@ -1,13 +1,14 @@
 
 public class Entity {
-private double x,y;
+private double x,y,size;
 private Type type;
 private boolean isRight;
-	Entity(double x,double y, Type type,boolean facing){
+	Entity(double x,double y, double size, Type type,boolean facing){
 		this.x=x;
 		this.y = y;
 		this.type = type;
 		this.isRight = facing;
+		this.setSize(size);
 	}
 	public double getX() {
 		return x;
@@ -20,6 +21,12 @@ private boolean isRight;
 	}
 	public boolean isRight() {
 		return isRight;
+	}
+	public double getSize() {
+		return size;
+	}
+	private void setSize(double size) {
+		this.size = size;
 	}
 	
 }

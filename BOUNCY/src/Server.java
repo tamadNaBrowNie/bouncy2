@@ -160,7 +160,7 @@ public class Server extends Application {
 
 						private Entity toEntity(Node ent) {
 							return new Entity(ent.getLayoutX(),
-									ent.getLayoutY(),
+									ent.getLayoutY(),ent.getBoundsInParent().getHeight(),
 									(ent instanceof Circle)?Type.BALL:Type.EXP,ent.getScaleX()>0);
 						}
 						
@@ -183,7 +183,7 @@ public class Server extends Application {
 				paneExp.setBackground(bgSprite);
 				paneExp.setId(name);
 //				spExplorer.setPrefSize(X_MAX, Y_MAX);
-				paneExp.setMaxSize(200, 200);
+				paneExp.setMaxSize(4.99, 4.99);
 				//todo check if input is in bounds
 				return ballPane.getChildren().add(paneExp);
 				

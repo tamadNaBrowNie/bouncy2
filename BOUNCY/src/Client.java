@@ -426,7 +426,7 @@ public class Client extends Application {
 		Node entity = null;
 		switch (ent.getType()) {
 		case BALL:
-			entity = new Circle(1, Paint.valueOf("Red"));
+			entity = new Circle(ent.getSize(), Paint.valueOf("Red"));
 			entity.relocate(ent.getX(), ent.getY());
 //			entity.setLayoutY(ent.getY());
 			break;
@@ -434,7 +434,7 @@ public class Client extends Application {
 			entity = new Pane();
 			// Image of sprite
 			((Region) entity).setBackground(bgSprite);
-			((Region) entity).setMaxSize(20, 20);
+			((Region) entity).setMaxSize(ent.getSize(), ent.getSize());
 //					paneRight.getChildren().add(spExplorer);
 
 //			entity = new Circle(1,Paint.valueOf("Red"));

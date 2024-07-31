@@ -38,6 +38,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 public class Client extends Application {
+private static final double SIZ_OTHER = 4.99;
+private static final int RAD = 12;
 //    private static final String prompt_n = "Number of Particles:";
 //    private static final String V_PX_S = "Velocity (px/s):";
 //    private static final String ADD_BY_ANGLE = "Add by Angle";
@@ -426,23 +428,25 @@ public class Client extends Application {
 		Node entity = null;
 		switch (ent.getType()) {
 		case BALL:
-			entity = new Circle(ent.getSize(), Paint.valueOf("Red"));
-			entity.relocate(ent.getX(), ent.getY());
+			entity = new Circle(RAD, Paint.valueOf("Red"));
+			
 //			entity.setLayoutY(ent.getY());
 			break;
 		case EXP:
 			entity = new Pane();
 			// Image of sprite
 			((Region) entity).setBackground(bgSprite);
-			((Region) entity).setMaxSize(ent.getSize(), ent.getSize());
+			((Region) entity).setMaxSize(SIZ_OTHER,SIZ_OTHER);
 //					paneRight.getChildren().add(spExplorer);
 
 //			entity = new Circle(1,Paint.valueOf("Red"));
-			entity.relocate(ent.getX(), ent.getY());
 			break;
 		default:
 			break;
 
+		}
+		if (entity != null){
+			entity.relocate(ent.getX(), ent.getY());
 		}
 		return entity;
 	}

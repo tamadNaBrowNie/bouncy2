@@ -3,7 +3,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import javafx.scene.Node;
+//import javafx.scene.Node;
 
 public interface Server_Interface extends Remote{
 //	List<Entity> getBalls() throws RemoteException;

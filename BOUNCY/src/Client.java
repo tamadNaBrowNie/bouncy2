@@ -2,7 +2,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -31,7 +30,9 @@ import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -109,7 +110,7 @@ public class Client extends Application {
 
 	private TextArea tester = new TextArea("(Test) Balls rn:\n");
 
-	private Separator separator1 = new Separator();
+//	private Separator separator1 = new Separator();
 	private Separator separatorV = new Separator();
 
 	private Label notif = new Label("");
@@ -146,7 +147,10 @@ public class Client extends Application {
 
 //    client coords.
 	private double my_X = 0, my_Y = 0;
+	private String uName = "";
+	private Background bgSprite;
 
+	@Override
 	public void start(Stage primaryStage) {
 //    	inputYexp.managedProperty().bind(inputYexp.visibleProperty());
 //    	inputXexp.managedProperty().bind(inputXexp.visibleProperty());
@@ -262,7 +266,7 @@ public class Client extends Application {
 //				new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)),
 		BackgroundImage sprite = new BackgroundImage(bgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
 				null, new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
-		Background bgSprite = new Background(sprite);
+		bgSprite = new Background(sprite);
 //				, bgFlip = new Background(flipSprite);
 //      The sprite
 		Pane paneExp = new Pane();
@@ -280,7 +284,12 @@ public class Client extends Application {
 //		gpDebug.setVisible(false);
 
 		btnAddExplorer.setOnAction(event -> {
-			changeMode();
+			try {
+				changeMode();
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		});
 //        btnAddExplorer.setOnAction(null);
@@ -368,29 +377,38 @@ public class Client extends Application {
 				boolean isClear = clear;
 				fps++;
 
-				Server_Interface foo = (hasExplorer)?server:null;
-				Platform.runLater(() -> {
-					if (isClear) {
-						ballPane.getChildren().clear();
-						return;
-					} else if (foo== null) {
-						return;
-					}
-					try {
-						foo.updateServer(my_X, my_Y, null, paneExp.getScaleX() > 0);
-						makeFrame();
-					} catch (RemoteException | InterruptedException | ExecutionException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+				Server_Interface foo = (hasExplorer) ? server : null;
 
-				});
+				if (isClear) {
+					Platform.runLater(() -> {
+						ballPane.getChildren().clear();
+					});
+					return;
+				} else if (foo == null) {
+					return;
+				}
+				try {
+					List<Entity> ents = foo.updateServer(my_X, my_Y, null, paneExp.getScaleX() > 0);
+					
+					es.submit(() -> 
+						Platform.runLater(() -> {
+							List<Node> nodes = ents.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
+							drawBalls(nodes, ballPane);
+							makeFrame();
+						})
+						
+					);
+
+				} catch (RemoteException | InterruptedException | ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 //				Platform.runLater(null);
 				String msg = "\nYou are at (in px):\n" + "X: [" + my_X + "]\n" + "Y: [" + my_Y + "]";
-				
-				textTest.setText((hasExplorer)?msg:"");
-				
+
+				textTest.setText((hasExplorer) ? msg : "");
+
 				try {
 					update(now);
 				} catch (Exception e) {
@@ -404,15 +422,67 @@ public class Client extends Application {
 		anims.start();
 	}
 
-	private void changeMode() {
+	private Node toNode(Entity ent) {
+		Node entity = null;
+		switch (ent.getType()) {
+		case BALL:
+			entity = new Circle(1, Paint.valueOf("Red"));
+			entity.relocate(ent.getX(), ent.getY());
+//			entity.setLayoutY(ent.getY());
+			break;
+		case EXP:
+			entity = new Pane();
+			// Image of sprite
+			((Region) entity).setBackground(bgSprite);
+			((Region) entity).setMaxSize(20, 20);
+//					paneRight.getChildren().add(spExplorer);
+
+//			entity = new Circle(1,Paint.valueOf("Red"));
+			entity.relocate(ent.getX(), ent.getY());
+			break;
+		default:
+			break;
+
+		}
+		return entity;
+	}
+
+	@Override
+	public void stop() {
+		if (hasExplorer && !uName.isEmpty() && server != null)
+
+		{
+			try {
+
+				server.leaveGame(uName);
+
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		try {
+			super.stop();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	private void changeMode() throws RemoteException {
 		hasExplorer = !hasExplorer;
 
 		if (!hasExplorer) {
 			ballPane.setScaleX(1);
 			ballPane.setScaleY(1);
 			ballPane.relocate(0, 0);
+			if (server != null) {
+				server.leaveGame(uName);
+			}
 			my_X = 0;
-			my_Y=0;
+			my_Y = 0;
 
 		} else {
 			explore();
@@ -452,7 +522,7 @@ public class Client extends Application {
 			} catch (RemoteException | NotBoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}	 
+			}
 
 		} catch (NumberFormatException e) {
 			notif.setText("Invalid Explorer coordinates.\n");
@@ -486,7 +556,7 @@ public class Client extends Application {
 		cen_Y = h - ballPane.getLayoutY() * s_y;
 
 		Platform.runLater(() -> balls.forEach(circle -> mov_ball(Y_off, X_off, cen_X, cen_Y, circle)));
-
+//		drawBalls();
 //		mov_balls(balls, Y_off, X_off, cen_X,cen_Y);
 	}
 
@@ -521,7 +591,7 @@ public class Client extends Application {
 	private void drawBalls(List<Node> nodes, Pane ballPane) {
 		try {
 //			List<Circle> circles = ball_buf.parallelStream().map(Particle::draw).collect(Collectors.toList());
-			ballPane.getChildren().clear();
+//			ballPane.getChildren().clear();
 			ballPane.getChildren().addAll(nodes);
 
 //			ball_buf.clear();

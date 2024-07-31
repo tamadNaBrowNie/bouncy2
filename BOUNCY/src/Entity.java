@@ -7,7 +7,7 @@ private boolean isRight;
 		this.x=x;
 		this.y = y;
 		this.type = type;
-		setRight(facing);
+		this.isRight = facing;
 	}
 	public double getX() {
 		return x;
@@ -18,10 +18,8 @@ private boolean isRight;
 	public Type getType() {
 		return this.type;
 	}
-	private boolean isRight() {
+	public boolean isRight() {
 		return isRight;
 	}
-	private void setRight(boolean isRight) {
-		this.isRight = isRight;
-	}
+	
 }

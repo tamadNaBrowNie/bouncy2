@@ -171,19 +171,22 @@ public class Server extends Application {
 			}
 
 			@Override
-			public void joinGame(double x, double y, String name) throws RemoteException {
+			public boolean joinGame(double x, double y, String name) throws RemoteException {
 				// TODO Auto-generated method stub
 //				StackPane spExplorer = new StackPane();
 //		      The sprite
+				if(name == null) return false;
+				else if (name.isEmpty())return false;
 				Pane paneExp = new Pane();
 		//Image of sprite
 				paneExp.relocate(x, y);
 				paneExp.setBackground(bgSprite);
-				ballPane.getChildren().add(paneExp);
-				
+				paneExp.setId(name);
 //				spExplorer.setPrefSize(X_MAX, Y_MAX);
 				paneExp.setMaxSize(200, 200);
-
+				//todo check if input is in bounds
+				return ballPane.getChildren().add(paneExp);
+				
 			}
 
 			@Override

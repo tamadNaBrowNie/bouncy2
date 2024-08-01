@@ -89,6 +89,9 @@ public class Client extends Application {
 	private TextField inputYexp = new TextField();
 	private GridPane gpExplorerXY = new GridPane(); // this is for the XY textfields ONLY
 
+	private Label labelIP = new Label("Input IP:");
+	private TextField inputIP = new TextField();	
+	
 	private Label labelPort = new Label("Input Port Number:");
 	private TextField inputPort = new TextField();
 	
@@ -176,15 +179,17 @@ public class Client extends Application {
 
 		//All tha can be seen:
 		//can remove all else na UI elems
-		gpExplorer.addRow(0, labelPort);
-		gpExplorer.addRow(1, inputPort);
-		gpExplorer.addRow(2, labelXYexp);
+		gpExplorer.addRow(0, labelIP);
+		gpExplorer.addRow(1, inputIP);
+		gpExplorer.addRow(2, labelPort);
+		gpExplorer.addRow(3, inputPort);
+		gpExplorer.addRow(4, labelXYexp);
 		gpExplorerXY.addRow(1, inputXexp);
 		gpExplorerXY.addRow(1, inputYexp);
-		gpExplorer.addRow(3, gpExplorerXY);
-		gpExplorer.addRow(4, btnAddExplorer);
-		gpExplorer.addRow(5, notif);
-		gpExplorer.addRow(6, textTest);
+		gpExplorer.addRow(5, gpExplorerXY);
+		gpExplorer.addRow(6, btnAddExplorer);
+		gpExplorer.addRow(7, notif);
+		gpExplorer.addRow(8, textTest);
 		gpExplorer.setMaxWidth(250);
 
 		paneLeft.addRow(0, gpExplorer);
@@ -477,7 +482,7 @@ public class Client extends Application {
 			
 			try {
 				synchronized (this) {
-					int PORT_NUM = Integer.parseInt(inputPort.getText());;
+					int PORT_NUM = Integer.parseInt(inputPort.getText());
 //					int PORT_NUM = 1099;
 //					INPUT PORT NUMBER ALSO
 					registry = LocateRegistry.getRegistry("PUT THE IP/URL HERE", PORT_NUM);
@@ -495,11 +500,10 @@ public class Client extends Application {
 				e.printStackTrace();
 				notif.setText(e.getMessage());
 			}
-
-		} catch (NumberFormatException e) {
-			notif.setText("Invalid Explorer coordinates.\n");
-			setExploring(false);
-		}
+			} catch (NumberFormatException e) {
+				notif.setText("Invalid Explorer coordinates.\n");
+				setExploring(false);
+			}
 	}
 
 	private void makeFrame() {

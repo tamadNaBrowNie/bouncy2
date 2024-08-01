@@ -42,7 +42,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 public class Server extends Application {
-    private static final int PORT_IN = 1099;
+    private static final int PORT_IN = 8888; //1099;
 	private static final int PORT_OUT = 429;
 	private static final String prompt_n = "Number of Particles:";
     private static final String V_PX_S = "Velocity (px/s):";
@@ -147,6 +147,7 @@ public class Server extends Application {
     	es = Executors.newFixedThreadPool(3);
     	System.setProperty("java.rmi.server.hostname", "192.168.1.1");  
     	Server_Interface worker = new Server_Interface() {
+
 			private List<Entity> getBalls(Bounds box) throws RemoteException, InterruptedException, ExecutionException {
 //				List <Entity> entities = new ArrayList<Entity>();
 				FutureTask<List<Entity>> t = new FutureTask<List<Entity>>(new Callable<List<Entity>>(){
@@ -260,7 +261,12 @@ public class Server extends Application {
 //			Naming.rebind("rmi://localhost:5000/game", worker);
 			LocateRegistry.createRegistry(PORT_IN);
 			Remote obj = UnicastRemoteObject.exportObject(worker,0);
+//			Naming.rebind("Server", obj);
+			
+//            Naming.rebind("//"+url+":"+port+"/undercover", serverGame);
 			Naming.rebind("Server", obj);
+            System.out.println("Server running at //" + obj.toString() + ":" + PORT_IN);
+
 //
 //            Naming.rebind("rmi://localhost:1099/master", worker);
 		} catch (RemoteException e) {

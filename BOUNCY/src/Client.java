@@ -92,6 +92,9 @@ public class Client extends Application {
 	private Label labelIP = new Label("Input IP:");
 	private TextField inputIP = new TextField();	
 	
+	private Label labelName = new Label("Input Client Name:");
+	private TextField inputName = new TextField();	
+	
 	private Label labelPort = new Label("Input Port Number:");
 	private TextField inputPort = new TextField();
 	
@@ -113,7 +116,8 @@ public class Client extends Application {
 
 	// private StackPane spMiniMap = new StackPane();
 	private GridPane gpDebug = new GridPane();
-	private static ExecutorService es = null;
+	private static ExecutorService es = Executors.newCachedThreadPool();
+
 	private static Registry registry;
 
 	public static void main(String[] args) {
@@ -129,7 +133,6 @@ public class Client extends Application {
 
 	@Override
 	public void init() throws Exception {
-		es = Executors.newFixedThreadPool(3);
 
 		paneRight.setLayoutX(270);
 		paneRight.setPrefHeight(Y_MAX);
@@ -179,19 +182,22 @@ public class Client extends Application {
 
 		//All tha can be seen:
 		//can remove all else na UI elems
-		gpExplorer.addRow(0, labelIP);
-		gpExplorer.addRow(1, inputIP);
-		gpExplorer.addRow(2, labelPort);
-		gpExplorer.addRow(3, inputPort);
-		gpExplorer.addRow(4, labelXYexp);
+		gpExplorer.addRow(0, labelName);
+		gpExplorer.addRow(1, inputName);
+		gpExplorer.addRow(2, labelIP);
+		gpExplorer.addRow(3, inputIP);
+		gpExplorer.addRow(4, labelPort);
+		gpExplorer.addRow(5, inputPort);
+		gpExplorer.addRow(6, labelXYexp);
 		gpExplorerXY.addRow(1, inputXexp);
 		gpExplorerXY.addRow(1, inputYexp);
-		gpExplorer.addRow(5, gpExplorerXY);
-		gpExplorer.addRow(6, btnAddExplorer);
-		gpExplorer.addRow(7, notif);
-		gpExplorer.addRow(8, textTest);
+		gpExplorer.addRow(7, gpExplorerXY);
+		gpExplorer.addRow(8, btnAddExplorer);
+		gpExplorer.addRow(9, notif);
+		gpExplorer.addRow(10, textTest);
+		
 		gpExplorer.setMaxWidth(250);
-
+		
 		paneLeft.addRow(0, gpExplorer);
 		
 		ballPane.setStyle("-fx-border-color: blue;" + // Border color
@@ -243,7 +249,7 @@ public class Client extends Application {
 
 				if (e instanceof ConnectException)
 					notif.setText("Server unreachable");
-
+				e.printStackTrace();
 				btnAddExplorer.setDisable(false);
 			}
 
@@ -272,7 +278,7 @@ public class Client extends Application {
 				break;
 			}
 			expLock.readLock().lock();
-			if (hasExplorer) {
+			if (!hasExplorer) {
 				expLock.readLock().unlock();
 				return;
 			}
@@ -346,6 +352,7 @@ public class Client extends Application {
 					return;
 				}
 				try {
+					//entity not seriliazble
 					List<Entity> ents = server.updateServer(my_X, my_Y, null, paneExp.getScaleX() > 0);
 
 					es.submit(() -> Platform.runLater(() -> {
@@ -362,6 +369,7 @@ public class Client extends Application {
 
 					if (e instanceof ConnectException)
 						notif.setText("Server unreachable");
+					e.printStackTrace();
 				}
 
 				String msg = "\nYou are at (in px):\n" + "X: [" + my_X + "]\n" + "Y: [" + my_Y + "]";
@@ -429,6 +437,7 @@ public class Client extends Application {
 
 			if (e instanceof ConnectException)
 				notif.setText("Server unreachable");
+			e.printStackTrace();
 		}
 
 	}
@@ -451,6 +460,14 @@ public class Client extends Application {
 			my_Y = 0;
 
 		} else {
+			if (inputName.getText().isEmpty()) {
+				notif.setText("NAME EMPTY");
+				btnAddExplorer.setDisable(false);
+				return;
+			}
+		
+			
+			
 			explore();
 			textTest.setText("In changemode!!!");
 			notif.setText("Exploring/... after explore()");
@@ -488,6 +505,12 @@ public class Client extends Application {
 			
 			try {
 				synchronized (this) {
+					
+					
+//					100 items multi choice
+//					8-11am WED, room to be announced
+//					*might change num of items
+//					
 					int PORT_NUM = Integer.parseInt(inputPort.getText());
 //					int PORT_NUM = 1099;
 //					INPUT PORT NUMBER ALSO
@@ -495,14 +518,19 @@ public class Client extends Application {
 					notif.setText(inputIP.getText());
 					if (registry == null)
 						throw new NotBoundException("No registry");
-					setServer((Server_Interface) registry.lookup("PUT THE SERVER/SERVICE NAME HERE"));
+					setServer((Server_Interface) registry.lookup("Server"));
+					
 				}
 				serverLock.readLock().lock();
 				Server_Interface server = getServer();
 				serverLock.readLock().unlock();
 				if(server == null)
 					throw new NotBoundException("Server not found");
+				
+				uName=inputName.getText();
+				
 				server.joinGame(my_X, my_Y, uName);
+				
 			} catch (NotBoundException e) {
 				e.printStackTrace();
 				notif.setText(e.getMessage());
@@ -569,6 +597,7 @@ public class Client extends Application {
 		fps *= 1_000_000_000.0 / curr;
 
 		fpsLabel.setText(String.format("FPS: %.2f", fps));
+		fpsLabel.setText(fpsLabel.getText()+"       "+ hasExplorer);
 		lastFPSTime = now;
 		fps = 0;
 
@@ -604,7 +633,7 @@ public class Client extends Application {
 
 		boolean isSeen = left <= x && right >= x && top >= y && bottom <= y;
 
-		circle.setVisible(hasExplorer && isSeen);
+//		circle.setVisible(hasExplorer && isSeen);
 
 	}
 

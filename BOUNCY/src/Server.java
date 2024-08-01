@@ -3,9 +3,11 @@ import java.rmi.Naming;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -42,7 +44,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 public class Server extends Application {
-    private static final int PORT_IN = 8888; //1099;
+    private static final int PORT_IN =9993; //1099;
 	private static final int PORT_OUT = 429;
 	private static final String prompt_n = "Number of Particles:";
     private static final String V_PX_S = "Velocity (px/s):";
@@ -87,7 +89,6 @@ public class Server extends Application {
     private Button btnAddByAngle = new Button(ADD_BY_ANGLE);
     private Button btnAddByVelocity = new Button(ADD_BY_VELOCITY);
 //    private Button btnAddExplorer = new Button(MODE_BTN_TXT);
-
 
     private GridPane gpDistance = new GridPane();
     private GridPane gpVelocity = new GridPane();
@@ -145,7 +146,7 @@ public class Server extends Application {
     public static void main(String[] args) {
 //    	HashMap<String,Integer> map = new HashMap<String,Integer>();
     	es = Executors.newFixedThreadPool(3);
-    	System.setProperty("java.rmi.server.hostname", "192.168.1.1");  
+    	System.setProperty("java.rmi.server.hostname", "localhost");  
     	Server_Interface worker = new Server_Interface() {
 
 			private List<Entity> getBalls(Bounds box) throws RemoteException, InterruptedException, ExecutionException {
@@ -181,18 +182,30 @@ public class Server extends Application {
 			public boolean joinGame(double x, double y, String name) throws RemoteException {
 				// TODO Auto-generated method stub
 //				StackPane spExplorer = new StackPane();
-//		      The sprite
+				boolean success = false;
 				if(name == null) return false;
 				else if (name.isEmpty())return false;
 				Pane paneExp = new Pane();
-		//Image of sprite
+
 				paneExp.relocate(x, y);
 				paneExp.setBackground(bgSprite);
 				paneExp.setId(name);
-//				spExplorer.setPrefSize(X_MAX, Y_MAX);
 				paneExp.setMaxSize(4.99, 4.99);
-				//todo check if input is in bounds
-				return ballPane.getChildren().add(paneExp);
+				FutureTask<Boolean> t= new FutureTask<Boolean>(new Callable<Boolean>() {
+
+					@Override
+					public Boolean call() throws Exception {
+						// TODO Auto-generated method stub
+						return ballPane.getChildren().add(paneExp);
+					}});
+				Platform.runLater(t);
+				try {
+					success = t.get();
+				} catch (InterruptedException | ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return success;
 				
 			}
 
@@ -227,19 +240,32 @@ public class Server extends Application {
 						Platform.runLater(()-> {
 
 								// TODO Auto-generated method stub
-								Node node = ballPane.getChildren()
-										.stream()
-										.filter(child->child.getId().equals(name))
-										.findFirst().get();
-								if(node == null||! (node instanceof Pane))
+							if (ballPane.getChildren().isEmpty())
+							{
+								return;	
+							}
+							if(name == null) {
+								return;
+							}
+							for(Node child: ballPane.getChildren()) {
+								if(!child.getId().equals(name)) {
+									continue;
+								}
+								if(child == null)
 									return;
-								Pane player = (Pane) node;
+								if(! (child instanceof Pane))
+									return;
+								Pane player = (Pane) child;
 								player.setLayoutX(x);
 								player.setLayoutY(y);
 								double facing  = player.getScaleX(); 
 								if(face_right ^ facing>=0) {
 									player.setScaleX(-facing);
 								}
+								return;
+							}
+								
+								
 								
 							}
 						
@@ -259,20 +285,17 @@ public class Server extends Application {
 		};
 		try {
 //			Naming.rebind("rmi://localhost:5000/game", worker);
-			LocateRegistry.createRegistry(PORT_IN);
+			Registry registry = LocateRegistry.createRegistry(PORT_IN);
 			Remote obj = UnicastRemoteObject.exportObject(worker,0);
 //			Naming.rebind("Server", obj);
 			
 //            Naming.rebind("//"+url+":"+port+"/undercover", serverGame);
-			Naming.rebind("Server", obj);
+			registry.rebind("Server", obj);
             System.out.println("Server running at //" + obj.toString() + ":" + PORT_IN);
 
 //
 //            Naming.rebind("rmi://localhost:1099/master", worker);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}        launch(args);

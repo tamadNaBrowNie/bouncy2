@@ -1,5 +1,6 @@
+import java.io.Serializable;
 
-public class Entity {
+public class Entity implements Serializable{
 private double x,y,size;
 private Type type;
 private boolean isRight;

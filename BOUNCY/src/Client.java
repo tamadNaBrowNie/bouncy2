@@ -437,7 +437,8 @@ public class Client extends Application {
 	private void changeMode() throws RemoteException {
 
 		setExploring(!hasExplorer);
-		
+		notif.setText("In changemode");
+
 		if (!hasExplorer) {
 			ballPane.setScaleX(1);
 			ballPane.setScaleY(1);
@@ -451,6 +452,9 @@ public class Client extends Application {
 
 		} else {
 			explore();
+			textTest.setText("In changemode!!!");
+			notif.setText("Exploring/... after explore()");
+
 		}
 		expLock.readLock().lock();
 		inputXexp.setVisible(!hasExplorer);
@@ -459,12 +463,14 @@ public class Client extends Application {
 		btnAddExplorer.setDisable(false);
 		btnAddExplorer.setText((hasExplorer) ? LEAVE_TXT : ENTRY_TXT);
 		expLock.readLock().unlock();
+		textTest.setText("In changemode (AFTER)!!!");
+
 	}
 
 	private void explore() throws AccessException, RemoteException {
 		try {
 
-			notif.setText("");
+			notif.setText("Exploring/...");
 			double ex_X = Double.parseDouble(inputXexp.getText());
 			double ex_Y = Double.parseDouble(inputYexp.getText());
 			if (ex_X > X_MAX || ex_X < 0 || ex_Y > Y_MAX || ex_Y < 0)
@@ -485,7 +491,8 @@ public class Client extends Application {
 					int PORT_NUM = Integer.parseInt(inputPort.getText());
 //					int PORT_NUM = 1099;
 //					INPUT PORT NUMBER ALSO
-					registry = LocateRegistry.getRegistry("PUT THE IP/URL HERE", PORT_NUM);
+					registry = LocateRegistry.getRegistry(inputIP.getText(), PORT_NUM);
+					notif.setText(inputIP.getText());
 					if (registry == null)
 						throw new NotBoundException("No registry");
 					setServer((Server_Interface) registry.lookup("PUT THE SERVER/SERVICE NAME HERE"));
@@ -500,10 +507,11 @@ public class Client extends Application {
 				e.printStackTrace();
 				notif.setText(e.getMessage());
 			}
-			} catch (NumberFormatException e) {
-				notif.setText("Invalid Explorer coordinates.\n");
-				setExploring(false);
-			}
+		} catch (NumberFormatException e) {
+			notif.setText("Invalid Explorer coordinates.\n");
+			setExploring(false);
+			//addexplorer fire here	
+		}
 	}
 
 	private void makeFrame() {

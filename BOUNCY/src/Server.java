@@ -43,8 +43,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-public class Server extends Application {
-    private static final int PORT_IN =9993; //1099;
+public class Server extends Application { //1099;
 	private static final int PORT_OUT = 429;
 	private static final String prompt_n = "Number of Particles:";
     private static final String V_PX_S = "Velocity (px/s):";
@@ -149,27 +148,41 @@ public class Server extends Application {
     	System.setProperty("java.rmi.server.hostname", "localhost");  
     	Server_Interface worker = new Server_Interface() {
 
-			private List<Entity> getBalls(Bounds box) throws RemoteException, InterruptedException, ExecutionException {
+    		private List<Entity> getBalls(double x, double y, int width, int height,String name) throws RemoteException, InterruptedException, ExecutionException {
 //				List <Entity> entities = new ArrayList<Entity>();
 				FutureTask<List<Entity>> t = new FutureTask<List<Entity>>(new Callable<List<Entity>>(){
 
 						@Override
 						public List<Entity> call() throws Exception {
 							
+							
 							List <Entity> entities = new ArrayList<Entity>();
-							entities= ballPane.getChildren().filtered(ent->box.contains(ent.getBoundsInParent()))
+							entities= ballPane.getChildren().filtered(ent->{
+								double w_h=width*0.5, h_h =  height*0.5, y2 = 720-y;
+								double lX  = ent.getLayoutX(),lY  =ent.getLayoutY();
+								boolean named = (ent.getId() ==null)?false
+										:ent.getId().equals(name);
+								return !named&&(lX>=  x-w_h && lX<=x+w_h&&lY>=y2-h_h&&lY<= y2) ;
+							})
 									.stream()
 									.map(ent->toEntity(ent))
 									.collect(Collectors.toList());
 //							ffs why won't they let me serialize this?
 //							FINE I WILL JUST GET THE COORDINATES AND THE TYPE
+							
 							return entities;
 						}
 
 						private Entity toEntity(Node ent) {
-							return new Entity(ent.getLayoutX(),
+							return  (ent instanceof Circle)
+									?
+									new Entity(ent.getLayoutX(),
 									ent.getLayoutY(),ent.getBoundsInParent().getHeight(),
-									(ent instanceof Circle)?Type.BALL:Type.EXP,ent.getScaleX()>0);
+									Type.BALL,ent.getScaleX()>0)
+									:
+										new Entity(ent.getLayoutX(),
+									ent.getLayoutY(),ent.getBoundsInParent().getHeight(),
+									Type.EXP,ent.getScaleX()>0,ent.getId());
 						}
 						
 					});
@@ -187,17 +200,30 @@ public class Server extends Application {
 				else if (name.isEmpty())return false;
 				Pane paneExp = new Pane();
 
-				paneExp.relocate(x, y);
-				paneExp.setBackground(bgSprite);
+				paneExp.setLayoutX(x);
+				paneExp.setLayoutY(720-y);
+//				paneExp.setBackground(bgSprite);
+				paneExp.setStyle(
+              // "-fx-background-color: white;"+
+              "-fx-border-color: blue;" + // Border color
+                      "-fx-border-width: 1px;" // Border width
+      );
 				paneExp.setId(name);
 				paneExp.setMaxSize(4.99, 4.99);
+				paneExp.setScaleX(100);
+				paneExp.setScaleY(100);
 				FutureTask<Boolean> t= new FutureTask<Boolean>(new Callable<Boolean>() {
 
+					
+				
 					@Override
 					public Boolean call() throws Exception {
+						System.out.println(name+" is JOINING");
+						ballPane.getChildren().add(paneExp);
 						// TODO Auto-generated method stub
-						return ballPane.getChildren().add(paneExp);
+						return true;
 					}});
+				
 				Platform.runLater(t);
 				try {
 					success = t.get();
@@ -218,7 +244,7 @@ public class Server extends Application {
 						// TODO Auto-generated method stub
 						if(name == null) return null;
 						else if (name.isEmpty()) return null;
-						return ballPane.getChildren().removeIf(node->node.getId().equalsIgnoreCase(name));
+						return ballPane.getChildren().removeIf(node->(node instanceof Pane && node.getId() != null)? node.getId().equals(name):false);
 					}});
 				try {
 					es.execute(()->{
@@ -235,9 +261,9 @@ public class Server extends Application {
 			public void updatePos(double x, double y, String name, boolean face_right) throws InterruptedException, ExecutionException {
 				// TODO Auto-generated method stub
 
-
 					es.submit(()->
 						Platform.runLater(()-> {
+							System.out.print("NAME: "+name+" XY:"+x+" "+y);
 
 								// TODO Auto-generated method stub
 							if (ballPane.getChildren().isEmpty())
@@ -257,7 +283,7 @@ public class Server extends Application {
 									return;
 								Pane player = (Pane) child;
 								player.setLayoutX(x);
-								player.setLayoutY(y);
+								player.setLayoutY(720-y);
 								double facing  = player.getScaleX(); 
 								if(face_right ^ facing>=0) {
 									player.setScaleX(-facing);
@@ -276,12 +302,15 @@ public class Server extends Application {
 			@Override
 			public List<Entity> updateServer(double x, double y, String name, boolean face_right) throws RemoteException, InterruptedException, ExecutionException {
 				// TODO Auto-generated method stub
+				
 				this.updatePos(x, y, name, face_right);
-				BoundingBox box = new BoundingBox(x, y, 33, 19);
-				return this.getBalls(box);
+//				BoundingBox box = new BoundingBox();
+				return this.getBalls(x, y, 33, 19,name);
 				
 				
 			}
+
+			
 		};
 		try {
 //			Naming.rebind("rmi://localhost:5000/game", worker);
@@ -306,7 +335,8 @@ public class Server extends Application {
 			e.printStackTrace();
 		}
     }
-    
+
+   private static final int PORT_IN =8818;
     public void start(Stage primaryStage) {
 //    	inputYexp.managedProperty().bind(inputYexp.visibleProperty());
 //    	inputXexp.managedProperty().bind(inputXexp.visibleProperty());
@@ -376,11 +406,11 @@ public class Server extends Application {
 
         paneLeft.addRow(0, paneTab);
 //        paneLeft.addRow(1, gpExplorer);
-        ballPane.setStyle(
-                // "-fx-background-color: white;"+
-                "-fx-border-color: blue;" + // Border color
-                        "-fx-border-width: 1px;" // Border width
-        );
+//        ballPane.setStyle(
+//                // "-fx-background-color: white;"+
+//                "-fx-border-color: blue;" + // Border color
+//                        "-fx-border-width: 1px;" // Border width
+//        );
 
 //        // private Pane camera = new StackPane();//making this stack pane is a bag idea
         //        String mapImgFile = ".\\map.jpg";
@@ -409,14 +439,14 @@ public class Server extends Application {
 
         // -------------------
 
-        paneRight.setStyle(
-        		"-fx-border-color: blue;" + // Border color
-                "-fx-border-width: 3px;" +
-                "-fx-background-image:url('map.jpg');"+
-                "-fx-background-repeat: no-repeat;"+
-                "-fx-border-color: grey;" + // Border color
-                "-fx-border-width: 5px;" // Border width
-        );
+//        paneRight.setStyle(
+//        		"-fx-border-color: blue;" + // Border color
+//                "-fx-border-width: 3px;" +
+//                "-fx-background-image:url('map.jpg');"+
+//                "-fx-background-repeat: no-repeat;"+
+//                "-fx-border-color: grey;" + // Border color
+//                "-fx-border-width: 5px;" // Border width
+//        );
 
         gpContainer.addRow(0, paneLeft, separatorV, paneRight);
         paneContainer.getChildren().addAll(gpContainer, gpDebug);

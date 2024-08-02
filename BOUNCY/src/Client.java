@@ -43,7 +43,7 @@ import javafx.stage.Stage;
 public class Client extends Application {
 	private static final double DY = 38.34;
 	private static final double DX = 38.34;
-	private static final double SIZ_OTHER = 4.99;
+	private static final double SIZ_OTHER = 10;
 	private static final int RAD = 12;
 //    private static final String prompt_n = "Number of Particles:";
 //    private static final String V_PX_S = "Velocity (px/s):";
@@ -52,8 +52,8 @@ public class Client extends Application {
 //    private static final String ADD_BY_DISTANCE = "Add by Distance";
 //	private List<Particle> ball_buf = new ArrayList<Particle>();
 	// private Canvas canvas= new Canvas(X_MAX, Y_MAX);;
-	private Label fpsLabel = new Label("FPS: 0");;
-	private long lastFPSTime = System.nanoTime();;
+	private Label fpsLabel = new Label("FPS: 0");
+	private long lastFPSTime = System.nanoTime();
 	// private int frameCount = 0;
 	private double fps = 0;
 	// public static ExecutorService es;
@@ -111,7 +111,7 @@ public class Client extends Application {
 
 	private GridPane gpContainer = new GridPane();
 	private GridPane paneLeft = new GridPane();
-	private Pane paneExp = new Pane();
+	private Pane paneExp = new StackPane();
 	// private BooleanBinding keyPressed = s_key.or(a_key).or(w_key).or(d_key);
 
 	// private StackPane spMiniMap = new StackPane();
@@ -129,7 +129,7 @@ public class Client extends Application {
 //    client coords.
 	private double my_X = 0, my_Y = 0;
 	private String uName = "";
-	private Background bgSprite;
+	private Background bgSprite = null;
 
 	@Override
 	public void init() throws Exception {
@@ -200,28 +200,35 @@ public class Client extends Application {
 		
 		paneLeft.addRow(0, gpExplorer);
 		
+		
+		
+//		
 		ballPane.setStyle("-fx-border-color: blue;" + // Border color
 				"-fx-border-width: 1px;" // Border width
 		);
+		
+		Circle cir = new Circle(RAD, Paint.valueOf("Red"));
+		cir.setLayoutX(0);
+		cir.setLayoutY(0);
+//		ballPane.getChildren().add(cir);
 
 		String bgFront = ".\\amongus.png";
 		Image bgImage = new Image(bgFront);
 		Pane pSprite = new Pane();
-		ballPane.setStyle("-fx-border-color: blue;" + // Border color
-				"-fx-border-width: 3px;" + "-fx-background-image:url('map.jpg');" + "-fx-background-repeat: no-repeat;"
-				+ " -fx-background-size: cover;" + " -fx-background-position: center center;"); // Border width
+//		ballPane.setStyle("-fx-border-color: blue;" + // Border color
+//				"-fx-border-width: 3px;" + "-fx-background-image:url('map.jpg');" + "-fx-background-repeat: no-repeat;"
+//				+ " -fx-background-size: cover;" + " -fx-background-position: center center;"); // Border width
 
 		pSprite.setMaxSize(30, 30);
 
-		paneRight.setStyle("-fx-border-color: grey;" + // Border color
-				"-fx-border-width: 5px;" // Border width
-		);
+//		paneRight.setStyle("-fx-border-color: grey;" + // Border color
+//				"-fx-border-width: 5px;" // Border width
+//		);
 
 		gpContainer.addRow(0, paneLeft, separatorV, paneRight);
 		paneContainer.getChildren().addAll(gpContainer, gpDebug);
 
 //        This is when we add the ballPane to screen
-		paneRight.getChildren().add(ballPane);
 
 //      Holds the sprite
 		StackPane spExplorer = new StackPane();
@@ -332,36 +339,46 @@ public class Client extends Application {
 		lastFPSTime = System.nanoTime();
 
 		AnimationTimer ticer = new AnimationTimer() {
-			boolean clear = true;
 
 			@Override
 
 			public void handle(long now) {
 //				fast negate
-				clear ^= true;
+//				clear ^= true;
 				fps++;
 				expLock.readLock().lock();
 				Server_Interface server = getServer();
 				expLock.readLock().unlock();
-				if (clear) {
-					Platform.runLater(() -> {
-						ballPane.getChildren().clear();
-					});
-					return;
-				} else if (server == null) {
+				 if (server == null) {
 					return;
 				}
 				try {
-					//entity not seriliazble
-					List<Entity> ents = server.updateServer(my_X, my_Y, null, paneExp.getScaleX() > 0);
+					fpsLabel.setText(fpsLabel.getText()+ my_X  + "ticing   " + my_Y);
+//					fpsLabel.setText(fpsLabel.getText()+"       "+ hasExplorer);
 
+					List<Entity> ents = server.updateServer(my_X, my_Y, uName, paneExp.getScaleX() > 0);
+					
 					es.submit(() -> Platform.runLater(() -> {
-						List<Node> nodes = ents.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
-						drawBalls(nodes, ballPane);
+					ballPane.getChildren().clear();
+						List<Node> nodes =ents.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
+//						System.out.println(nodes);
+//						ballPane.getChildren().clear();
+						drawBalls(nodes); 
+//					for(Entity entity: ents) {
+//						Node node =toNode(entity);
+//						boolean added =ballPane.getChildren().add(node);
+//						if(added)
+//							
+//							{String e= "\nnode: "+node.getLayoutX();
+//						
+//						textTest.setText(textTest.getText()+e);
+//						}
+//					}
+						drawBalls(nodes);
 						makeFrame();
 					})
 
-					);
+					).get();
 
 				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
@@ -385,12 +402,19 @@ public class Client extends Application {
 			}
 
 		};
-		Thread anims = new Thread(() -> ticer.start());
-		anims.start();
+//		Thread anims = new Thread(() -> ticer.start());
+//		anims.start();
+		ticer.start();
+		paneRight.getChildren().add(ballPane);
+
 	}
 
 	private Node toNode(Entity ent) {
 		Node entity = null;
+		if(ent == null)
+			return null;
+//		Platform.runLater(()->fpsLabel.setText(fpsLabel.getText()+ent.toString()));
+		
 		switch (ent.getType()) {
 		case BALL:
 			entity = new Circle(RAD, Paint.valueOf("Red"));
@@ -398,18 +422,32 @@ public class Client extends Application {
 //			entity.setLayoutY(ent.getY());
 			break;
 		case EXP:
-			entity = new Pane();
-			// Image of sprite
-			((Region) entity).setBackground(bgSprite);
-			((Region) entity).setMaxSize(SIZ_OTHER, SIZ_OTHER);
-
+			//todo test for why exp not showing
+//			entity = new Circle(1, Paint.valueOf("Blue"));
+			Pane exp = new Pane();
+//			 Image of sprite
+//			exp.setBackground(bgSprite);
+			exp.setMaxSize(SIZ_OTHER, SIZ_OTHER);
+			exp.setStyle(
+		              // "-fx-background-color: white;"+
+		              "-fx-border-color: blue;" + // Border color
+		                      "-fx-border-width: 1px;" // Border width
+		      );
+			entity=exp;
 			break;
 		default:
+			notif.setText("Nothing foound");
 			break;
 
 		}
 		if (entity != null) {
-			entity.relocate(ent.getX(), ent.getY());
+			ent.setName("ENTITY BALL");
+			entity.setId(ent.name);
+			entity.setLayoutX(ent.getX());
+			entity.setLayoutY( ent.getY());
+			entity.setVisible(true);
+			
+			
 		}
 		return entity;
 	}
@@ -446,7 +484,7 @@ public class Client extends Application {
 	private void changeMode() throws RemoteException {
 
 		setExploring(!hasExplorer);
-		notif.setText("In changemode");
+//		notif.setText("In changemode");
 
 		if (!hasExplorer) {
 			ballPane.setScaleX(1);
@@ -469,8 +507,8 @@ public class Client extends Application {
 			
 			
 			explore();
-			textTest.setText("In changemode!!!");
-			notif.setText("Exploring/... after explore()");
+//			textTest.setText("In changemode!!!");
+//			notif.setText("Exploring/... after explore()");
 
 		}
 		expLock.readLock().lock();
@@ -480,7 +518,7 @@ public class Client extends Application {
 		btnAddExplorer.setDisable(false);
 		btnAddExplorer.setText((hasExplorer) ? LEAVE_TXT : ENTRY_TXT);
 		expLock.readLock().unlock();
-		textTest.setText("In changemode (AFTER)!!!");
+//		textTest.setText("In changemode (AFTER)!!!");
 
 	}
 
@@ -576,12 +614,25 @@ public class Client extends Application {
 //		mov_balls(balls, Y_off, X_off, cen_X,cen_Y);
 	}
 
-	private void drawBalls(List<Node> nodes, Pane ballPane) {
+	private void drawBalls(List<Node> nodes) {
 		try {
+			
+			
+			//TODO NOT GETTTING THE UPDATED X AND Y OF THE OTHER  EXPLORERS
 //			List<Circle> circles = ball_buf.parallelStream().map(Particle::draw).collect(Collectors.toList());
 //			ballPane.getChildren().clear();
-			ballPane.getChildren().addAll(nodes);
-
+//			textTest.setText(nodes.toString());
+			ballPane.getChildren().clear();
+			ballPane.getChildren().setAll(nodes);
+			
+//			String names = "n_";
+//			ballPane.getChildren().forEach(node->names.concat(node.getId()+"\n"));
+//			fpsLabel.setText(fpsLabel.getText() +" NAME: "+names+"           TIMENOW: " + System.nanoTime()/1000000 +" -> SIZE:");
+			//TODO
+			//display return val^
+			//add also system time sa string
+			
+			
 //			ball_buf.clear();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -597,7 +648,6 @@ public class Client extends Application {
 		fps *= 1_000_000_000.0 / curr;
 
 		fpsLabel.setText(String.format("FPS: %.2f", fps));
-		fpsLabel.setText(fpsLabel.getText()+"       "+ hasExplorer);
 		lastFPSTime = now;
 		fps = 0;
 

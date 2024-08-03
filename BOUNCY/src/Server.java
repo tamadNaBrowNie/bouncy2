@@ -210,8 +210,8 @@ public class Server extends Application { //1099;
       );
 				paneExp.setId(name);
 				paneExp.setMaxSize(4.99, 4.99);
-				paneExp.setScaleX(100);
-				paneExp.setScaleY(100);
+				paneExp.setScaleX(20);
+				paneExp.setScaleY(20);
 				FutureTask<Boolean> t= new FutureTask<Boolean>(new Callable<Boolean>() {
 
 					
@@ -336,7 +336,7 @@ public class Server extends Application { //1099;
 		}
     }
 
-   private static final int PORT_IN =8818;
+   private static final int PORT_IN =8887;
     public void start(Stage primaryStage) {
 //    	inputYexp.managedProperty().bind(inputYexp.visibleProperty());
 //    	inputXexp.managedProperty().bind(inputXexp.visibleProperty());

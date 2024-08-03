@@ -322,7 +322,7 @@ public class Server extends Application { //1099;
 		}
     }
 
-   private static final int PORT_IN =8885;
+   private static final int PORT_IN =8881;
     public void start(Stage primaryStage) {
 //    	inputYexp.managedProperty().bind(inputYexp.visibleProperty());
 //    	inputXexp.managedProperty().bind(inputXexp.visibleProperty());
@@ -339,7 +339,11 @@ public class Server extends Application { //1099;
         ballPane.setMinWidth(X_MAX);
         ballPane.setLayoutX(0);
         ballPane.setLayoutY(0);
-
+        ballPane.setStyle(             
+           		"-fx-background-image:url('bg_grid.png');"+
+                   "-fx-border-color: blue;" + // Border color
+                           "-fx-border-width: 1px;" // Border width
+           );
         gpDebug.addRow(0, fpsLabel);
 //        gpDebug.addRow(1, textTest);
 //        gpDebug.addRow(2, notif);
@@ -392,11 +396,7 @@ public class Server extends Application { //1099;
 
         paneLeft.addRow(0, paneTab);
 //        paneLeft.addRow(1, gpExplorer);
-       ballPane.setStyle(             
-       		"-fx-background-image:url('bg_grid.jpg') "+
-               "-fx-border-color: blue;" + // Border color
-                       "-fx-border-width: 1px;" // Border width
-       );
+
 
 //        // private Pane camera = new StackPane();//making this stack pane is a bag idea
         //        String mapImgFile = ".\\map.jpg";

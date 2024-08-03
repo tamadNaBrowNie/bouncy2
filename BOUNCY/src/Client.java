@@ -203,7 +203,7 @@ public class Client extends Application {
 		
 		
 //		
-		ballPane.setStyle("-fx-border-color: blue;" + // Border color
+		ballPane.setStyle("-fx-border-color: yellow;" + // Border color
 				"-fx-border-width: 1px;" // Border width
 		);
 		
@@ -212,8 +212,8 @@ public class Client extends Application {
 		cir.setLayoutY(0);
 //		ballPane.getChildren().add(cir);
 
-		String bgFront = ".\\amongus.png";
-		Image bgImage = new Image(bgFront);
+//		String bgFront = ".\\amongus.png";
+//		Image bgImage = new Image(bgFront);
 		Pane pSprite = new Pane();
 //		ballPane.setStyle("-fx-border-color: blue;" + // Border color
 //				"-fx-border-width: 3px;" + "-fx-background-image:url('map.jpg');" + "-fx-background-repeat: no-repeat;"
@@ -233,10 +233,17 @@ public class Client extends Application {
 //      Holds the sprite
 		StackPane spExplorer = new StackPane();
 
-		BackgroundImage sprite = new BackgroundImage(bgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
-				null, new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
-		bgSprite = new Background(sprite);
-		paneExp.setBackground(bgSprite);
+//		BackgroundImage sprite = new BackgroundImage(bgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+//				null, new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
+//		bgSprite = new Background(sprite);
+//		paneExp.setBackground(bgSprite);
+		
+		paneExp.setStyle(
+	              // "-fx-background-color: white;"+
+	              "-fx-border-color: blue;" + // Border color
+	                      "-fx-border-width: 1px;" // Border width   
+				);
+		
 		spExplorer.getChildren().add(paneExp);
 
 		spExplorer.setLayoutX(58);

@@ -262,11 +262,12 @@ public class Server extends Application { //1099;
 								return;
 							}
 							for(Node child: ballPane.getChildren()) {
-								if(!child.getId().equals(name)) {
-									continue;
-								}
+                                
 								if(! (child instanceof Pane))
-									return;
+                                continue;
+								if(!child.getId().equals(name)) 
+									continue;
+								
 								Pane player = (Pane) child;
 								player.setLayoutX(x);
 								player.setLayoutY(720-y);

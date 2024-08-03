@@ -342,6 +342,8 @@ public class Client extends Application {
 		System.nanoTime();
 		lastFPSTime = System.nanoTime();
 
+		paneRight.getChildren().add(ballPane);
+		
 		AnimationTimer ticer = new AnimationTimer() {
 			private boolean clear = true;
 			@Override
@@ -412,7 +414,6 @@ public class Client extends Application {
 //		Thread anims = new Thread(() -> ticer.start());
 //		anims.start();
 		ticer.start();
-		paneRight.getChildren().add(ballPane);
 
 	}
 

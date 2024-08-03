@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -353,46 +354,44 @@ public class Client extends Application {
 					return;
 				}
 				try {
+
+					if(clear)
+						{
+						Platform.runLater(() -> 
+						ballPane.getChildren().clear()
+						);return;
+						}
 					fpsLabel.setText(fpsLabel.getText()+ my_X  + "ticing   " + my_Y);
-//					fpsLabel.setText(fpsLabel.getText()+"       "+ hasExplorer);
+					List<Node> nodes = es.submit(new Callable<List<Node>>() {
 
-					List<Entity> ents = server.updateServer(my_X, my_Y, uName, paneExp.getScaleX() > 0);
-					
-					es.submit(() -> Platform.runLater(() -> {
-						if(clear)
+						@Override
+						public List<Node> call() throws Exception {
+							// TODO Auto-generated method stub\
+							try
 							{
-							ballPane.getChildren().clear();
-							return;
+								List<Entity> ents=	  server.updateServer(my_X, my_Y, uName, paneExp.getScaleX() > 0);
+								return ents.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
+							}catch (RemoteException e) {
+
+								if (e instanceof ConnectException)
+									notif.setText("Server unreachable");
+								e.printStackTrace();
 							}
-						List<Node> nodes =ents.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
-						System.out.println(nodes);
-//						ballPane.getChildren().clear();
-						drawBalls(nodes); 
-//					for(Entity entity: ents) {
-//						Node node =toNode(entity);
-//						boolean added =ballPane.getChildren().add(node);
-//						if(added)
-//							
-//							{String e= "\nnode: "+node.getLayoutX();
-//						
-//						textTest.setText(textTest.getText()+e);
-//						}
-//					}
-//						drawBalls(nodes);
-//						makeFrame();
-					})
 
-					).get();
-
+							return null;
+						}
+						
+					}).get();
+					
+					Platform.runLater(() -> 
+					drawBalls(nodes)); 
+				
+				
+					
+					
 				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
-				} catch (RemoteException e) {
-
-					if (e instanceof ConnectException)
-						notif.setText("Server unreachable");
-					e.printStackTrace();
-				}
-
+				} 
 				String msg = "\nYou are at (in px):\n" + "X: [" + my_X + "]\n" + "Y: [" + my_Y + "]";
 
 				notif.setText((hasExplorer) ? msg : "");
@@ -594,22 +593,9 @@ public class Client extends Application {
 		try {
 			
 			
-			//TODO NOT GETTTING THE UPDATED X AND Y OF THE OTHER  EXPLORERS
-//			List<Circle> circles = ball_buf.parallelStream().map(Particle::draw).collect(Collectors.toList());
-//			ballPane.getChildren().clear();
-//			textTest.setText(nodes.toString());
-			ballPane.getChildren().clear();
-			ballPane.getChildren().setAll(nodes);
+
+			ballPane.getChildren().addAll(nodes);
 			
-//			String names = "n_";
-//			ballPane.getChildren().forEach(node->names.concat(node.getId()+"\n"));
-//			fpsLabel.setText(fpsLabel.getText() +" NAME: "+names+"           TIMENOW: " + System.nanoTime()/1000000 +" -> SIZE:");
-			//TODO
-			//display return val^
-			//add also system time sa string
-			
-			
-//			ball_buf.clear();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

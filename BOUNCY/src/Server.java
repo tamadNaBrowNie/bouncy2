@@ -145,7 +145,7 @@ public class Server extends Application { //1099;
     public static void main(String[] args) {
 //    	HashMap<String,Integer> map = new HashMap<String,Integer>();
     	es = Executors.newFixedThreadPool(3);
-    	System.setProperty("java.rmi.server.hostname", "localhost");  
+    	  
     	Server_Interface worker = new Server_Interface() {
 
     		private List<Entity> getBalls(double x, double y, int width, int height,String name) throws RemoteException, InterruptedException, ExecutionException {
@@ -162,7 +162,7 @@ public class Server extends Application { //1099;
 								double lX  = ent.getLayoutX(),lY  =ent.getLayoutY();
 								boolean named = (ent.getId() ==null)?false
 										:ent.getId().equals(name);
-								return !named&&(lX>=  x-w_h && lX<=x+w_h&&lY>=y2-h_h&&lY<= y2) ;
+								return !named&&(lX>=  x-w_h && lX<=x+w_h&&lY>=y2-h_h&&lY<= y2+h_h) ;
 							})
 									.stream()
 									.map(ent->toEntity(ent))

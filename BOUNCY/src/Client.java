@@ -549,11 +549,13 @@ public class Client extends Application {
 //					8-11am WED, room to be announced
 //					*might change num of items
 //					
+					String ip= inputIP.getText();
+					System.setProperty("java.rmi.server.hostname", ip);
 					int PORT_NUM = Integer.parseInt(inputPort.getText());
 //					int PORT_NUM = 1099;
 //					INPUT PORT NUMBER ALSO
-					registry = LocateRegistry.getRegistry(inputIP.getText(), PORT_NUM);
-					notif.setText(inputIP.getText());
+					registry = LocateRegistry.getRegistry(ip, PORT_NUM);
+					notif.setText(ip);
 					if (registry == null)
 						throw new NotBoundException("No registry");
 					setServer((Server_Interface) registry.lookup("Server"));

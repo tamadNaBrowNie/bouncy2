@@ -1,5 +1,3 @@
-import java.net.MalformedURLException;
-import java.rmi.Naming;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -7,7 +5,6 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -18,8 +15,6 @@ import java.util.stream.Collectors;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.geometry.BoundingBox;
-import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -32,19 +27,13 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 public class Server extends Application { //1099;
-	private static final int PORT_OUT = 429;
 	private static final String prompt_n = "Number of Particles:";
     private static final String V_PX_S = "Velocity (px/s):";
     private static final String ADD_BY_ANGLE = "Add by Angle";
@@ -97,16 +86,16 @@ public class Server extends Application { //1099;
     private GridPane gpEndXY = new GridPane();
     private GridPane gpStartEndVelocity = new GridPane();
     private GridPane gpStartEndAngle = new GridPane();
-    private static final Image bgImage = new Image(".\\amongus.png");
+//    private static final Image bgImage = new Image(".\\amongus.png");
 //     		, bgImageFlipped = new Image(".\\amongusflipped.png");
 
-	private static final BackgroundImage sprite = new BackgroundImage(Server.bgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, null,
-					new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
+//	private static final BackgroundImage sprite = new BackgroundImage(Server.bgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, null,
+//					new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
 //	flipSprite = new BackgroundImage(Server.bgImageFlipped, BackgroundRepeat.NO_REPEAT,
 //			BackgroundRepeat.NO_REPEAT, null,
 //			new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)),
 //
-	private static final Background bgSprite = new Background(sprite);
+//	private static final Background bgSprite = new Background(sprite);
 //			, bgFlip = new Background(flipSprite);
 
 //    Exp stuff?
@@ -193,7 +182,7 @@ public class Server extends Application { //1099;
 
 			@Override
 			public boolean joinGame(double x, double y, String name) throws RemoteException {
-				// TODO Auto-generated method stub
+				
 //				StackPane spExplorer = new StackPane();
 				boolean success = false;
 				if(name == null) return false;
@@ -220,7 +209,7 @@ public class Server extends Application { //1099;
 					public Boolean call() throws Exception {
 						System.out.println(name+" is JOINING");
 						ballPane.getChildren().add(paneExp);
-						// TODO Auto-generated method stub
+						//
 						return true;
 					}});
 				
@@ -228,7 +217,6 @@ public class Server extends Application { //1099;
 				try {
 					success = t.get();
 				} catch (InterruptedException | ExecutionException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				return success;
@@ -241,7 +229,7 @@ public class Server extends Application { //1099;
 
 					@Override
 					public Boolean call() throws Exception {
-						// TODO Auto-generated method stub
+						//
 						if(name == null) return null;
 						else if (name.isEmpty()) return null;
 						return ballPane.getChildren().removeIf(node->(node instanceof Pane && node.getId() != null)? node.getId().equals(name):false);
@@ -252,20 +240,20 @@ public class Server extends Application { //1099;
 					});
 					task.get();
 				} catch (InterruptedException | ExecutionException e) {
-					// TODO Auto-generated catch block
+				
 					e.printStackTrace();
 				}
 				
 			}
 
 			public void updatePos(double x, double y, String name, boolean face_right) throws InterruptedException, ExecutionException {
-				// TODO Auto-generated method stub
+				//
 
 					es.submit(()->
 						Platform.runLater(()-> {
 							System.out.print("NAME: "+name+" XY:"+x+" "+y);
 
-								// TODO Auto-generated method stub
+								//
 							if (ballPane.getChildren().isEmpty())
 							{
 								return;	
@@ -277,8 +265,6 @@ public class Server extends Application { //1099;
 								if(!child.getId().equals(name)) {
 									continue;
 								}
-								if(child == null)
-									return;
 								if(! (child instanceof Pane))
 									return;
 								Pane player = (Pane) child;
@@ -300,11 +286,10 @@ public class Server extends Application { //1099;
 			}
 
 			@Override
-			public List<Entity> updateServer(double x, double y, String name, boolean face_right) throws RemoteException, InterruptedException, ExecutionException {
-				// TODO Auto-generated method stub
+			public List<Entity> updateServer(double x, double y, String name, boolean face_right) throws RemoteException, InterruptedException, ExecutionException 
+			{
 				
 				this.updatePos(x, y, name, face_right);
-//				BoundingBox box = new BoundingBox();
 				return this.getBalls(x, y, 33, 19,name);
 				
 				
@@ -325,18 +310,18 @@ public class Server extends Application { //1099;
 //
 //            Naming.rebind("rmi://localhost:1099/master", worker);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
+		
 			e.printStackTrace();
 		}        launch(args);
         try {
 			es.shutdown();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
     }
 
-   private static final int PORT_IN =8887;
+   private static final int PORT_IN =8885;
     public void start(Stage primaryStage) {
 //    	inputYexp.managedProperty().bind(inputYexp.visibleProperty());
 //    	inputXexp.managedProperty().bind(inputXexp.visibleProperty());
@@ -406,11 +391,11 @@ public class Server extends Application { //1099;
 
         paneLeft.addRow(0, paneTab);
 //        paneLeft.addRow(1, gpExplorer);
-//        ballPane.setStyle(
-//                // "-fx-background-color: white;"+
-//                "-fx-border-color: blue;" + // Border color
-//                        "-fx-border-width: 1px;" // Border width
-//        );
+       ballPane.setStyle(             
+       		"-fx-background-image:url('bg_grid.jpg') "+
+               "-fx-border-color: blue;" + // Border color
+                       "-fx-border-width: 1px;" // Border width
+       );
 
 //        // private Pane camera = new StackPane();//making this stack pane is a bag idea
         //        String mapImgFile = ".\\map.jpg";
@@ -418,7 +403,6 @@ public class Server extends Application { //1099;
 //        Pane pSprite = new Pane();
 //        ballPane.setStyle(
 //        		
-//        		"-fx-background-image:map.jpg "
 //        		
 //        		);
 //        BackgroundSize siz = new BackgroundSize(

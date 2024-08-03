@@ -21,19 +21,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
+
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
@@ -129,7 +121,7 @@ public class Client extends Application {
 //    client coords.
 	private double my_X = 0, my_Y = 0;
 	private String uName = "";
-	private Background bgSprite = null;
+//	private Background bgSprite = null;
 
 	@Override
 	public void init() throws Exception {
@@ -203,9 +195,6 @@ public class Client extends Application {
 		
 		
 //		
-		ballPane.setStyle("-fx-border-color: yellow;" + // Border color
-				"-fx-border-width: 1px;" // Border width
-		);
 		
 		Circle cir = new Circle(RAD, Paint.valueOf("Red"));
 		cir.setLayoutX(0);
@@ -220,7 +209,10 @@ public class Client extends Application {
 //				+ " -fx-background-size: cover;" + " -fx-background-position: center center;"); // Border width
 
 		pSprite.setMaxSize(30, 30);
-
+		pSprite.setStyle("-fx-border-color: yellow;" + // Border color
+				"-fx-border-width: 1px;" // Border width
+		);
+		
 //		paneRight.setStyle("-fx-border-color: grey;" + // Border color
 //				"-fx-border-width: 5px;" // Border width
 //		);
@@ -346,12 +338,13 @@ public class Client extends Application {
 		lastFPSTime = System.nanoTime();
 
 		AnimationTimer ticer = new AnimationTimer() {
-
+			private boolean clear = true;
 			@Override
-
+			
 			public void handle(long now) {
 //				fast negate
-//				clear ^= true;
+				this.clear ^= true;
+				boolean clear = this.clear;
 				fps++;
 				expLock.readLock().lock();
 				Server_Interface server = getServer();
@@ -366,9 +359,13 @@ public class Client extends Application {
 					List<Entity> ents = server.updateServer(my_X, my_Y, uName, paneExp.getScaleX() > 0);
 					
 					es.submit(() -> Platform.runLater(() -> {
-					ballPane.getChildren().clear();
+						if(clear)
+							{
+							ballPane.getChildren().clear();
+							return;
+							}
 						List<Node> nodes =ents.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
-//						System.out.println(nodes);
+						System.out.println(nodes);
 //						ballPane.getChildren().clear();
 						drawBalls(nodes); 
 //					for(Entity entity: ents) {
@@ -381,8 +378,8 @@ public class Client extends Application {
 //						textTest.setText(textTest.getText()+e);
 //						}
 //					}
-						drawBalls(nodes);
-						makeFrame();
+//						drawBalls(nodes);
+//						makeFrame();
 					})
 
 					).get();
@@ -589,39 +586,9 @@ public class Client extends Application {
 		}
 	}
 
-	private void makeFrame() {
-		try {
-			es.submit(() ->
 
-			check_vis(ballPane.getChildren())).get();
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-	}
 
-	private void check_vis(List<Node> balls) {
-		final double w, h, s_x, s_y, Y_off, X_off, cen_X, cen_Y;
 
-		w = ballPane.getWidth() * 0.5;
-		h = ballPane.getHeight() * 0.5;
-		s_x = 1.0 / ballPane.getScaleX();
-		s_y = 1.0 / ballPane.getScaleY();
-
-		Y_off = h * s_y;
-		X_off = w * s_x;
-
-		cen_X = w - ballPane.getLayoutX() * s_x;
-		cen_Y = h - ballPane.getLayoutY() * s_y;
-
-		Platform.runLater(() -> {
-			expLock.readLock().lock();
-			balls.forEach(circle -> mov_ball(Y_off, X_off, cen_X, cen_Y, circle));
-			expLock.readLock().unlock();
-		});
-
-//		drawBalls();
-//		mov_balls(balls, Y_off, X_off, cen_X,cen_Y);
-	}
 
 	private void drawBalls(List<Node> nodes) {
 		try {
@@ -683,17 +650,17 @@ public class Client extends Application {
 		expLock.writeLock().unlock();
 	}
 
-	private void mov_ball(double Y_off, double X_off, double cen_X, double cen_Y, Node circle) {
-		double x = circle.getLayoutX(), y = circle.getLayoutY(), top, bottom, left, right;
-		top = cen_Y + Y_off;
-		bottom = cen_Y - Y_off;
-		left = cen_X - X_off;
-		right = cen_X + X_off;
+//	private void mov_ball(double Y_off, double X_off, double cen_X, double cen_Y, Node circle) {
+//		double x = circle.getLayoutX(), y = circle.getLayoutY(), top, bottom, left, right;
+//		top = cen_Y + Y_off;
+//		bottom = cen_Y - Y_off;
+//		left = cen_X - X_off;
+//		right = cen_X + X_off;
 
-		boolean isSeen = left <= x && right >= x && top >= y && bottom <= y;
+//		boolean isSeen = left <= x && right >= x && top >= y && bottom <= y;
 
 //		circle.setVisible(hasExplorer && isSeen);
 
-	}
+//	}
 
 }

@@ -139,7 +139,11 @@ public class Client extends Application {
 		ballPane.setMinWidth(X_MAX);
 		ballPane.setLayoutX(0);
 		ballPane.setLayoutY(0);
-
+		ballPane.setStyle(             
+           		"-fx-background-image:url('bg_grid.png');"+
+                   "-fx-border-color: blue;" + // Border color
+                           "-fx-border-width: 1px;" // Border width
+           );
 		gpDebug.addRow(0, fpsLabel);
 //		gpDebug.addRow(1, textTest);
 //		gpDebug.addRow(2, notif);

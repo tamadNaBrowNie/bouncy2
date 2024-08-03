@@ -196,7 +196,8 @@ public class Client extends Application {
 		gpExplorer.setMaxWidth(250);
 		
 		paneLeft.addRow(0, gpExplorer);
-		
+		paneRight.getChildren().add(ballPane);
+
 		
 		
 //		
@@ -342,7 +343,6 @@ public class Client extends Application {
 		System.nanoTime();
 		lastFPSTime = System.nanoTime();
 
-		paneRight.getChildren().add(ballPane);
 		
 		AnimationTimer ticer = new AnimationTimer() {
 			private boolean clear = true;

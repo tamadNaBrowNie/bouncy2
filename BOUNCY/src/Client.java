@@ -365,7 +365,7 @@ public class Client extends Application {
 						ballPane.getChildren().clear()
 						);return;
 						}
-					fpsLabel.setText(fpsLabel.getText()+ my_X  + "ticing   " + my_Y);
+//					fpsLabel.setText(fpsLabel.getText()+ my_X  + "ticing   " + my_Y);
 					List<Node> nodes = es.submit(new Callable<List<Node>>() {
 
 						@Override
@@ -443,7 +443,7 @@ public class Client extends Application {
 			entity=exp;
 			break;
 		default:
-			notif.setText("Nothing foound");
+			notif.setText("Nothing found");
 			break;
 
 		}

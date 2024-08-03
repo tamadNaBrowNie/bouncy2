@@ -207,7 +207,7 @@ public class Server extends Application { //1099;
 				
 					@Override
 					public Boolean call() throws Exception {
-						System.out.println(name+" is JOINING");
+						System.out.println(name+" is JOINING\n");
 						ballPane.getChildren().add(paneExp);
 						//
 						return true;
@@ -251,7 +251,7 @@ public class Server extends Application { //1099;
 
 					es.submit(()->
 						Platform.runLater(()-> {
-							System.out.print("NAME: "+name+" XY:"+x+" "+y);
+							System.out.print("NAME: "+name+" XY:"+x+" "+y+'\n');
 
 								//
 							if (ballPane.getChildren().isEmpty())
@@ -306,7 +306,7 @@ public class Server extends Application { //1099;
 			
 //            Naming.rebind("//"+url+":"+port+"/undercover", serverGame);
 			registry.rebind("Server", obj);
-            System.out.println("Server running at //" + obj.toString() + ":" + PORT_IN);
+            System.out.println("Server running at //" + obj.toString() + ":" + PORT_IN+'\n');
 
 //
 //            Naming.rebind("rmi://localhost:1099/master", worker);

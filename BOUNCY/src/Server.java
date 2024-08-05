@@ -163,7 +163,7 @@ public class Server extends Application {
 					@Override
 					public Boolean call() throws Exception {
 						ObservableList<Node> children = ballPane.getChildren();
-						if (children.stream().anyMatch(node -> name.equals(node.getId()))) {
+						if (children.filtered(node->node instanceof Pane).stream().anyMatch(node -> name.equals(node.getId()))) {
 							return false;
 						}
 						System.out.println(name + " is JOINING\n");
@@ -258,7 +258,7 @@ public class Server extends Application {
 			Remote obj = UnicastRemoteObject.exportObject(worker, 0);
 			registry.rebind("Server", obj);
 			System.out.println("Server running at //" + obj.toString() + ":" + PORT_IN + '\n');
-			es.submit(() -> launch(args)).get();
+			launch(args);
 			UnicastRemoteObject.unexportObject(worker, false);
 			registry.unbind("Server");
 			UnicastRemoteObject.unexportObject(registry, false);
@@ -267,10 +267,6 @@ public class Server extends Application {
 			e.printStackTrace();
 		} catch (NotBoundException e) {
 			System.out.println("Server never bound");
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
 
@@ -556,7 +552,7 @@ public class Server extends Application {
 	}
 
 	private Circle draw(double x, double y, double theta, double v) {
-		int r = 12;
+		int r = 4;
 
 		Circle circle = new Circle(r, Color.RED);
 		double ppu = v * 0.0166666666667;

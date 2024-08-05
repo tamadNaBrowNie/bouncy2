@@ -122,9 +122,7 @@ public class Client extends Application {
 		ballPane.setMinWidth(X_MAX);
 		ballPane.setLayoutX(0);
 		ballPane.setLayoutY(0);
-		ballPane.setStyle(
-				"-fx-background-image:url('bg_grid.png');" 
-				+ "-fx-border-color: blue;" + // Border color
+		ballPane.setStyle("-fx-background-image:url('bg_grid.png');" + "-fx-border-color: blue;" + // Border color
 				"-fx-border-width: 1px;" // Border width
 		);
 		gpDebug.addRow(0, fpsLabel);
@@ -182,7 +180,7 @@ public class Client extends Application {
 		gpContainer.addRow(0, paneLeft, separatorV, paneRight);
 		paneContainer.getChildren().addAll(gpContainer, gpDebug);
 
-//      Holds the sprite
+		// Holds the sprite
 		StackPane spExplorer = new StackPane();
 
 		paneExp.setStyle("-fx-border-color: blue;" + // Border color
@@ -232,7 +230,7 @@ public class Client extends Application {
 			@Override
 
 			public void handle(long now) {
-//				fast negate
+				// fast negate
 				this.clear ^= true;
 				boolean clear = this.clear;
 				fps++;
@@ -245,7 +243,7 @@ public class Client extends Application {
 				try {
 
 					if (clear) {
-						Platform.runLater(() -> ballPane.getChildren().clear());
+						ballPane.getChildren().clear();
 						return;
 					}
 					List<Node> nodes = es.submit(new Callable<List<Node>>() {
@@ -253,8 +251,9 @@ public class Client extends Application {
 						@Override
 						public List<Node> call() throws Exception {
 							try {
-								List<Entity> ents = server.updateServer(my_X, my_Y, uName, paneExp.getScaleX() > 0);
-								return ents.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
+								return server.updateServer(my_X, my_Y, uName, paneExp.getScaleX() > 0).parallelStream()
+										.map(ent -> toNode(ent)).collect(Collectors.toList());
+
 							} catch (RemoteException e) {
 
 								warnUnreachable(e);
@@ -264,23 +263,21 @@ public class Client extends Application {
 						}
 
 					}).get();
-
-					Platform.runLater(() -> drawBalls(nodes));
+					drawBalls(nodes);
 
 				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
 				}
-				String msg = "\nYou are at (in px):\n" + "X: [" + my_X + "]\n" + "Y: [" + my_Y + "]";
 
-				expLock.readLock().lock();
-				notif.setText((hasExplorer) ? msg : "");
-				expLock.readLock().unlock();
-				try {
-					update(now);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				double curr = now - lastFPSTime;
 
+				if (curr < 500_000_000)
+					return;
+				fps *= 1_000_000_000.0 / curr;
+
+				fpsLabel.setText(String.format("FPS: %.2f", fps));
+				lastFPSTime = now;
+				fps = 0;
 			}
 
 		};
@@ -297,16 +294,18 @@ public class Client extends Application {
 		e.printStackTrace();
 	}
 
+	private final String msg = "\nYou are at (in px):\n" + "X: [ %.2f ]\n" + "Y: [ %.2f ]";
+
 	private void handleKB(KeyEvent e) {
 		switch (e.getCode()) {
-		case E:
-			btnAddExplorer.fire();
-			break;
-		case ESCAPE:
-			Platform.exit();
-			break;
-		default:
-			break;
+			case E:
+				btnAddExplorer.fire();
+				break;
+			case ESCAPE:
+				Platform.exit();
+				break;
+			default:
+				break;
 		}
 		expLock.readLock().lock();
 		if (!hasExplorer) {
@@ -314,8 +313,9 @@ public class Client extends Application {
 			return;
 		}
 		expLock.readLock().unlock();
+		;
 		switch (e.getCode()) {
-		case W:
+			case W:
 				my_Y++;
 				break;
 			case S:
@@ -327,7 +327,7 @@ public class Client extends Application {
 			case D:
 				my_X++;
 				break;
-	
+
 			default:
 				break;
 		}
@@ -346,6 +346,7 @@ public class Client extends Application {
 		else if (my_Y <= EX_BOUND)
 			my_Y = EX_LIM;
 
+		notif.setText(String.format(msg, my_X, my_Y));
 		ballPane.setLayoutX((halfSizX - my_X) * DX);
 		ballPane.setLayoutY((my_Y - halfSizY) * DY);
 	}
@@ -355,20 +356,20 @@ public class Client extends Application {
 		if (ent == null)
 			return null;
 		switch (ent.getType()) {
-		case BALL:
-			entity = new Circle(RAD, Paint.valueOf("Red"));
-			break;
-		case EXP:
-			Pane exp = new Pane();
-			exp.setMaxSize(SIZ_OTHER, SIZ_OTHER);
-			exp.setStyle("-fx-border-color: blue;" + // Border color
-					"-fx-border-width: 1px;" // Border width
-			);
-			entity = exp;
-			break;
-		default:
-			notif.setText("Nothing found");
-			break;
+			case BALL:
+				entity = new Circle(RAD, Paint.valueOf("Red"));
+				break;
+			case EXP:
+				Pane exp = new Pane();
+				exp.setMaxSize(SIZ_OTHER, SIZ_OTHER);
+				exp.setStyle("-fx-border-color: blue;" + // Border color
+						"-fx-border-width: 1px;" // Border width
+				);
+				entity = exp;
+				break;
+			default:
+				notif.setText("Nothing found");
+				break;
 
 		}
 		if (entity != null) {
@@ -427,12 +428,11 @@ public class Client extends Application {
 		expLock.readLock().lock();
 		changeControls(hasExplorer);
 		expLock.readLock().unlock();
-		
 
 	}
 
 	private void changeControls(boolean exp) {
-		
+
 		inputXexp.setVisible(!exp);
 		inputYexp.setVisible(!exp);
 		inputIP.setDisable(exp);
@@ -441,7 +441,7 @@ public class Client extends Application {
 		paneRight.setVisible(exp);
 		btnAddExplorer.setDisable(false);
 		btnAddExplorer.setText((exp) ? LEAVE_TXT : ENTRY_TXT);
-		
+
 	}
 
 	private void explore() throws AccessException, RemoteException {
@@ -506,20 +506,6 @@ public class Client extends Application {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	private void update(long now) {
-
-		double curr = now - lastFPSTime;
-
-		if (curr < 500_000_000)
-			return;
-		fps *= 1_000_000_000.0 / curr;
-
-		fpsLabel.setText(String.format("FPS: %.2f", fps));
-		lastFPSTime = now;
-		fps = 0;
-
 	}
 
 	private Server_Interface getServer() {

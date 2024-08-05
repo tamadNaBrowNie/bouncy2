@@ -1,5 +1,4 @@
 import java.rmi.AccessException;
-import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -24,7 +23,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -38,18 +37,9 @@ public class Client extends Application {
 	private static final double DX = 38.34;
 	private static final double SIZ_OTHER = 10;
 	private static final int RAD = 12;
-//    private static final String prompt_n = "Number of Particles:";
-//    private static final String V_PX_S = "Velocity (px/s):";
-//    private static final String ADD_BY_ANGLE = "Add by Angle";
-//    private static final String ADD_BY_VELOCITY = "Add by Velocity";
-//    private static final String ADD_BY_DISTANCE = "Add by Distance";
-//	private List<Particle> ball_buf = new ArrayList<Particle>();
-	// private Canvas canvas= new Canvas(X_MAX, Y_MAX);;
 	private Label fpsLabel = new Label("FPS: 0");
 	private long lastFPSTime = System.nanoTime();
-	// private int frameCount = 0;
 	private double fps = 0;
-	// public static ExecutorService es;
 	private boolean hasExplorer = false;
 
 	private final double X_MAX = 1280, Y_MAX = 720;
@@ -75,22 +65,20 @@ public class Client extends Application {
 	private GridPane gpStartEndVelocity = new GridPane();
 	private GridPane gpStartEndAngle = new GridPane();
 
-//    Exp stuff?
-
 	private Label labelXYexp = new Label("Spawn Explorer on (X,Y) Coordinates:");
 	private TextField inputXexp = new TextField();
 	private TextField inputYexp = new TextField();
 	private GridPane gpExplorerXY = new GridPane(); // this is for the XY textfields ONLY
 
 	private Label labelIP = new Label("Input IP:");
-	private TextField inputIP = new TextField();	
-	
+	private TextField inputIP = new TextField();
+
 	private Label labelName = new Label("Input Client Name:");
-	private TextField inputName = new TextField();	
-	
+	private TextField inputName = new TextField();
+
 	private Label labelPort = new Label("Input Port Number:");
 	private TextField inputPort = new TextField();
-	
+
 	private GridPane gpExplorer = new GridPane();
 
 	private TextArea tester = new TextArea("(Test) Balls rn:\n");
@@ -105,9 +93,6 @@ public class Client extends Application {
 	private GridPane gpContainer = new GridPane();
 	private GridPane paneLeft = new GridPane();
 	private Pane paneExp = new StackPane();
-	// private BooleanBinding keyPressed = s_key.or(a_key).or(w_key).or(d_key);
-
-	// private StackPane spMiniMap = new StackPane();
 	private GridPane gpDebug = new GridPane();
 	private static ExecutorService es = Executors.newCachedThreadPool();
 
@@ -119,10 +104,8 @@ public class Client extends Application {
 
 	private ReentrantReadWriteLock serverLock = new ReentrantReadWriteLock(), expLock = new ReentrantReadWriteLock();
 
-//    client coords.
 	private double my_X = 0, my_Y = 0;
 	private String uName = "";
-//	private Background bgSprite = null;
 
 	@Override
 	public void init() throws Exception {
@@ -139,15 +122,12 @@ public class Client extends Application {
 		ballPane.setMinWidth(X_MAX);
 		ballPane.setLayoutX(0);
 		ballPane.setLayoutY(0);
-		ballPane.setStyle(             
-           		"-fx-background-image:url('bg_grid.png');"+
-                   "-fx-border-color: blue;" + // Border color
-                           "-fx-border-width: 1px;" // Border width
-           );
+		ballPane.setStyle(
+				"-fx-background-image:url('bg_grid.png');" 
+				+ "-fx-border-color: blue;" + // Border color
+				"-fx-border-width: 1px;" // Border width
+		);
 		gpDebug.addRow(0, fpsLabel);
-//		gpDebug.addRow(1, textTest);
-//		gpDebug.addRow(2, notif);
-
 		gpDebug.setLayoutX(260);
 		gpDebug.setLayoutY(0);
 
@@ -167,18 +147,14 @@ public class Client extends Application {
 		gpDistance.setMaxWidth(250);
 		gpAngle.setMaxWidth(250);
 
-		//will look like
+		// will look like
 		/**
-		 * Input Server IP Number:(?) need pa ba
-		 * Input Port Number:
-		 * [            ]
-		 * Spawn Explorer on (X,Y) coordinates:
-		 * [     ][     ]
-		 * Join Server btn
+		 * Input Server IP Number:(?) need pa ba Input Port Number: [ ] Spawn Explorer
+		 * on (X,Y) coordinates: [ ][ ] Join Server btn
 		 */
 
-		//All tha can be seen:
-		//can remove all else na UI elems
+		// All tha can be seen:
+		// can remove all else na UI elems
 		gpExplorer.addRow(0, labelName);
 		gpExplorer.addRow(1, inputName);
 		gpExplorer.addRow(2, labelIP);
@@ -192,56 +168,27 @@ public class Client extends Application {
 		gpExplorer.addRow(8, btnAddExplorer);
 		gpExplorer.addRow(9, notif);
 		gpExplorer.addRow(10, textTest);
-		
+
 		gpExplorer.setMaxWidth(250);
-		
+
 		paneLeft.addRow(0, gpExplorer);
 		paneRight.getChildren().add(ballPane);
-
-		
-		
-//		
-		
-		Circle cir = new Circle(RAD, Paint.valueOf("Red"));
-		cir.setLayoutX(0);
-		cir.setLayoutY(0);
-//		ballPane.getChildren().add(cir);
-
-//		String bgFront = ".\\amongus.png";
-//		Image bgImage = new Image(bgFront);
 		Pane pSprite = new Pane();
-//		ballPane.setStyle("-fx-border-color: blue;" + // Border color
-//				"-fx-border-width: 3px;" + "-fx-background-image:url('map.jpg');" + "-fx-background-repeat: no-repeat;"
-//				+ " -fx-background-size: cover;" + " -fx-background-position: center center;"); // Border width
-
 		pSprite.setMaxSize(30, 30);
 		pSprite.setStyle("-fx-border-color: yellow;" + // Border color
 				"-fx-border-width: 1px;" // Border width
 		);
-		
-//		paneRight.setStyle("-fx-border-color: grey;" + // Border color
-//				"-fx-border-width: 5px;" // Border width
-//		);
 
 		gpContainer.addRow(0, paneLeft, separatorV, paneRight);
 		paneContainer.getChildren().addAll(gpContainer, gpDebug);
 
-//        This is when we add the ballPane to screen
-
 //      Holds the sprite
 		StackPane spExplorer = new StackPane();
 
-//		BackgroundImage sprite = new BackgroundImage(bgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
-//				null, new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
-//		bgSprite = new Background(sprite);
-//		paneExp.setBackground(bgSprite);
-		
-		paneExp.setStyle(
-	              // "-fx-background-color: white;"+
-	              "-fx-border-color: blue;" + // Border color
-	                      "-fx-border-width: 1px;" // Border width   
-				);
-		
+		paneExp.setStyle("-fx-border-color: blue;" + // Border color
+				"-fx-border-width: 1px;" // Border width
+		);
+
 		spExplorer.getChildren().add(paneExp);
 
 		spExplorer.setLayoutX(58);
@@ -254,14 +201,12 @@ public class Client extends Application {
 
 		btnAddExplorer.setOnAction(event -> {
 			try {
-				notif.setText("Going to "+inputPort.getText());
+				notif.setText("Going to " + inputPort.getText());
 				btnAddExplorer.setDisable(true);
 				changeMode();
 			} catch (RemoteException e) {
 
-				if (e instanceof ConnectException)
-					notif.setText("Server unreachable");
-				e.printStackTrace();
+				warnUnreachable(e);
 				btnAddExplorer.setDisable(false);
 			}
 
@@ -273,81 +218,19 @@ public class Client extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		Scene scene = new Scene(paneContainer);
-		primaryStage.setTitle("Particle Physics Simulator");
+		primaryStage.setTitle("Particle Physics Simulator Client");
 		primaryStage.setScene(scene);
 		primaryStage.show();
 
-		scene.setOnKeyPressed(e -> {
-			switch (e.getCode()) {
-			case E:
-				btnAddExplorer.fire();
-				break;
-			case ESCAPE:
-
-				Platform.exit();
-				break;
-			default:
-				break;
-			}
-			expLock.readLock().lock();
-			if (!hasExplorer) {
-				expLock.readLock().unlock();
-				return;
-			}
-			expLock.readLock().unlock();
-			double facing = paneExp.getScaleX();
-			switch (e.getCode()) {
-			case W:
-				my_Y++;
-				break;
-			case S:
-				my_Y--;
-				break;
-			case A:
-				my_X--;
-				if (facing > 0)
-					paneExp.setScaleX(-facing);
-				break;
-			case D:
-				my_X++;
-				if (facing < 0)
-					paneExp.setScaleX(-facing);
-				break;
-
-			default:
-				break;
-			}
-			final double EX_LIM = 2 + EX_BOUND;
-			double halfSizX = X_MAX * 0.5, halfSizY = Y_MAX * 0.5;
-
-			if (my_X >= X_MAX - EX_BOUND) {
-
-				my_X = X_MAX - EX_LIM;
-			}
-			if (my_X <= EX_BOUND) {
-				my_X = EX_LIM;
-			}
-			if (my_Y >= Y_MAX - EX_BOUND) {
-
-				my_Y = Y_MAX - EX_LIM;
-			}
-			if (my_Y <= EX_BOUND) {
-
-				my_Y = EX_LIM;
-			}
-
-			ballPane.setLayoutX((halfSizX - my_X) * DX);
-			ballPane.setLayoutY((my_Y - halfSizY) * DY);
-
-		});
+		scene.setOnKeyPressed(e -> handleKB(e));
 		System.nanoTime();
 		lastFPSTime = System.nanoTime();
 
-		
 		AnimationTimer ticer = new AnimationTimer() {
 			private boolean clear = true;
+
 			@Override
-			
+
 			public void handle(long now) {
 //				fast negate
 				this.clear ^= true;
@@ -356,52 +239,42 @@ public class Client extends Application {
 				expLock.readLock().lock();
 				Server_Interface server = getServer();
 				expLock.readLock().unlock();
-				 if (server == null) {
+				if (server == null) {
 					return;
 				}
 				try {
 
-					if(clear)
-						{
-						Platform.runLater(() -> 
-						ballPane.getChildren().clear()
-						);return;
-						}
-//					fpsLabel.setText(fpsLabel.getText()+ my_X  + "ticing   " + my_Y);
+					if (clear) {
+						Platform.runLater(() -> ballPane.getChildren().clear());
+						return;
+					}
 					List<Node> nodes = es.submit(new Callable<List<Node>>() {
 
 						@Override
 						public List<Node> call() throws Exception {
-							// TODO Auto-generated method stub\
-							try
-							{
-								List<Entity> ents=	  server.updateServer(my_X, my_Y, uName, paneExp.getScaleX() > 0);
+							try {
+								List<Entity> ents = server.updateServer(my_X, my_Y, uName, paneExp.getScaleX() > 0);
 								return ents.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
-							}catch (RemoteException e) {
+							} catch (RemoteException e) {
 
-								if (e instanceof ConnectException)
-									notif.setText("Server unreachable");
-								e.printStackTrace();
+								warnUnreachable(e);
 							}
 
 							return null;
 						}
-						
+
 					}).get();
-					
-					Platform.runLater(() -> 
-					drawBalls(nodes)); 
-				
-				
-					
-					
+
+					Platform.runLater(() -> drawBalls(nodes));
+
 				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
-				} 
+				}
 				String msg = "\nYou are at (in px):\n" + "X: [" + my_X + "]\n" + "Y: [" + my_Y + "]";
 
+				expLock.readLock().lock();
 				notif.setText((hasExplorer) ? msg : "");
-
+				expLock.readLock().unlock();
 				try {
 					update(now);
 				} catch (Exception e) {
@@ -411,37 +284,90 @@ public class Client extends Application {
 			}
 
 		};
-//		Thread anims = new Thread(() -> ticer.start());
-//		anims.start();
 		ticer.start();
 
 	}
 
+	private void warnUnreachable(RemoteException e) {
+		setExploring(true);
+		btnAddExplorer.fire();
+		notif.setText("Server unreachable");
+		e.printStackTrace();
+	}
+
+	private void handleKB(KeyEvent e) {
+		switch (e.getCode()) {
+		case E:
+			btnAddExplorer.fire();
+			break;
+		case ESCAPE:
+			Platform.exit();
+			break;
+		default:
+			break;
+		}
+		expLock.readLock().lock();
+		if (!hasExplorer) {
+			expLock.readLock().unlock();
+			return;
+		}
+		expLock.readLock().unlock();
+		double facing = paneExp.getScaleX();
+		switch (e.getCode()) {
+		case W:
+			my_Y++;
+			break;
+		case S:
+			my_Y--;
+			break;
+		case A:
+			my_X--;
+			if (facing > 0)
+				paneExp.setScaleX(-facing);
+			break;
+		case D:
+			my_X++;
+			if (facing < 0)
+				paneExp.setScaleX(-facing);
+			break;
+
+		default:
+			break;
+		}
+		final double EX_LIM = 2 + EX_BOUND;
+		double halfSizX = X_MAX * 0.5, halfSizY = Y_MAX * 0.5;
+
+		if (my_X >= X_MAX - EX_BOUND)
+			my_X = X_MAX - EX_LIM;
+
+		if (my_X <= EX_BOUND)
+			my_X = EX_LIM;
+
+		if (my_Y >= Y_MAX - EX_BOUND)
+			my_Y = Y_MAX - EX_LIM;
+
+		if (my_Y <= EX_BOUND)
+			my_Y = EX_LIM;
+
+		ballPane.setLayoutX((halfSizX - my_X) * DX);
+		ballPane.setLayoutY((my_Y - halfSizY) * DY);
+	}
+
 	private Node toNode(Entity ent) {
 		Node entity = null;
-		if(ent == null)
+		if (ent == null)
 			return null;
-//		Platform.runLater(()->fpsLabel.setText(fpsLabel.getText()+ent.toString()));
-		
 		switch (ent.getType()) {
 		case BALL:
 			entity = new Circle(RAD, Paint.valueOf("Red"));
-
-//			entity.setLayoutY(ent.getY());
 			break;
 		case EXP:
-			//todo test for why exp not showing
-//			entity = new Circle(1, Paint.valueOf("Blue"));
 			Pane exp = new Pane();
-//			 Image of sprite
-//			exp.setBackground(bgSprite);
 			exp.setMaxSize(SIZ_OTHER, SIZ_OTHER);
-			exp.setStyle(
-		              // "-fx-background-color: white;"+
-		              "-fx-border-color: blue;" + // Border color
-		                      "-fx-border-width: 1px;" // Border width
-		      );
-			entity=exp;
+			exp.setStyle("-fx-border-color: blue;" + // Border color
+					"-fx-border-width: 1px;" // Border width
+			);
+			entity = exp;
 			break;
 		default:
 			notif.setText("Nothing found");
@@ -452,10 +378,9 @@ public class Client extends Application {
 			ent.setName("ENTITY BALL");
 			entity.setId(ent.name);
 			entity.setLayoutX(ent.getX());
-			entity.setLayoutY( ent.getY());
+			entity.setLayoutY(ent.getY());
 			entity.setVisible(true);
-			
-			
+
 		}
 		return entity;
 	}
@@ -472,6 +397,7 @@ public class Client extends Application {
 
 	private void leaveGame(String uName) {
 		Server_Interface server = getServer();
+		serverLock.readLock().lock();
 		if (uName.isEmpty())
 			return;
 		try {
@@ -480,53 +406,38 @@ public class Client extends Application {
 			server.leaveGame(uName);
 
 		} catch (RemoteException e) {
-
-			if (e instanceof ConnectException)
-				notif.setText("Server unreachable");
-			e.printStackTrace();
+			warnUnreachable(e);
+		} finally {
+			serverLock.readLock().unlock();
+			setServer(null);
 		}
-
 	}
 
-	//probs here
 	private void changeMode() throws RemoteException {
 
 		setExploring(!hasExplorer);
-//		notif.setText("In changemode");
-
 		if (!hasExplorer) {
-			ballPane.setScaleX(1);
-			ballPane.setScaleY(1);
-			ballPane.relocate(0, 0);
-			if (getServer() != null) {
-				getServer().leaveGame(uName);
-				setServer(null);
-			}
+			leaveGame(uName);
 			my_X = 0;
 			my_Y = 0;
 
-		} else {
-			if (inputName.getText().isEmpty()) {
-				notif.setText("NAME EMPTY");
-				btnAddExplorer.setDisable(false);
-				return;
-			}
-		
-			
-			
-			explore();
-//			textTest.setText("In changemode!!!");
-//			notif.setText("Exploring/... after explore()");
+		} else if (inputName.getText().isEmpty()) {
+			notif.setText("NAME EMPTY");
 
-		}
+			setExploring(false);
+		} else
+			explore();
+
 		expLock.readLock().lock();
 		inputXexp.setVisible(!hasExplorer);
 		inputYexp.setVisible(!hasExplorer);
+		inputIP.setDisable(hasExplorer);
+		inputPort.setDisable(hasExplorer);
+		inputName.setDisable(hasExplorer);
 		paneRight.setVisible(hasExplorer);
 		btnAddExplorer.setDisable(false);
 		btnAddExplorer.setText((hasExplorer) ? LEAVE_TXT : ENTRY_TXT);
 		expLock.readLock().unlock();
-//		textTest.setText("In changemode (AFTER)!!!");
 
 	}
 
@@ -548,37 +459,32 @@ public class Client extends Application {
 			ex_Y = (my_Y - ballPane.getHeight() * 0.5) * DY;
 			ballPane.setLayoutX(ex_X);
 			ballPane.setLayoutY(ex_Y);
-			
+
 			try {
-				synchronized (this) {
-					
-					
-//					100 items multi choice
-//					8-11am WED, room to be announced
-//					*might change num of items
-//					
-					String ip= inputIP.getText();
-					System.setProperty("java.rmi.server.hostname", ip);
-					int PORT_NUM = Integer.parseInt(inputPort.getText());
-//					int PORT_NUM = 1099;
-//					INPUT PORT NUMBER ALSO
-					registry = LocateRegistry.getRegistry(ip, PORT_NUM);
-					notif.setText(ip);
-					if (registry == null)
-						throw new NotBoundException("No registry");
-					setServer((Server_Interface) registry.lookup("Server"));
-					
-				}
+
+				String ip = inputIP.getText();
+				System.setProperty("java.rmi.server.hostname", ip);
+				int PORT_NUM = Integer.parseInt(inputPort.getText());
+
+				registry = LocateRegistry.getRegistry(ip, PORT_NUM);
+				notif.setText(ip);
+				if (registry == null)
+					throw new NotBoundException("No registry");
+				setServer((Server_Interface) registry.lookup("Server"));
 				serverLock.readLock().lock();
 				Server_Interface server = getServer();
-				serverLock.readLock().unlock();
-				if(server == null)
+
+				if (server == null) {
+					serverLock.readLock().unlock();
 					throw new NotBoundException("Server not found");
-				
-				uName=inputName.getText();
-				
-				server.joinGame(my_X, my_Y, uName);
-				
+				}
+				uName = inputName.getText();
+				if (!server.joinGame(my_X, my_Y, uName)) {
+					notif.setText("Can't join :(");
+					setExploring(false);
+				}
+				serverLock.readLock().unlock();
+
 			} catch (NotBoundException e) {
 				e.printStackTrace();
 				notif.setText(e.getMessage());
@@ -586,21 +492,14 @@ public class Client extends Application {
 		} catch (NumberFormatException e) {
 			notif.setText("Invalid Explorer coordinates.\n");
 			setExploring(false);
-			//addexplorer fire here	
 		}
 	}
 
-
-
-
-
 	private void drawBalls(List<Node> nodes) {
 		try {
-			
-			
 
 			ballPane.getChildren().addAll(nodes);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -640,18 +539,5 @@ public class Client extends Application {
 		this.hasExplorer = hasExplorer;
 		expLock.writeLock().unlock();
 	}
-
-//	private void mov_ball(double Y_off, double X_off, double cen_X, double cen_Y, Node circle) {
-//		double x = circle.getLayoutX(), y = circle.getLayoutY(), top, bottom, left, right;
-//		top = cen_Y + Y_off;
-//		bottom = cen_Y - Y_off;
-//		left = cen_X - X_off;
-//		right = cen_X + X_off;
-
-//		boolean isSeen = left <= x && right >= x && top >= y && bottom <= y;
-
-//		circle.setVisible(hasExplorer && isSeen);
-
-//	}
 
 }

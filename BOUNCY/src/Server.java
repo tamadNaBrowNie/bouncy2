@@ -32,6 +32,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -117,12 +118,12 @@ public class Server extends Application { // 1099;
 			private List<Entity> getBalls(double x, double y, int width, int height, String name)
 					throws RemoteException, InterruptedException, ExecutionException {
 
-				FutureTask<List<Entity>> t = new FutureTask<List<Entity>>(new Callable<List<Entity>>() {
+				FutureTask<List<Entity>> t = new FutureTask<>(new Callable<List<Entity>>() {
 
 					@Override
 					public List<Entity> call() throws Exception {
 
-						List<Entity> entities = new ArrayList<Entity>();
+						List<Entity> entities = new ArrayList<>();
 						entities = ballPane.getChildren().filtered(ent -> {
 							double w_h = width * 0.5, h_h = height * 0.5, y2 = 720 - y;
 							double lX = ent.getLayoutX(), lY = ent.getLayoutY();
@@ -149,18 +150,20 @@ public class Server extends Application { // 1099;
 			@Override
 			public boolean joinGame(double x, double y, String name) throws RemoteException {
 				boolean success = false;
-				if (name == null)
+				if (name == null) {
 					return false;
-				else if (name.isEmpty())
+				} else if (name.isEmpty()) {
 					return false;
+				}
 
-				FutureTask<Boolean> t = new FutureTask<Boolean>(new Callable<Boolean>() {
+				FutureTask<Boolean> t = new FutureTask<>(new Callable<Boolean>() {
 
 					@Override
 					public Boolean call() throws Exception {
 						ObservableList<Node> children = ballPane.getChildren();
-						if (children.stream().anyMatch(node -> name.equals(node.getId())))
+						if (children.stream().anyMatch(node -> name.equals(node.getId()))) {
 							return false;
+						}
 						System.out.println(name + " is JOINING\n");
 						Pane paneExp = new Pane();
 
@@ -190,51 +193,59 @@ public class Server extends Application { // 1099;
 			@Override
 			public void leaveGame(String name) throws RemoteException {
 
-				if (name == null)
+				if (name == null) {
 					return;
-				else if (name.isEmpty())
+				} else if (name.isEmpty()) {
 					return;
+				}
 				Platform.runLater(() -> ballPane.getChildren()
 						.removeIf(node -> node instanceof Pane && name.equals(node.getId())));
 
 			}
 
-			public void updatePos(double x, double y, String name, boolean face_right)
+			public boolean updatePos(double x, double y, String name, boolean face_right)
 					throws InterruptedException, ExecutionException {
 				//
 				if (name == null) {
-					return;
+					return false;
 				}
 
-				Platform.runLater(() -> {
+				FutureTask<Boolean> task = new FutureTask<>(new Callable<Boolean>() {
 
-					List<Node> players = ballPane.getChildren().filtered(node -> node instanceof Pane);
-					if (players.isEmpty()) {
-						return;
+					@Override
+					public Boolean call() throws Exception {
+						List<Node> players = ballPane.getChildren();
+						if (players.isEmpty()) {
+							return false;
+						}
+
+						for (Node child : players) {
+
+							if (!name.equals(child.getId())) {
+								continue;
+							}
+							child.setLayoutX(x);
+							child.setLayoutY(720 - y);
+							System.out.print("NAME: " + name + " XY:" + x + " " + y + '\n');
+							return true;
+						}
+						return false;
 					}
-
-					for (Node child : players) {
-
-						if (!child.getId().equals(name))
-							continue;
-						child.setLayoutX(x);
-						child.setLayoutY(720 - y);
-						return;
-					}
-
 				}
-
 				);
-				es.submit(() -> System.out.print("NAME: " + name + " XY:" + x + " " + y + '\n')).get();
+				Platform.runLater(task);
+				return task.get();
 
 			}
 
 			@Override
-			public List<Entity> updateServer(double x, double y, String name, boolean face_right)
-					throws RemoteException, InterruptedException, ExecutionException {
+			public List<Entity> updateServer(double x, double y, String name, boolean face_right) throws RemoteException, InterruptedException, ExecutionException {
 
-				this.updatePos(x, y, name, face_right);
+				if(!this.updatePos(x, y, name, face_right)) {
+					throw new RemoteException();
+				}
 				return this.getBalls(x, y, 33, 19, name);
+
 
 			}
 
@@ -270,6 +281,7 @@ public class Server extends Application { // 1099;
 		}
 	}
 
+	@Override
 	public void start(Stage primaryStage) {
 		paneRight.setLayoutX(270);
 		paneRight.setPrefHeight(Y_MAX);
@@ -281,10 +293,8 @@ public class Server extends Application { // 1099;
 
 		ballPane.setPrefHeight(Y_MAX);
 		ballPane.setMinWidth(X_MAX);
-		ballPane.relocate(0,0);
-		ballPane.setStyle(
-				"-fx-background-image:url('bg_grid.png');" +
-				"-fx-border-color: blue;" + // Border color
+		ballPane.relocate(0, 0);
+		ballPane.setStyle("-fx-background-image:url('bg_grid.png');" + "-fx-border-color: blue;" + // Border color
 				"-fx-border-width: 1px;" // Border width
 		);
 		gpDebug.addRow(0, fpsLabel);
@@ -338,8 +348,9 @@ public class Server extends Application { // 1099;
 		paneRight.getChildren().add(ballPane);
 
 		scene.setOnKeyPressed(e -> {
-			if (e.getCode() == KeyCode.ESCAPE)
+			if (e.getCode() == KeyCode.ESCAPE) {
 				Platform.exit();
+			}
 		});
 
 		tabVelocity.setOnSelectionChanged(e -> {
@@ -385,12 +396,12 @@ public class Server extends Application { // 1099;
 				double angle = Double.parseDouble(inputAngle.getText());
 				int n = Integer.parseInt(inputCount.getText());
 
-				if (n > 0)
+				if (n > 0) {
 					addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, ballPane);
+				}
 			} catch (NumberFormatException e) {
 				notif.setText("Invalid input\n");
 			}
-			;
 		});
 
 		btnAddByAngle.setOnAction(event -> {
@@ -403,8 +414,9 @@ public class Server extends Application { // 1099;
 
 				final int n = Integer.parseInt(inputCount.getText());
 
-				if (n >= 0)
+				if (n >= 0) {
 					addParticlesByAngle(n, startX, startY, startAngle, endAngle, velocity, ballPane);
+				}
 
 			} catch (NumberFormatException e) {
 				notif.setText("Invalid input\n");
@@ -421,8 +433,9 @@ public class Server extends Application { // 1099;
 
 				final int n = Integer.parseInt(inputCount.getText());
 
-				if (n > 0)
+				if (n > 0) {
 					addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle, ballPane);
+				}
 			} catch (NumberFormatException e) {
 				notif.setText("Invalid input\n");
 			}
@@ -436,12 +449,16 @@ public class Server extends Application { // 1099;
 
 				fps++;
 				makeFrame();
+				double curr = now - lastFPSTime;
 
-				try {
-					update(now);
-				} catch (Exception e) {
-					e.printStackTrace();
+				if (curr < 500_000_000) {
+					return;
 				}
+				fps *= 1_000_000_000.0 / curr;
+
+				fpsLabel.setText(String.format("FPS: %.2f", fps));
+				lastFPSTime = now;
+				fps = 0;
 
 			}
 
@@ -471,12 +488,14 @@ public class Server extends Application { // 1099;
 
 		circle.setVisible(isSeen);
 
-		if (x_f <= 0 || x_f >= X_MAX)
+		if (x_f <= 0 || x_f >= X_MAX) {
 			circle.setTranslateX(-dx);
+		}
 
 		circle.setLayoutX(x_0 + circle.getTranslateX());
-		if (y_f >= Y_MAX || y_f <= 0)
+		if (y_f >= Y_MAX || y_f <= 0) {
 			circle.setTranslateY(-dy);
+		}
 		circle.setLayoutY(y_0 + circle.getTranslateY());
 	}
 
@@ -540,25 +559,6 @@ public class Server extends Application { // 1099;
 
 	}
 
-	private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity,
-			double angle, Pane ballPane) {
-		double dx = (endX - startX) / (n);
-		double dy = (endY - startY) / (n);
-		double x = startX;
-		double y = startY;
-
-		for (int i = 0; i < n; i++) {
-			double xin = x, yin = y;
-
-			ball_buf.add(new Particle(xin, yin, Math.toRadians(angle), velocity));
-			x += dx;
-			y += dy;
-		}
-
-		drawBalls(ballPane);
-
-	}
-
 	private void drawBalls(Pane ballPane) {
 		try {
 			List<Circle> circles = ball_buf.parallelStream().map(Particle::draw).collect(Collectors.toList());
@@ -570,12 +570,61 @@ public class Server extends Application { // 1099;
 		}
 	}
 
+	private Circle draw(double x, double y,
+			double theta, double v) {
+		int r = 12;
+
+		Circle circle = new Circle(r, Color.RED);
+		final double T = 0.0166666666667;
+		double ppu = v * T;
+
+		if (x > X_MAX) {
+			x = X_MAX;
+		}
+		if (x < 0) {
+			x = 0;
+		}
+
+		if (y < 0) {
+			y = 0;
+		}
+		if (y > Y_MAX) {
+			x = Y_MAX;
+		}
+		circle.setLayoutX(x);
+		circle.setLayoutY(y);
+		circle.setTranslateX(-ppu * Math.cos(theta));
+		circle.setTranslateY(-ppu * Math.sin(theta));
+		return circle;
+	}
+
+	private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity,
+			double angle, Pane ballPane) {
+		double dx = (endX - startX) / (n);
+		double dy = (endY - startY) / (n);
+		double x = startX;
+		double y = startY;
+
+		for (int i = 0; i < n; i++) {
+			double xin = x, yin = y;
+
+			ball_buf.add(new Particle(xin, yin, Math.toRadians(angle), velocity));
+//			ballPane.getChildren().add(draw(xin, yin, Math.toRadians(angle), velocity));
+			x += dx;
+			y += dy;
+		}
+
+		drawBalls(ballPane);
+
+	}
+
 	private void addParticlesByAngle(int n, double startX, double startY, double startAngle, double endAngle,
 			double velocity, Pane paneBall) {
 		double angleDiff = (endAngle - startAngle) / (n);
 		double angle = startAngle;
 		for (int i = 0; i < n; i++) {
 			ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
+//			ballPane.getChildren().add(draw(startX, startY, Math.toRadians(angle), velocity));
 			angle += angleDiff;
 
 		}
@@ -596,20 +645,6 @@ public class Server extends Application { // 1099;
 
 		}
 		drawBalls(ballPane);
-	}
-
-	private void update(long now) {
-
-		double curr = now - lastFPSTime;
-
-		if (curr < 500_000_000)
-			return;
-		fps *= 1_000_000_000.0 / curr;
-
-		fpsLabel.setText(String.format("FPS: %.2f", fps));
-		lastFPSTime = now;
-		fps = 0;
-
 	}
 
 }

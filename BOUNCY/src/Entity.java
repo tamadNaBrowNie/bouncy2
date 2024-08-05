@@ -2,17 +2,17 @@ import java.io.Serializable;
 
 public class Entity implements Serializable{
 /**
-	 * 
+	 *
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 4L;
 private double x,y,size;
 private Type type;
 public String name;
 @Override
 public String toString() {
-	
-	
-	
+
+
+
 	return String.format("X: %.2f, Y : %.2f", this.x,this.y) +" "+ isRight+" " + type+" "+name;
 }
 private boolean isRight;
@@ -53,5 +53,5 @@ private boolean isRight;
 	private void setSize(double size) {
 		this.size = size;
 	}
-	
+
 }

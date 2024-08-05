@@ -37,18 +37,20 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-public class Server extends Application { // 1099;
+public class Server extends Application {
+	private static final int l_width = 250;
+// 1099;
 	private static final String prompt_n = "Number of Particles:";
 	private static final String V_PX_S = "Velocity (px/s):";
 	private static final String ADD_BY_ANGLE = "Add by Angle";
 	private static final String ADD_BY_VELOCITY = "Add by Velocity";
 	private static final String ADD_BY_DISTANCE = "Add by Distance";
-	private List<Particle> ball_buf = new ArrayList<Particle>();
 	private Label fpsLabel = new Label("FPS: 0");
 	private long lastFPSTime = System.nanoTime();
 	private double fps = 0;
 
-	private final double X_MAX = 1280, Y_MAX = 720;
+	private final static double X_MAX = 1280;
+	private final static double Y_MAX = 720;
 	private Pane paneContainer = new Pane();
 
 	private static Pane ballPane = new Pane();
@@ -231,21 +233,20 @@ public class Server extends Application { // 1099;
 						}
 						return false;
 					}
-				}
-				);
+				});
 				Platform.runLater(task);
 				return task.get();
 
 			}
 
 			@Override
-			public List<Entity> updateServer(double x, double y, String name, boolean face_right) throws RemoteException, InterruptedException, ExecutionException {
+			public List<Entity> updateServer(double x, double y, String name, boolean face_right)
+					throws RemoteException, InterruptedException, ExecutionException {
 
-				if(!this.updatePos(x, y, name, face_right)) {
+				if (!this.updatePos(x, y, name, face_right)) {
 					throw new RemoteException();
 				}
 				return this.getBalls(x, y, 33, 19, name);
-
 
 			}
 
@@ -297,21 +298,21 @@ public class Server extends Application { // 1099;
 		ballPane.setStyle("-fx-background-image:url('bg_grid.png');" + "-fx-border-color: blue;" + // Border color
 				"-fx-border-width: 1px;" // Border width
 		);
+
 		gpDebug.addRow(0, fpsLabel);
-		gpDebug.setLayoutX(260);
-		gpDebug.setLayoutY(0);
+		gpDebug.relocate(260, 0);
 
 		gridPane.setAlignment(Pos.BASELINE_CENTER);
 
-		tester.setMaxSize(250, Y_MAX);
+		tester.setMaxSize(l_width, Y_MAX);
 
 		separatorV.setOrientation(Orientation.VERTICAL);
 
-		gridPane.setMaxWidth(250);
+		gridPane.setMaxWidth(l_width);
 
-		btnAddByDistance.setPrefWidth(250);
-		btnAddByVelocity.setPrefWidth(250);
-		btnAddByAngle.setPrefWidth(250);
+		btnAddByDistance.setPrefWidth(l_width);
+		btnAddByVelocity.setPrefWidth(l_width);
+		btnAddByAngle.setPrefWidth(l_width);
 
 		paneTab.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
@@ -325,13 +326,13 @@ public class Server extends Application { // 1099;
 		gpEndXY.addRow(0, inputEndX, inputEndY);
 		gpStartEndAngle.addRow(0, inputStartAngle, inputEndAngle);
 
-		gpStartEndVelocity.setMaxWidth(250);
-		gpStartEndAngle.setMaxWidth(250);
-		gpStartXY.setMaxWidth(250);
-		gpEndXY.setMaxWidth(250);
-		gpVelocity.setMaxWidth(250);
-		gpDistance.setMaxWidth(250);
-		gpAngle.setMaxWidth(250);
+		gpStartEndVelocity.setMaxWidth(l_width);
+		gpStartEndAngle.setMaxWidth(l_width);
+		gpStartXY.setMaxWidth(l_width);
+		gpEndXY.setMaxWidth(l_width);
+		gpVelocity.setMaxWidth(l_width);
+		gpDistance.setMaxWidth(l_width);
+		gpAngle.setMaxWidth(l_width);
 		tabVelocity.setContent(gpVelocity);
 		tabDistance.setContent(gpDistance);
 		tabAngle.setContent(gpAngle);
@@ -362,7 +363,7 @@ public class Server extends Application { // 1099;
 			gpAngle.getChildren().clear();
 			gpVelocity.getChildren().clear();
 			initTabVelocity();
-			gpVelocity.setMaxWidth(250);
+			gpVelocity.setMaxWidth(l_width);
 
 		});
 
@@ -414,7 +415,7 @@ public class Server extends Application { // 1099;
 
 				final int n = Integer.parseInt(inputCount.getText());
 
-				if (n >= 0) {
+				if (n > 0) {
 					addParticlesByAngle(n, startX, startY, startAngle, endAngle, velocity, ballPane);
 				}
 
@@ -448,7 +449,10 @@ public class Server extends Application { // 1099;
 			public void handle(long now) {
 
 				fps++;
-				makeFrame();
+//				makeFrame();
+				ballPane.getChildren().filtered(node -> (node instanceof Circle))
+						.forEach(circle -> mov_ball((Circle) circle));
+
 				double curr = now - lastFPSTime;
 
 				if (curr < 500_000_000) {
@@ -463,37 +467,23 @@ public class Server extends Application { // 1099;
 			}
 
 		};
-		Thread anims = new Thread(() -> ticer.start());
-		anims.start();
+//		Thread anims = new Thread(() -> ticer.start());
+//		anims.start();
+		ticer.start();
 	}
 
-	private void makeFrame() {
-		try {
-			es.submit(() -> Platform.runLater(() -> mov_balls())).get();
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void mov_balls() {
-		List<Node> balls = ballPane.getChildren().filtered(node -> (node instanceof Circle));
-
-		balls.forEach(circle -> mov_ball(circle));
-	}
-
-	private void mov_ball(Node circle) {
+	private void mov_ball(Circle circle) {
 		boolean isSeen = true;
 		double x_0 = circle.getLayoutX(), y_0 = circle.getLayoutY(), dx = circle.getTranslateX(),
-				dy = circle.getTranslateY(), x_f = x_0 + dx, y_f = y_0 + dy;
-
+				dy = circle.getTranslateY(), x_f = x_0 + dx, y_f = y_0 + dy, r = circle.getRadius();
 		circle.setVisible(isSeen);
 
-		if (x_f <= 0 || x_f >= X_MAX) {
+		if (x_f < r || x_f > X_MAX - r) {
 			circle.setTranslateX(-dx);
 		}
 
 		circle.setLayoutX(x_0 + circle.getTranslateX());
-		if (y_f >= Y_MAX || y_f <= 0) {
+		if (y_f > Y_MAX - r || y_f < r) {
 			circle.setTranslateY(-dy);
 		}
 		circle.setLayoutY(y_0 + circle.getTranslateY());
@@ -559,40 +549,30 @@ public class Server extends Application { // 1099;
 
 	}
 
-	private void drawBalls(Pane ballPane) {
-		try {
-			List<Circle> circles = ball_buf.parallelStream().map(Particle::draw).collect(Collectors.toList());
+	private void drawBalls(List<Circle> circles, Pane ballPane) {
+		if (!circles.isEmpty()) {
 			ballPane.getChildren().addAll(circles);
-
-			ball_buf.clear();
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 
-	private Circle draw(double x, double y,
-			double theta, double v) {
+	private Circle draw(double x, double y, double theta, double v) {
 		int r = 12;
 
 		Circle circle = new Circle(r, Color.RED);
-		final double T = 0.0166666666667;
-		double ppu = v * T;
+		double ppu = v * 0.0166666666667;
 
-		if (x > X_MAX) {
-			x = X_MAX;
-		}
-		if (x < 0) {
-			x = 0;
+		if (x > X_MAX - r) {
+			x = X_MAX - r;
+		} else if (x < r) {
+			x = r;
 		}
 
-		if (y < 0) {
-			y = 0;
+		if (y < r) {
+			y = r;
+		} else if (y > Y_MAX - r) {
+			y = Y_MAX - r;
 		}
-		if (y > Y_MAX) {
-			x = Y_MAX;
-		}
-		circle.setLayoutX(x);
-		circle.setLayoutY(y);
+		circle.relocate(x, 720 - y);
 		circle.setTranslateX(-ppu * Math.cos(theta));
 		circle.setTranslateY(-ppu * Math.sin(theta));
 		return circle;
@@ -600,51 +580,90 @@ public class Server extends Application { // 1099;
 
 	private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity,
 			double angle, Pane ballPane) {
-		double dx = (endX - startX) / (n);
-		double dy = (endY - startY) / (n);
-		double x = startX;
-		double y = startY;
+		try {
+			ArrayList<Circle> balls = es.submit(new Callable<ArrayList<Circle>>() {
 
-		for (int i = 0; i < n; i++) {
-			double xin = x, yin = y;
+				@Override
+				public ArrayList<Circle> call() throws Exception {
+					final double dx = (n > 1) ? (endX - startX) / (n - 1) : 0,
+							dy = (n > 1) ? (endY - startY) / (n - 1) : 0;
+					double x = startX;
+					double y = startY;
+					ArrayList<Circle> balls = new ArrayList<>();
+					for (int i = 0; i < n; i++) {
+						double xin = x, yin = y;
 
-			ball_buf.add(new Particle(xin, yin, Math.toRadians(angle), velocity));
-//			ballPane.getChildren().add(draw(xin, yin, Math.toRadians(angle), velocity));
-			x += dx;
-			y += dy;
+						balls.add(draw(xin, yin, Math.toRadians(angle), velocity));
+						x += dx;
+						y += dy;
+					}
+					return balls;
+				}
+			}).get();
+
+			drawBalls(balls, ballPane);
+		} catch (InterruptedException | ExecutionException e) {
+
+			e.printStackTrace();
 		}
-
-		drawBalls(ballPane);
 
 	}
 
 	private void addParticlesByAngle(int n, double startX, double startY, double startAngle, double endAngle,
 			double velocity, Pane paneBall) {
-		double angleDiff = (endAngle - startAngle) / (n);
-		double angle = startAngle;
-		for (int i = 0; i < n; i++) {
-			ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
-//			ballPane.getChildren().add(draw(startX, startY, Math.toRadians(angle), velocity));
-			angle += angleDiff;
+		try {
+			ArrayList<Circle> balls = es.submit(new Callable<ArrayList<Circle>>() {
 
+				@Override
+				public ArrayList<Circle> call() throws Exception {
+
+					final double angleDiff = (n > 1) ? (endAngle - startAngle) / (n - 1) : 0;
+					double angle = startAngle;
+					ArrayList<Circle> balls = new ArrayList<>();
+					for (int i = 0; i < n; i++) {
+						balls.add(draw(startX, startY, Math.toRadians(angle), velocity));
+						angle += angleDiff;
+
+					}
+					return balls;
+				}
+			}).get();
+
+			drawBalls(balls, ballPane);
+		} catch (InterruptedException | ExecutionException e) {
+
+			e.printStackTrace();
 		}
-		drawBalls(paneBall);
+
 	}
 
 	private void addParticlesByVelocity(int n, double startX, double startY, double startVelocity, double endVelocity,
 			double angle, Pane ballPane) {
-		double velocityDiff = (n > 1) ? (endVelocity - startVelocity) / (n - 1) : 0;
-		double v = startVelocity;
-		for (int i = 0; i < n; i++) {
+		try {
+			ArrayList<Circle> balls = es.submit(new Callable<ArrayList<Circle>>() {
 
-			double velocity = v;
+				@Override
+				public ArrayList<Circle> call() throws Exception {
 
-			ball_buf.add(new Particle(startX, startY, Math.toRadians(angle), velocity));
+					final double velocityDiff = (n > 1) ? (endVelocity - startVelocity) / (n - 1) : 0;
+					ArrayList<Circle> balls = new ArrayList<>();
+					double v = startVelocity;
+					for (int i = 0; i < n; i++) {
+						double velocity = v;
 
-			v += velocityDiff;
+						balls.add(draw(startX, startY, Math.toRadians(angle), velocity));
 
+						v += velocityDiff;
+
+					}
+					return balls;
+				}
+			}).get();
+
+			drawBalls(balls, ballPane);
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
 		}
-		drawBalls(ballPane);
-	}
 
+	}
 }

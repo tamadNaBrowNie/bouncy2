@@ -289,9 +289,11 @@ public class Client extends Application {
 	}
 
 	private void warnUnreachable(RemoteException e) {
-		setExploring(true);
-		btnAddExplorer.fire();
+		setExploring(false);
+
 		notif.setText("Server unreachable");
+		setServer(null);
+		changeControls(false);
 		e.printStackTrace();
 	}
 
@@ -312,27 +314,22 @@ public class Client extends Application {
 			return;
 		}
 		expLock.readLock().unlock();
-		double facing = paneExp.getScaleX();
 		switch (e.getCode()) {
 		case W:
-			my_Y++;
-			break;
-		case S:
-			my_Y--;
-			break;
-		case A:
-			my_X--;
-			if (facing > 0)
-				paneExp.setScaleX(-facing);
-			break;
-		case D:
-			my_X++;
-			if (facing < 0)
-				paneExp.setScaleX(-facing);
-			break;
-
-		default:
-			break;
+				my_Y++;
+				break;
+			case S:
+				my_Y--;
+				break;
+			case A:
+				my_X--;
+				break;
+			case D:
+				my_X++;
+				break;
+	
+			default:
+				break;
 		}
 		final double EX_LIM = 2 + EX_BOUND;
 		double halfSizX = X_MAX * 0.5, halfSizY = Y_MAX * 0.5;
@@ -340,13 +337,13 @@ public class Client extends Application {
 		if (my_X >= X_MAX - EX_BOUND)
 			my_X = X_MAX - EX_LIM;
 
-		if (my_X <= EX_BOUND)
+		else if (my_X <= EX_BOUND)
 			my_X = EX_LIM;
 
 		if (my_Y >= Y_MAX - EX_BOUND)
 			my_Y = Y_MAX - EX_LIM;
 
-		if (my_Y <= EX_BOUND)
+		else if (my_Y <= EX_BOUND)
 			my_Y = EX_LIM;
 
 		ballPane.setLayoutX((halfSizX - my_X) * DX);
@@ -427,18 +424,24 @@ public class Client extends Application {
 			setExploring(false);
 		} else
 			explore();
-
 		expLock.readLock().lock();
-		inputXexp.setVisible(!hasExplorer);
-		inputYexp.setVisible(!hasExplorer);
-		inputIP.setDisable(hasExplorer);
-		inputPort.setDisable(hasExplorer);
-		inputName.setDisable(hasExplorer);
-		paneRight.setVisible(hasExplorer);
-		btnAddExplorer.setDisable(false);
-		btnAddExplorer.setText((hasExplorer) ? LEAVE_TXT : ENTRY_TXT);
+		changeControls(hasExplorer);
 		expLock.readLock().unlock();
+		
 
+	}
+
+	private void changeControls(boolean exp) {
+		
+		inputXexp.setVisible(!exp);
+		inputYexp.setVisible(!exp);
+		inputIP.setDisable(exp);
+		inputPort.setDisable(exp);
+		inputName.setDisable(exp);
+		paneRight.setVisible(exp);
+		btnAddExplorer.setDisable(false);
+		btnAddExplorer.setText((exp) ? LEAVE_TXT : ENTRY_TXT);
+		
 	}
 
 	private void explore() throws AccessException, RemoteException {

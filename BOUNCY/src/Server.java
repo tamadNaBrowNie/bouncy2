@@ -210,10 +210,8 @@ public class Server extends Application {
 				} else if (name.isEmpty()) {
 					return;
 				}
-				es.execute(() -> playerList.forEach((k, v) -> {
-					if (System.nanoTime()- v.getTime() > 30_000_000_000l)
-						playerList.remove(k);
-				}));
+						playerList.remove(name);
+
 				Platform.runLater(() -> ballPane.getChildren()
 						.removeIf(node -> node instanceof Pane && name.equals(node.getId())));
 

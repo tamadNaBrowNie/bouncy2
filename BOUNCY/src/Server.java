@@ -118,7 +118,27 @@ public class Server extends Application {
 
 	public static void main(String[] args) {
 		es = Executors.newFixedThreadPool(3);
+	
 		Server_Interface worker = new Server_Interface() {
+			@Override
+			public List<Entity> updateServer(double x, double y, String name, boolean face_right)
+					throws RemoteException, InterruptedException, ExecutionException {
+				if (!this.updatePos(x, y, name, face_right))
+					throw new RemoteException();
+				return this.getBalls(x, y, 33, 19, name);
+
+			}
+			@Override
+			public void leaveGame(String name) throws RemoteException {
+				if (name == null)
+					return;
+				else if (name.isEmpty())
+					return;
+				playerList.remove(name);
+				Platform.runLater(() -> ballPane.getChildren()
+						.removeIf(node -> node instanceof Pane && name.equals(node.getId())));
+			}
+
 			private List<Entity> getBalls(double x, double y, int width, int height, String name)
 					throws RemoteException, InterruptedException, ExecutionException {
 
@@ -202,21 +222,6 @@ public class Server extends Application {
 
 			}
 
-			@Override
-			public void leaveGame(String name) throws RemoteException {
-
-				if (name == null) {
-					return;
-				} else if (name.isEmpty()) {
-					return;
-				}
-						playerList.remove(name);
-
-				Platform.runLater(() -> ballPane.getChildren()
-						.removeIf(node -> node instanceof Pane && name.equals(node.getId())));
-
-			}
-
 			public boolean updatePos(double x, double y, String name, boolean face_right)
 					throws InterruptedException, ExecutionException {
 				//
@@ -254,17 +259,6 @@ public class Server extends Application {
 				});
 				Platform.runLater(task);
 				return task.get();
-			}
-
-			@Override
-			public List<Entity> updateServer(double x, double y, String name, boolean face_right)
-					throws RemoteException, InterruptedException, ExecutionException {
-
-				if (!this.updatePos(x, y, name, face_right)) {
-					throw new RemoteException();
-				}
-				return this.getBalls(x, y, 33, 19, name);
-
 			}
 
 		};

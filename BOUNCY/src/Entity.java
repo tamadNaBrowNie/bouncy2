@@ -25,11 +25,7 @@ private boolean isRight;
 		this.name = "f00";
 	}
 	Entity(double x,double y, double size, Type type,boolean facing, String name){
-		this.x=x;
-		this.y = y;
-		this.type = type;
-		this.isRight = facing;
-		this.setSize(size);
+		this(x,y,size,type,facing);
 		this.name = name;
 	}
 	public double getX() {

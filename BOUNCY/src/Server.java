@@ -463,7 +463,7 @@ public class Server extends Application {
 				ballPane.getChildren().filtered(node -> (node instanceof Circle))
 						.forEach(circle -> mov_ball((Circle) circle));
 				es.execute(() -> playerList.forEach((k, v) -> {
-					if (now - v.getTime() > 5_000_000_000l)
+					if (now - v.getTime() > 30_000_000_000l)
 						playerList.remove(k);
 				}));
 				double curr = now - lastFPSTime;

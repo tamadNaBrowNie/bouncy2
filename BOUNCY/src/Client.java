@@ -267,8 +267,8 @@ public class Client extends Application {
 										.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
 
 							} catch (RemoteException e) {
-								Platform.runLater(()->warnUnreachable(e));
-								
+								Platform.runLater(() -> warnUnreachable(e));
+
 							}
 
 							return null;
@@ -294,10 +294,13 @@ public class Client extends Application {
 
 	}
 
-	private void warnUnreachable(RemoteException e) {
-		setExploring(false);
+	private void warnUnreachable(Exception e) {
+		warnUnreachable(e, "Server unreachable");
+	}
 
-		notif.setText("Server unreachable");
+	private void warnUnreachable(Exception e, String msg) {
+		setExploring(false);
+		notif.setText(msg);
 		setServer(null);
 		changeControls(false);
 		e.printStackTrace();
@@ -465,7 +468,7 @@ public class Client extends Application {
 			int port = Integer.parseInt(inputPort.getText());
 			ballPane.setScaleX(DX);
 			ballPane.setScaleY(DY);
-			
+
 			if (ex_X > X_MAX || ex_X < 0 || ex_Y > Y_MAX || ex_Y < 0)
 				throw new NumberFormatException();
 			double off_x = (ex_X >= X_MAX) ? EX_BOUND : (ex_X <= 0) ? -EX_BOUND : 0f,
@@ -511,7 +514,7 @@ public class Client extends Application {
 					} catch (NotBoundException e) {
 						e.printStackTrace();
 						String msg = e.getMessage();
-						System.out.println(msg);
+						Platform.runLater(()->warnUnreachable(e,msg));
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}

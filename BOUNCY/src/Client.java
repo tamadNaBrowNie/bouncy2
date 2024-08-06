@@ -8,6 +8,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 public class Client extends Application {
+	private static final String joinFailM = "Can't join";
 	private static final double DY = 38.34;
 	private static final double DX = 38.34;
 	private static final double SIZ_OTHER = 10;
@@ -117,7 +120,7 @@ public class Client extends Application {
 		clip.setLayoutX(0);
 		clip.setLayoutY(0);
 		paneRight.setClip(clip);
-		paneRight.setVisible(hasExplorer);
+		paneRight.setVisible(false);
 		ballPane.setPrefHeight(Y_MAX);
 		ballPane.setMinWidth(X_MAX);
 		ballPane.setLayoutX(0);
@@ -206,6 +209,8 @@ public class Client extends Application {
 
 				warnUnreachable(e);
 				btnAddExplorer.setDisable(false);
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
 			}
 
 		});
@@ -234,41 +239,6 @@ public class Client extends Application {
 				this.clear ^= true;
 				boolean clear = this.clear;
 				fps++;
-				expLock.readLock().lock();
-				Server_Interface server = getServer();
-				expLock.readLock().unlock();
-				if (server == null) {
-					return;
-				}
-				try {
-
-					if (clear) {
-						ballPane.getChildren().clear();
-						return;
-					}
-					List<Node> nodes = es.submit(new Callable<List<Node>>() {
-
-						@Override
-						public List<Node> call() throws Exception {
-							try {
-								return server.updateServer(my_X, my_Y, uName, paneExp.getScaleX() > 0).parallelStream()
-										.map(ent -> toNode(ent)).collect(Collectors.toList());
-
-							} catch (RemoteException e) {
-
-								warnUnreachable(e);
-							}
-
-							return null;
-						}
-
-					}).get();
-					drawBalls(nodes);
-
-				} catch (InterruptedException | ExecutionException e) {
-					e.printStackTrace();
-				}
-
 				double curr = now - lastFPSTime;
 
 				if (curr < 500_000_000)
@@ -278,6 +248,45 @@ public class Client extends Application {
 				fpsLabel.setText(String.format("FPS: %.2f", fps));
 				lastFPSTime = now;
 				fps = 0;
+
+				try {
+
+					if (clear) {
+						ballPane.getChildren().clear();
+						return;
+					}
+					List<Node> nodes = es.submit(new Callable<List<Node>>() {
+						@Override
+						public List<Node> call() throws Exception {
+							Server_Interface server = getServer();
+							if (server == null) {
+								return null;
+							}
+							try {
+								return server.updateServer(my_X, my_Y, getuName(), paneExp.getScaleX() > 0)
+										.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
+
+							} catch (RemoteException e) {
+
+								warnUnreachable(e);
+							}
+
+							return null;
+						}
+
+					}).get(1, TimeUnit.SECONDS);
+					if (nodes == null || nodes.isEmpty())
+						return;
+					drawBalls(nodes);
+
+				} catch (InterruptedException | ExecutionException e) {
+					e.printStackTrace();
+				} catch (TimeoutException e) {
+					notif.setText("Server Timeout");
+					btnAddExplorer.fire();
+					e.printStackTrace();
+				}
+
 			}
 
 		};
@@ -298,38 +307,35 @@ public class Client extends Application {
 
 	private void handleKB(KeyEvent e) {
 		switch (e.getCode()) {
-			case E:
-				btnAddExplorer.fire();
-				break;
-			case ESCAPE:
-				Platform.exit();
-				break;
-			default:
-				break;
+		case E:
+			btnAddExplorer.fire();
+			break;
+		case ESCAPE:
+			Platform.exit();
+			break;
+		default:
+			break;
 		}
-		expLock.readLock().lock();
-		if (!hasExplorer) {
-			expLock.readLock().unlock();
+		if (!isExploring()) {
 			return;
 		}
-		expLock.readLock().unlock();
 		;
 		switch (e.getCode()) {
-			case W:
-				my_Y++;
-				break;
-			case S:
-				my_Y--;
-				break;
-			case A:
-				my_X--;
-				break;
-			case D:
-				my_X++;
-				break;
+		case W:
+			my_Y++;
+			break;
+		case S:
+			my_Y--;
+			break;
+		case A:
+			my_X--;
+			break;
+		case D:
+			my_X++;
+			break;
 
-			default:
-				break;
+		default:
+			break;
 		}
 		final double EX_LIM = 2 + EX_BOUND;
 		double halfSizX = X_MAX * 0.5, halfSizY = Y_MAX * 0.5;
@@ -356,20 +362,20 @@ public class Client extends Application {
 		if (ent == null)
 			return null;
 		switch (ent.getType()) {
-			case BALL:
-				entity = new Circle(RAD, Paint.valueOf("Red"));
-				break;
-			case EXP:
-				Pane exp = new Pane();
-				exp.setMaxSize(SIZ_OTHER, SIZ_OTHER);
-				exp.setStyle("-fx-border-color: blue;" + // Border color
-						"-fx-border-width: 1px;" // Border width
-				);
-				entity = exp;
-				break;
-			default:
-				notif.setText("Nothing found");
-				break;
+		case BALL:
+			entity = new Circle(RAD, Paint.valueOf("Red"));
+			break;
+		case EXP:
+			Pane exp = new Pane();
+			exp.setMaxSize(SIZ_OTHER, SIZ_OTHER);
+			exp.setStyle("-fx-border-color: blue;" + // Border color
+					"-fx-border-width: 1px;" // Border width
+			);
+			entity = exp;
+			break;
+		default:
+			notif.setText("Nothing found");
+			break;
 
 		}
 		if (entity != null) {
@@ -385,17 +391,21 @@ public class Client extends Application {
 
 	@Override
 	public void stop() throws Exception {
+		if (es != null) {
+			leaveGame(getuName());
+			super.stop();
+			return;
+		}
+		es.execute(() -> leaveGame(getuName()));
+		es.shutdown();
+		es.awaitTermination(5, TimeUnit.SECONDS);
 
-		leaveGame(uName);
-		if (es != null)
-			es.shutdown();
 		super.stop();
 
 	}
 
 	private void leaveGame(String uName) {
 		Server_Interface server = getServer();
-		serverLock.readLock().lock();
 		if (uName.isEmpty())
 			return;
 		try {
@@ -406,28 +416,30 @@ public class Client extends Application {
 		} catch (RemoteException e) {
 			warnUnreachable(e);
 		} finally {
-			serverLock.readLock().unlock();
 			setServer(null);
 		}
 	}
 
-	private void changeMode() throws RemoteException {
+	private void changeMode() throws RemoteException, InterruptedException, ExecutionException {
 
-		setExploring(!hasExplorer);
-		if (!hasExplorer) {
-			leaveGame(uName);
+		boolean exploring = isExploring();
+		if (exploring) {
+			try {
+				es.submit(() -> leaveGame(getuName())).get(1, TimeUnit.SECONDS);
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			} catch (TimeoutException e) {
+				notif.setText("You have already left");
+			}
 			my_X = 0;
 			my_Y = 0;
-
 		} else if (inputName.getText().isEmpty()) {
 			notif.setText("NAME EMPTY");
-
-			setExploring(false);
+			setExploring(true);
 		} else
 			explore();
-		expLock.readLock().lock();
-		changeControls(hasExplorer);
-		expLock.readLock().unlock();
+		setExploring(!isExploring());
+		changeControls(isExploring());
 
 	}
 
@@ -448,54 +460,71 @@ public class Client extends Application {
 		try {
 
 			notif.setText("Exploring/...");
-			double ex_X = Double.parseDouble(inputXexp.getText());
-			double ex_Y = Double.parseDouble(inputYexp.getText());
+			double ex_X = Double.parseDouble(inputXexp.getText()), ex_Y = Double.parseDouble(inputYexp.getText());
+			String ip = inputIP.getText(), name = inputName.getText();
+			int port = Integer.parseInt(inputPort.getText());
+			ballPane.setScaleX(DX);
+			ballPane.setScaleY(DY);
+			
 			if (ex_X > X_MAX || ex_X < 0 || ex_Y > Y_MAX || ex_Y < 0)
 				throw new NumberFormatException();
 			double off_x = (ex_X >= X_MAX) ? EX_BOUND : (ex_X <= 0) ? -EX_BOUND : 0f,
 					off_y = (ex_Y >= Y_MAX) ? -EX_BOUND : (ex_Y <= 0) ? EX_BOUND : 0f;
-			ballPane.setScaleX(DX);
-			ballPane.setScaleY(DY);
+
 			my_X = ex_X -= off_x;
 			my_Y = ex_Y += off_y;
-			ex_X = (ballPane.getWidth() * 0.5 - my_X) * DX;
-			ex_Y = (my_Y - ballPane.getHeight() * 0.5) * DY;
-			ballPane.setLayoutX(ex_X);
-			ballPane.setLayoutY(ex_Y);
+			ex_X = (ballPane.getWidth() * 0.5 - ex_X) * DX;
+			ex_Y = (ex_Y - ballPane.getHeight() * 0.5) * DY;
+			ballPane.relocate(ex_X, ex_Y);
 
-			try {
+			if (joinServer(ip, name, port))
+				return;
 
-				String ip = inputIP.getText();
-				System.setProperty("java.rmi.server.hostname", ip);
-				int PORT_NUM = Integer.parseInt(inputPort.getText());
+			notif.setText("Can't join :(");
 
-				registry = LocateRegistry.getRegistry(ip, PORT_NUM);
-				notif.setText(ip);
-				if (registry == null)
-					throw new NotBoundException("No registry");
-				setServer((Server_Interface) registry.lookup("Server"));
-				serverLock.readLock().lock();
-				Server_Interface server = getServer();
-
-				if (server == null) {
-					serverLock.readLock().unlock();
-					throw new NotBoundException("Server not found");
-				}
-				uName = inputName.getText();
-				if (!server.joinGame(my_X, my_Y, uName)) {
-					notif.setText("Can't join :(");
-					setExploring(false);
-				}
-				serverLock.readLock().unlock();
-
-			} catch (NotBoundException e) {
-				e.printStackTrace();
-				notif.setText(e.getMessage());
-			}
 		} catch (NumberFormatException e) {
-			notif.setText("Invalid Explorer coordinates.\n");
-			setExploring(false);
+			notif.setText("Invalid inputs.\n");
 		}
+		setExploring(true);
+	}
+
+	public boolean joinServer(String ip, String name, int port) {
+		try {
+			return es.submit(new Callable<Boolean>() {
+
+				@Override
+				public Boolean call() throws Exception {
+					System.setProperty("java.rmi.server.hostname", ip);
+					try {
+						registry = LocateRegistry.getRegistry(ip, port);
+						if (registry == null)
+							throw new NotBoundException("No registry");
+						setServer((Server_Interface) registry.lookup("Server"));
+
+						Server_Interface server = getServer();
+
+						if (server == null) {
+							throw new NotBoundException("Server not found");
+						}
+						setuName(name);
+						return server.joinGame(my_X, my_Y, name);
+					} catch (NotBoundException e) {
+						e.printStackTrace();
+						String msg = e.getMessage();
+						System.out.println(msg);
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
+					return false;
+
+				}
+			}).get(3, TimeUnit.SECONDS);
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		} catch (TimeoutException e) {
+			notif.setText("Connetion Timed out");
+		}
+		return false;
 	}
 
 	private void drawBalls(List<Node> nodes) {
@@ -527,6 +556,32 @@ public class Client extends Application {
 		expLock.writeLock().lock();
 		this.hasExplorer = hasExplorer;
 		expLock.writeLock().unlock();
+	}
+
+	private ReentrantReadWriteLock nameLock = new ReentrantReadWriteLock();
+
+	public String getuName() {
+		String name = null;
+		nameLock.readLock().lock();
+		name = uName;
+		nameLock.readLock().unlock();
+		return name;
+	}
+
+	public void setuName(String uName) {
+
+		nameLock.writeLock().lock();
+		this.uName = uName;
+
+		nameLock.writeLock().unlock();
+	}
+
+	public boolean isExploring() {
+		boolean hasExplorer = false;
+		expLock.readLock().lock();
+		hasExplorer = this.hasExplorer;
+		expLock.readLock().unlock();
+		return hasExplorer;
 	}
 
 }

@@ -7,6 +7,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentHashMap.KeySetView;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -112,11 +114,11 @@ public class Server extends Application {
 	private GridPane gpDebug = new GridPane();
 	private static ExecutorService es;
 
+	private static ConcurrentHashMap<String, Player> playerList = new ConcurrentHashMap<String, Player>(0);
+
 	public static void main(String[] args) {
 		es = Executors.newFixedThreadPool(3);
-
 		Server_Interface worker = new Server_Interface() {
-
 			private List<Entity> getBalls(double x, double y, int width, int height, String name)
 					throws RemoteException, InterruptedException, ExecutionException {
 
@@ -163,7 +165,8 @@ public class Server extends Application {
 					@Override
 					public Boolean call() throws Exception {
 						ObservableList<Node> children = ballPane.getChildren();
-						if (children.filtered(node->node instanceof Pane).stream().anyMatch(node -> name.equals(node.getId()))) {
+						if (playerList.contains(name)
+								|| children.stream().anyMatch(node -> name.equals(node.getId()))) {
 							return false;
 						}
 						System.out.println(name + " is JOINING\n");
@@ -178,7 +181,14 @@ public class Server extends Application {
 						paneExp.setMaxSize(4.99, 4.99);
 						paneExp.setScaleX(20);
 						paneExp.setScaleY(20);
-						return ballPane.getChildren().add(paneExp);
+						boolean success = children.add(paneExp);
+						if (!success)
+							return false;
+						int i = children.size() - 1;
+						if (paneExp != children.get(i))
+							i = children.indexOf(paneExp);
+
+						return playerList.put(name, new Player(i, System.nanoTime(), paneExp)) == null;
 					}
 				});
 
@@ -217,26 +227,31 @@ public class Server extends Application {
 					@Override
 					public Boolean call() throws Exception {
 						List<Node> players = ballPane.getChildren();
-						if (players.isEmpty()) {
+						if (players.isEmpty())
+							return false;
+						Player player = playerList.get(name);
+						if (player == null) {
+							ballPane.getChildren().removeIf(node -> node instanceof Pane && name.equals(node.getId()));
 							return false;
 						}
 
-						for (Node child : players) {
-
-							if (!name.equals(child.getId())) {
-								continue;
-							}
+						Node child = players.get(player.getIndex());
+						if (player.getNode() != child) {
+							ballPane.getChildren().removeIf(node -> node instanceof Pane && name.equals(node.getId()));
+							return false;
+						}
+						if (child.getLayoutX() != x && child.getLayoutY() != y) {
 							child.setLayoutX(x);
 							child.setLayoutY(720 - y);
-							System.out.print("NAME: " + name + " XY:" + x + " " + y + '\n');
-							return true;
+							player.setTime(System.nanoTime());
 						}
-						return false;
+						System.out.print("NAME: " + name + " XY:" + x + " " + y + '\n');
+
+						return true;
 					}
 				});
 				Platform.runLater(task);
 				return task.get();
-
 			}
 
 			@Override
@@ -445,10 +460,12 @@ public class Server extends Application {
 			public void handle(long now) {
 
 				fps++;
-//				makeFrame();
 				ballPane.getChildren().filtered(node -> (node instanceof Circle))
 						.forEach(circle -> mov_ball((Circle) circle));
-
+				es.execute(() -> playerList.forEach((k, v) -> {
+					if (now - v.getTime() > 5_000_000_000l)
+						playerList.remove(k);
+				}));
 				double curr = now - lastFPSTime;
 
 				if (curr < 500_000_000) {
@@ -463,8 +480,6 @@ public class Server extends Application {
 			}
 
 		};
-//		Thread anims = new Thread(() -> ticer.start());
-//		anims.start();
 		ticer.start();
 	}
 

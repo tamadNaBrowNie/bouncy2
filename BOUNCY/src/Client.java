@@ -267,8 +267,8 @@ public class Client extends Application {
 										.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
 
 							} catch (RemoteException e) {
-
-								warnUnreachable(e);
+								Platform.runLater(()->warnUnreachable(e));
+								
 							}
 
 							return null;

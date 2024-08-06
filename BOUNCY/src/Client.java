@@ -248,20 +248,22 @@ public class Client extends Application {
 				fpsLabel.setText(String.format("FPS: %.2f", fps));
 				lastFPSTime = now;
 				fps = 0;
-
+				if (server == null) {
+					return;
+				}
 				try {
 
 					if (clear) {
 						ballPane.getChildren().clear();
 						return;
 					}
-					List<Node> nodes = es.submit(new Callable<List<Node>>() {
+					
+					List<Node> nodes = 
+							es.submit(new Callable<List<Node>>() {
 						@Override
 						public List<Node> call() throws Exception {
 							Server_Interface server = getServer();
-							if (server == null) {
-								return null;
-							}
+							
 							try {
 								return server.updateServer(my_X, my_Y, getuName(), paneExp.getScaleX() > 0)
 										.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
@@ -286,6 +288,10 @@ public class Client extends Application {
 					btnAddExplorer.fire();
 					e.printStackTrace();
 				}
+//				catch (RemoteException e) {
+//					e.printStackTrace();
+//				}
+				
 
 			}
 
@@ -514,7 +520,7 @@ public class Client extends Application {
 					} catch (NotBoundException e) {
 						e.printStackTrace();
 						String msg = e.getMessage();
-						Platform.runLater(()->warnUnreachable(e,msg));
+						Platform.runLater(() -> warnUnreachable(e, msg));
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}

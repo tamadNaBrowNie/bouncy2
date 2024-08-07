@@ -214,7 +214,7 @@ public class Server extends Application {
 						if (paneExp != children.get(i))
 							i = children.indexOf(paneExp);
 
-						return playerList.put(name, new Player(i, System.nanoTime(), paneExp)) == null;
+						return playerList.putIfAbsent(name, new Player(i, System.nanoTime(), paneExp)) == null;
 					}
 				});
 

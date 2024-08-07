@@ -14,10 +14,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
+import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -37,6 +42,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class Server extends Application {
 	private static final int l_width = 250;
@@ -117,7 +123,7 @@ public class Server extends Application {
 
 	public static void main(String[] args) {
 		es = Executors.newFixedThreadPool(3);
-	
+
 		Server_Interface worker = new Server_Interface() {
 			@Override
 			public List<Entity> updateServer(double x, double y, String name, boolean face_right)
@@ -127,6 +133,7 @@ public class Server extends Application {
 				return this.getBalls(x, y, 33, 19, name);
 
 			}
+
 			@Override
 			public void leaveGame(String name) throws RemoteException {
 				if (name == null)
@@ -453,14 +460,13 @@ public class Server extends Application {
 		AnimationTimer ticer = new AnimationTimer() {
 			@Override
 			public void handle(long now) {
+				if(now % 10_000_000_000l <=0 )
+					es.execute(() -> playerList.forEach((k, v) -> {
+						if (now - v.getTime() > 30_000_000_000l)
+							playerList.remove(k);
+					}));
 
 				fps++;
-				ballPane.getChildren().filtered(node -> (node instanceof Circle))
-						.forEach(circle -> mov_ball((Circle) circle));
-				es.execute(() -> playerList.forEach((k, v) -> {
-					if (now - v.getTime() > 30_000_000_000l)
-						playerList.remove(k);
-				}));
 				double curr = now - lastFPSTime;
 
 				if (curr < 500_000_000) {
@@ -476,20 +482,25 @@ public class Server extends Application {
 
 		};
 		ticer.start();
+		Timeline timeline = new Timeline(new KeyFrame(Duration.millis(16.66667), new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent t) {
+				ballPane.getChildren().filtered(node -> (node instanceof Circle))
+						.forEach(circle -> mov_ball((Circle) circle));
+			}
+		}));
+		timeline.setCycleCount(Animation.INDEFINITE);
+		timeline.play();
 	}
 
 	private void mov_ball(Circle circle) {
-		boolean isSeen = true;
 		double x_0 = circle.getLayoutX(), y_0 = circle.getLayoutY(), dx = circle.getTranslateX(),
 				dy = circle.getTranslateY(), x_f = x_0 + dx, y_f = y_0 + dy, r = circle.getRadius();
-		circle.setVisible(isSeen);
-
-		if (x_f < r || x_f > X_MAX - r) {
+		if (x_f <= r || x_f >= X_MAX - r) {
 			circle.setTranslateX(-dx);
 		}
 
 		circle.setLayoutX(x_0 + circle.getTranslateX());
-		if (y_f > Y_MAX - r || y_f < r) {
+		if (y_f >= Y_MAX - r || y_f <= r) {
 			circle.setTranslateY(-dy);
 		}
 		circle.setLayoutY(y_0 + circle.getTranslateY());

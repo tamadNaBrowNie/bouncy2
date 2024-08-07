@@ -8,12 +8,16 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
+import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Orientation;
@@ -33,6 +37,10 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 public class Client extends Application {
 	private static final double DY = 38.34;
@@ -111,7 +119,6 @@ public class Client extends Application {
 
 	@Override
 	public void init() throws Exception {
-
 		paneRight.setLayoutX(270);
 		paneRight.setPrefHeight(Y_MAX);
 		paneRight.setMinWidth(1280);
@@ -228,15 +235,20 @@ public class Client extends Application {
 		System.nanoTime();
 		lastFPSTime = System.nanoTime();
 
+		Timeline timeline = new Timeline(new KeyFrame(Duration.millis(16.66667), new EventHandler<ActionEvent>() {
+			boolean clr = true;
+
+			public void handle(ActionEvent t) {
+				clr ^= true;
+				makeFrame(clr);
+			}
+		}));
+		timeline.setCycleCount(Animation.INDEFINITE);
+		timeline.play();
 		AnimationTimer ticer = new AnimationTimer() {
-			private boolean clear = true;
 
 			@Override
-
 			public void handle(long now) {
-				// fast negate
-				this.clear ^= true;
-				boolean clear = this.clear;
 				fps++;
 				double curr = now - lastFPSTime;
 
@@ -247,56 +259,55 @@ public class Client extends Application {
 				fpsLabel.setText(String.format("FPS: %.2f", fps));
 				lastFPSTime = now;
 				fps = 0;
-				if (server == null) {
-					return;
-				}
-				try {
-
-					if (clear) {
-						ballPane.getChildren().clear();
-						return;
-					}
-					
-					List<Node> nodes = 
-							es.submit(new Callable<List<Node>>() {
-						@Override
-						public List<Node> call() throws Exception {
-							Server_Interface server = getServer();
-							
-							try {
-								return server.updateServer(my_X, my_Y, getuName(), paneExp.getScaleX() > 0)
-										.parallelStream().map(ent -> toNode(ent)).collect(Collectors.toList());
-
-							} catch (RemoteException e) {
-								Platform.runLater(() -> warnUnreachable(e));
-
-							}
-
-							return null;
-						}
-
-					}).get(1, TimeUnit.SECONDS);
-					if (nodes == null || nodes.isEmpty())
-						return;
-					drawBalls(nodes);
-
-				} catch (InterruptedException | ExecutionException e) {
-					e.printStackTrace();
-				} catch (TimeoutException e) {
-					notif.setText("Server Timeout");
-					btnAddExplorer.fire();
-					e.printStackTrace();
-				}
-//				catch (RemoteException e) {
-//					e.printStackTrace();
-//				}
-				
 
 			}
 
 		};
 		ticer.start();
 
+	}
+
+	public void makeFrame(boolean clear) {
+		Server_Interface server = getServer();
+		if (server == null) {
+			return;
+		}
+		if (clear) {
+			ballPane.getChildren().clear();
+			return;
+		}
+		Future<List<Node>> result = es.submit(new Callable<List<Node>>() {
+			@Override
+			public List<Node> call() throws Exception {
+
+				try {
+					return server.updateServer(my_X, my_Y, getuName(), paneExp.getScaleX() > 0).parallelStream()
+							.map(ent -> toNode(ent)).collect(Collectors.toList());
+
+				} catch (RemoteException e) {
+					Platform.runLater(() -> warnUnreachable(e));
+
+				}
+
+				return null;
+			}
+
+		});
+		try {
+
+			List<Node> nodes = result.get(1, TimeUnit.SECONDS);
+			if (nodes == null || nodes.isEmpty())
+				return;
+			drawBalls(nodes);
+
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		} catch (TimeoutException e) {
+			notif.setText("Server Timeout");
+			btnAddExplorer.fire();
+			result.cancel(true);
+			e.printStackTrace();
+		}
 	}
 
 	private void warnUnreachable(Exception e) {
@@ -431,12 +442,15 @@ public class Client extends Application {
 	private void changeMode() throws RemoteException, InterruptedException, ExecutionException {
 
 		boolean exploring = isExploring();
+
 		if (exploring) {
+			Future<?> result = es.submit(() -> leaveGame(getuName()));
 			try {
-				es.submit(() -> leaveGame(getuName())).get(1, TimeUnit.SECONDS);
+				result.get(1, TimeUnit.SECONDS);
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			} catch (TimeoutException e) {
+				result.cancel(true);
 				notif.setText("You have already left");
 			}
 			my_X = 0;
@@ -497,39 +511,43 @@ public class Client extends Application {
 	}
 
 	public boolean joinServer(String ip, String name, int port) {
-		try {
-			return es.submit(new Callable<Boolean>() {
 
-				@Override
-				public Boolean call() throws Exception {
-					System.setProperty("java.rmi.server.hostname", ip);
-					try {
-						registry = LocateRegistry.getRegistry(ip, port);
-						if (registry == null)
-							throw new NotBoundException("No registry");
-						setServer((Server_Interface) registry.lookup("Server"));
+		Future<Boolean> result = es.submit(new Callable<Boolean>() {
 
-						Server_Interface server = getServer();
+			@Override
+			public Boolean call() throws Exception {
+				System.setProperty("java.rmi.server.hostname", ip);
 
-						if (server == null) {
-							throw new NotBoundException("Server not found");
-						}
-						setuName(name);
-						return server.joinGame(my_X, my_Y, name);
-					} catch (NotBoundException e) {
-						e.printStackTrace();
-						String msg = e.getMessage();
-						Platform.runLater(() -> warnUnreachable(e, msg));
-					} catch (RemoteException e) {
-						e.printStackTrace();
+				try {
+					registry = LocateRegistry.getRegistry(ip, port);
+					if (registry == null)
+						throw new NotBoundException("No registry");
+					setServer((Server_Interface) registry.lookup("Server"));
+
+					Server_Interface server = getServer();
+
+					if (server == null) {
+						throw new NotBoundException("Server not found");
 					}
-					return false;
-
+					setuName(name);
+					return server.joinGame(my_X, my_Y, name);
+				} catch (NotBoundException e) {
+					e.printStackTrace();
+					String msg = e.getMessage();
+					Platform.runLater(() -> warnUnreachable(e, msg));
+				} catch (RemoteException e) {
+					e.printStackTrace();
 				}
-			}).get(3, TimeUnit.SECONDS);
+				return false;
+
+			}
+		});
+		try {
+			return result.get(1, TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		} catch (TimeoutException e) {
+			result.cancel(true);
 			notif.setText("Connetion Timed out");
 		}
 		return false;

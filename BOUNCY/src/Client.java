@@ -35,7 +35,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 public class Client extends Application {
-	private static final String joinFailM = "Can't join";
 	private static final double DY = 38.34;
 	private static final double DX = 38.34;
 	private static final double SIZ_OTHER = 10;

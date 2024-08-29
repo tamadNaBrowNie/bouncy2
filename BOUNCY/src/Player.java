@@ -6,16 +6,11 @@ public class Player {
 		time = t;
 		this.setNode(node);
 	}
-private int index;
+public final int index;
 private long time;
 private Node node;
-public int getIndex() {
-	return index;
-}
-public void setIndex(int index) {
-	this.index = index;
-}
-public long getTime() {
+
+	public long getTime() {
 	return time;
 }
 public void setTime(long time) {

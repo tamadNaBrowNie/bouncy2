@@ -1,34 +1,16 @@
-import java.rmi.AccessException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
-
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -39,72 +21,79 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 public class Client extends Application {
 	private static final double DY = 38.34;
 	private static final double DX = 38.34;
 	private static final double SIZ_OTHER = 10;
 	private static final int RAD = 12;
-	private Label fpsLabel = new Label("FPS: 0");
+	private final Label fpsLabel = new Label("FPS: 0");
 	private long lastFPSTime = System.nanoTime();
 	private double fps = 0;
 	private boolean hasExplorer = false;
 
 	private final double X_MAX = 1280, Y_MAX = 720;
-	private Pane paneContainer = new Pane();
+	private final Pane paneContainer = new Pane();
 
-	private Pane ballPane = new Pane();
+	private final Pane ballPane = new Pane();
 
-	private Pane paneRight = new Pane();
+	private final Pane paneRight = new Pane();
 
-	private GridPane gridPane = new GridPane();
+	private final GridPane gridPane = new GridPane();
 
 	private Server_Interface server = null;
 	private final String ENTRY_TXT = "BECOME AN EXPLORER";
-	private final String LEAVE_TXT = "LEAVE";
-	private Button btnAddExplorer = new Button(ENTRY_TXT);
+    private final Button btnAddExplorer = new Button(ENTRY_TXT);
 
-	private GridPane gpDistance = new GridPane();
-	private GridPane gpVelocity = new GridPane();
-	private GridPane gpAngle = new GridPane();
+	private final GridPane gpDistance = new GridPane();
+	private final GridPane gpVelocity = new GridPane();
+	private final GridPane gpAngle = new GridPane();
 
-	private GridPane gpStartXY = new GridPane();
-	private GridPane gpEndXY = new GridPane();
-	private GridPane gpStartEndVelocity = new GridPane();
-	private GridPane gpStartEndAngle = new GridPane();
+	private final GridPane gpStartXY = new GridPane();
+	private final GridPane gpEndXY = new GridPane();
+	private final GridPane gpStartEndVelocity = new GridPane();
+	private final GridPane gpStartEndAngle = new GridPane();
 
-	private Label labelXYexp = new Label("Spawn Explorer on (X,Y) Coordinates:");
-	private TextField inputXexp = new TextField();
-	private TextField inputYexp = new TextField();
-	private GridPane gpExplorerXY = new GridPane(); // this is for the XY textfields ONLY
+	private final Label labelXYexp = new Label("Spawn Explorer on (X,Y) Coordinates:");
+	private final TextField inputXexp = new TextField();
+	private final TextField inputYexp = new TextField();
+	private final GridPane gpExplorerXY = new GridPane(); // this is for the XY textfields ONLY
 
-	private Label labelIP = new Label("Input IP:");
-	private TextField inputIP = new TextField();
+	private final Label labelIP = new Label("Input IP:");
+	private final TextField inputIP = new TextField();
 
-	private Label labelName = new Label("Input Client Name:");
-	private TextField inputName = new TextField();
+	private final Label labelName = new Label("Input Client Name:");
+	private final TextField inputName = new TextField();
 
-	private Label labelPort = new Label("Input Port Number:");
-	private TextField inputPort = new TextField();
+	private final Label labelPort = new Label("Input Port Number:");
+	private final TextField inputPort = new TextField();
 
-	private GridPane gpExplorer = new GridPane();
+	private final GridPane gpExplorer = new GridPane();
 
-	private TextArea tester = new TextArea("(Test) Balls rn:\n");
+	private final TextArea tester = new TextArea("(Test) Balls rn:\n");
 
-	private Separator separatorV = new Separator();
+	private final Separator separatorV = new Separator();
 
-	private Label notif = new Label("ERROR GO HERE");
-	private Label textTest = new Label("");
+	private final Label notif = new Label("ERROR GO HERE");
+	private final Label textTest = new Label("");
 
 	private final float EX_BOUND = 5.2164841f;
 
-	private GridPane gpContainer = new GridPane();
-	private GridPane paneLeft = new GridPane();
-	private Pane paneExp = new StackPane();
-	private GridPane gpDebug = new GridPane();
-	private static ExecutorService es = Executors.newCachedThreadPool();
+	private final GridPane gpContainer = new GridPane();
+	private final GridPane paneLeft = new GridPane();
+	private final Pane paneExp = new StackPane();
+	private final GridPane gpDebug = new GridPane();
+	private static final ExecutorService es = Executors.newCachedThreadPool();
 
 	private static Registry registry;
 
@@ -112,7 +101,8 @@ public class Client extends Application {
 		launch(args);
 	}
 
-	private ReentrantReadWriteLock serverLock = new ReentrantReadWriteLock(), expLock = new ReentrantReadWriteLock();
+	private final ReentrantReadWriteLock serverLock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock expLock = new ReentrantReadWriteLock();
 
 	private double my_X = 0, my_Y = 0;
 	private String uName = "";
@@ -155,7 +145,8 @@ public class Client extends Application {
 		gpAngle.setMaxWidth(250);
 
 		// will look like
-		/**
+		/*
+		 *
 		 * Input Server IP Number:(?) need pa ba Input Port Number: [ ] Spawn Explorer
 		 * on (X,Y) coordinates: [ ][ ] Join Server btn
 		 */
@@ -206,23 +197,28 @@ public class Client extends Application {
 		paneRight.getChildren().add(spExplorer);
 		spExplorer.setVisible(true);
 
-		btnAddExplorer.setOnAction(event -> {
-			try {
-				notif.setText("Going to " + inputPort.getText());
-				btnAddExplorer.setDisable(true);
-				changeMode();
-			} catch (RemoteException e) {
-
-				warnUnreachable(e);
-				btnAddExplorer.setDisable(false);
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
-
-		});
+		btnAddExplorer.setOnAction(this::ExploreEvent);
 		super.init();
 
 	}
+	private void ExploreEvent(ActionEvent event) {
+		ExploreEvent();
+	}
+	private void ExploreEvent() {
+		try {
+
+			btnAddExplorer.setDisable(true);
+			changeMode();
+		} catch (RemoteException e) {
+
+			warnUnreachable(e);
+			btnAddExplorer.setDisable(false);
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -231,18 +227,18 @@ public class Client extends Application {
 		primaryStage.setScene(scene);
 		primaryStage.show();
 
-		scene.setOnKeyPressed(e -> handleKB(e));
+		scene.setOnKeyPressed(this::handleKB);
 		System.nanoTime();
 		lastFPSTime = System.nanoTime();
 
 		Timeline timeline = new Timeline(new KeyFrame(Duration.millis(16.66667), new EventHandler<ActionEvent>() {
 			boolean clr = true;
-
-			public void handle(ActionEvent t) {
-				clr ^= true;
-				makeFrame(clr);
-			}
-		}));
+			@Override
+            public void handle(ActionEvent t) {
+                clr = !clr;
+                makeFrame(clr);
+            }
+        }));
 		timeline.setCycleCount(Animation.INDEFINITE);
 		timeline.play();
 		AnimationTimer ticer = new AnimationTimer() {
@@ -252,11 +248,10 @@ public class Client extends Application {
 				fps++;
 				double curr = now - lastFPSTime;
 
-				if (curr < 500_000_000)
-					return;
+				if (curr < 500_000_000) return;
 				fps *= 1_000_000_000.0 / curr;
 
-				fpsLabel.setText(String.format("FPS: %.2f", fps));
+				fpsLabel.setText(format("FPS: %.2f", fps));
 				lastFPSTime = now;
 				fps = 0;
 
@@ -276,35 +271,29 @@ public class Client extends Application {
 			ballPane.getChildren().clear();
 			return;
 		}
-		Future<List<Node>> result = es.submit(new Callable<List<Node>>() {
-			@Override
-			public List<Node> call() throws Exception {
+		Future<List<Node>> result = es.submit(() -> {
 
-				try {
-					return server.updateServer(my_X, my_Y, getuName(), paneExp.getScaleX() > 0).parallelStream()
-							.map(ent -> toNode(ent)).collect(Collectors.toList());
+            try {
+                return server.updateServer(my_X, my_Y, getuName(), paneExp.getScaleX() > 0).parallelStream()
+                        .map(this::toNode).collect(Collectors.toList());
 
-				} catch (RemoteException e) {
-					Platform.runLater(() -> warnUnreachable(e));
+            } catch (RemoteException e) {
+                warnUnreachable(e);
 
-				}
-
-				return null;
-			}
-
-		});
+            }
+            return null;
+        });
 		try {
 
 			List<Node> nodes = result.get(1, TimeUnit.SECONDS);
-			if (nodes == null || nodes.isEmpty())
-				return;
-			drawBalls(nodes);
+			if (nodes != null && !nodes.isEmpty())
+				drawBalls(nodes);
 
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		} catch (TimeoutException e) {
 			notif.setText("Server Timeout");
-			btnAddExplorer.fire();
+			ExploreEvent();
 			result.cancel(true);
 			e.printStackTrace();
 		}
@@ -322,12 +311,10 @@ public class Client extends Application {
 		e.printStackTrace();
 	}
 
-	private final String msg = "\nYou are at (in px):\n" + "X: [ %.2f ]\n" + "Y: [ %.2f ]";
-
-	private void handleKB(KeyEvent e) {
+    private void handleKB(KeyEvent e) {
 		switch (e.getCode()) {
 		case E:
-			btnAddExplorer.fire();
+			ExploreEvent();
 			break;
 		case ESCAPE:
 			Platform.exit();
@@ -338,8 +325,7 @@ public class Client extends Application {
 		if (!isExploring()) {
 			return;
 		}
-		;
-		switch (e.getCode()) {
+        switch (e.getCode()) {
 		case W:
 			my_Y++;
 			break;
@@ -371,16 +357,18 @@ public class Client extends Application {
 		else if (my_Y <= EX_BOUND)
 			my_Y = EX_LIM;
 
-		notif.setText(String.format(msg, my_X, my_Y));
+        String msg = "\nYou are at (in px): X: [ %.2f ], Y: [ %.2f ]";
+        notif.setText(format(msg, my_X, my_Y));
 		ballPane.setLayoutX((halfSizX - my_X) * DX);
 		ballPane.setLayoutY((my_Y - halfSizY) * DY);
 	}
 
 	private Node toNode(Entity ent) {
-		Node entity = null;
+
 		if (ent == null)
 			return null;
-		switch (ent.getType()) {
+		Node entity;
+		switch (ent.type) {
 		case BALL:
 			entity = new Circle(RAD, Paint.valueOf("Red"));
 			break;
@@ -394,30 +382,26 @@ public class Client extends Application {
 			break;
 		default:
 			notif.setText("Nothing found");
-			break;
+			return null;
 
 		}
-		if (entity != null) {
-			ent.setName("ENTITY BALL");
-			entity.setId(ent.name);
-			entity.setLayoutX(ent.getX());
-			entity.setLayoutY(ent.getY());
-			entity.setVisible(true);
-
-		}
+		ent.setName("ENTITY BALL");
+		entity.setId(ent.name);
+		entity.setLayoutX(ent.x);
+		entity.setLayoutY(ent.y);
+		entity.setVisible(true);
 		return entity;
 	}
 
 	@Override
 	public void stop() throws Exception {
-		if (es != null) {
-			leaveGame(getuName());
-			super.stop();
-			return;
-		}
+//		if (es != null) {
+//			leaveGame(getuName());
+//			super.stop();
+//			return;
+//		}
 		es.execute(() -> leaveGame(getuName()));
 		es.shutdown();
-		es.awaitTermination(5, TimeUnit.SECONDS);
 
 		super.stop();
 
@@ -444,6 +428,7 @@ public class Client extends Application {
 		boolean exploring = isExploring();
 
 		if (exploring) {
+			notif.setText("");
 			Future<?> result = es.submit(() -> leaveGame(getuName()));
 			try {
 				result.get(1, TimeUnit.SECONDS);
@@ -458,8 +443,10 @@ public class Client extends Application {
 		} else if (inputName.getText().isEmpty()) {
 			notif.setText("NAME EMPTY");
 			setExploring(true);
-		} else
+		} else {
+			notif.setText("Going to " + inputPort.getText());
 			explore();
+		}
 		setExploring(!isExploring());
 		changeControls(isExploring());
 
@@ -474,11 +461,12 @@ public class Client extends Application {
 		inputName.setDisable(exp);
 		paneRight.setVisible(exp);
 		btnAddExplorer.setDisable(false);
-		btnAddExplorer.setText((exp) ? LEAVE_TXT : ENTRY_TXT);
+        String LEAVE_TXT = "LEAVE";
+        btnAddExplorer.setText((exp) ? LEAVE_TXT : ENTRY_TXT);
 
 	}
 
-	private void explore() throws AccessException, RemoteException {
+	private void explore() {
 		try {
 
 			notif.setText("Exploring/...");
@@ -512,36 +500,32 @@ public class Client extends Application {
 
 	public boolean joinServer(String ip, String name, int port) {
 
-		Future<Boolean> result = es.submit(new Callable<Boolean>() {
+		Future<Boolean> result = es.submit(() -> {
+            System.setProperty("java.rmi.server.hostname", ip);
 
-			@Override
-			public Boolean call() throws Exception {
-				System.setProperty("java.rmi.server.hostname", ip);
+            try {
+                registry = LocateRegistry.getRegistry(ip, port);
+                if (registry == null)
+                    throw new NotBoundException("No registry");
+                setServer((Server_Interface) registry.lookup("Server"));
 
-				try {
-					registry = LocateRegistry.getRegistry(ip, port);
-					if (registry == null)
-						throw new NotBoundException("No registry");
-					setServer((Server_Interface) registry.lookup("Server"));
+                Server_Interface server = getServer();
 
-					Server_Interface server = getServer();
+                if (server == null) {
+                    throw new NotBoundException("Server not found");
+                }
+                setuName(name);
+                return server.joinGame(my_X, my_Y, name);
+            } catch (NotBoundException e) {
+                e.printStackTrace();
+                String msg = e.getMessage();
+                Platform.runLater(() -> warnUnreachable(e, msg));
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+			return false;
 
-					if (server == null) {
-						throw new NotBoundException("Server not found");
-					}
-					setuName(name);
-					return server.joinGame(my_X, my_Y, name);
-				} catch (NotBoundException e) {
-					e.printStackTrace();
-					String msg = e.getMessage();
-					Platform.runLater(() -> warnUnreachable(e, msg));
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
-				return false;
-
-			}
-		});
+        });
 		try {
 			return result.get(1, TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException e) {
@@ -565,9 +549,9 @@ public class Client extends Application {
 
 	private Server_Interface getServer() {
 
-		Server_Interface server = null;
+
 		serverLock.readLock().lock();
-		server = this.server;
+		Server_Interface server = this.server;
 		serverLock.readLock().unlock();
 		return server;
 	}
@@ -584,12 +568,12 @@ public class Client extends Application {
 		expLock.writeLock().unlock();
 	}
 
-	private ReentrantReadWriteLock nameLock = new ReentrantReadWriteLock();
+	private final ReentrantReadWriteLock nameLock = new ReentrantReadWriteLock();
 
 	public String getuName() {
-		String name = null;
+
 		nameLock.readLock().lock();
-		name = uName;
+		String name = uName;
 		nameLock.readLock().unlock();
 		return name;
 	}
@@ -603,9 +587,9 @@ public class Client extends Application {
 	}
 
 	public boolean isExploring() {
-		boolean hasExplorer = false;
+
 		expLock.readLock().lock();
-		hasExplorer = this.hasExplorer;
+		boolean hasExplorer = this.hasExplorer;
 		expLock.readLock().unlock();
 		return hasExplorer;
 	}

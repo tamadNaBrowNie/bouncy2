@@ -1,19 +1,3 @@
-import java.rmi.NotBoundException;
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import java.util.stream.Collectors;
-
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
@@ -21,20 +5,12 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.control.TabPane.TabClosingPolicy;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -44,6 +20,18 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.rmi.NotBoundException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 public class Server extends Application {
 	private static final int l_width = 250;
 // 1099;
@@ -52,85 +40,89 @@ public class Server extends Application {
 	private static final String ADD_BY_ANGLE = "Add by Angle";
 	private static final String ADD_BY_VELOCITY = "Add by Velocity";
 	private static final String ADD_BY_DISTANCE = "Add by Distance";
-	private Label fpsLabel = new Label("FPS: 0");
+	private final Label fpsLabel = new Label("FPS: 0");
 	private long lastFPSTime = System.nanoTime();
 	private double fps = 0;
 
 	private final static double X_MAX = 1280;
 	private final static double Y_MAX = 720;
-	private Pane paneContainer = new Pane();
+	private final Pane paneContainer = new Pane();
 
-	private static Pane ballPane = new Pane();
+	private static final Pane ballPane = new Pane();
 
-	private Pane paneRight = new Pane();
+	private final Pane paneRight = new Pane();
 
-	private GridPane gridPane = new GridPane();
+	private final GridPane gridPane = new GridPane();
 
-	private TextField inputStartX = new TextField();
-	private TextField inputStartY = new TextField();
+	private final TextField inputStartX = new TextField();
+	private final TextField inputStartY = new TextField();
 
-	private TextField inputEndX = new TextField();
-	private TextField inputEndY = new TextField();
-	private TextField inputStartAngle = new TextField();
-	private TextField inputEndAngle = new TextField();
+	private final TextField inputEndX = new TextField();
+	private final TextField inputEndY = new TextField();
+	private final TextField inputStartAngle = new TextField();
+	private final TextField inputEndAngle = new TextField();
 
-	private TextField inputStartVelocity = new TextField();
-	private TextField inputEndVelocity = new TextField();
-	private Label labelVelocity = new Label(V_PX_S);
-	private TextField inputVelocity = new TextField();
-	private Label labelAngle = new Label("Angle (degrees):");
-	private TextField inputAngle = new TextField();
-	private Label labelCount = new Label(prompt_n);
-	private TextField inputCount = new TextField();
-	private Button btnAddByDistance = new Button(ADD_BY_DISTANCE);
-	private Button btnAddByAngle = new Button(ADD_BY_ANGLE);
-	private Button btnAddByVelocity = new Button(ADD_BY_VELOCITY);
+	private final TextField inputStartVelocity = new TextField();
+	private final TextField inputEndVelocity = new TextField();
+	private final Label labelVelocity = new Label(V_PX_S);
+	private final TextField inputVelocity = new TextField();
+	private final Label labelAngle = new Label("Angle (degrees):");
+	private final TextField inputAngle = new TextField();
+	private final Label labelCount = new Label(prompt_n);
+	private final TextField inputCount = new TextField();
+	private final Button btnAddByDistance = new Button(ADD_BY_DISTANCE);
+	private final Button btnAddByAngle = new Button(ADD_BY_ANGLE);
+	private final Button btnAddByVelocity = new Button(ADD_BY_VELOCITY);
 
-	private GridPane gpDistance = new GridPane();
-	private GridPane gpVelocity = new GridPane();
-	private GridPane gpAngle = new GridPane();
+	private final GridPane gpDistance = new GridPane();
+	private final GridPane gpVelocity = new GridPane();
+	private final GridPane gpAngle = new GridPane();
 
-	private GridPane gpStartXY = new GridPane();
-	private GridPane gpEndXY = new GridPane();
-	private GridPane gpStartEndVelocity = new GridPane();
-	private GridPane gpStartEndAngle = new GridPane();
+	private final GridPane gpStartXY = new GridPane();
+	private final GridPane gpEndXY = new GridPane();
+	private final GridPane gpStartEndVelocity = new GridPane();
+	private final GridPane gpStartEndAngle = new GridPane();
 
-	private TabPane paneTab = new TabPane();
-	private Tab tabDistance = new Tab(ADD_BY_DISTANCE);
-	private Tab tabAngle = new Tab("Angle");
-	private Tab tabVelocity = new Tab("Velocity");
+	private final TabPane paneTab = new TabPane();
+	private final Tab tabDistance = new Tab(ADD_BY_DISTANCE);
+	private final Tab tabAngle = new Tab("Angle");
+	private final Tab tabVelocity = new Tab("Velocity");
 
-	private TextArea tester = new TextArea("(Test) Balls rn:\n");
+	private final TextArea tester = new TextArea("(Test) Balls rn:\n");
 
-	private Separator separator1 = new Separator();
-	private Separator separatorV = new Separator();
+	private final Separator separator1 = new Separator();
+	private final Separator separatorV = new Separator();
 
-	private Label notif = new Label("");
+	private final Label notif = new Label("");
 
-	private Label labelStartXY = new Label("Starting Points (X,Y):");
+	private final Label labelStartXY = new Label("Starting Points (X,Y):");
 
-	private Label labelEndXY = new Label("End Points (X,Y):");
-	private Label labelStartEndVelocity = new Label("Starting and Ending Velocity:");
-	private Label labelStartEndAngle = new Label("Starting and Ending Angle:");
-	private Label labelConstXY = new Label("Spawn Point (X,Y):");
+	private final Label labelEndXY = new Label("End Points (X,Y):");
+	private final Label labelStartEndVelocity = new Label("Starting and Ending Velocity:");
+	private final Label labelStartEndAngle = new Label("Starting and Ending Angle:");
+	private final Label labelConstXY = new Label("Spawn Point (X,Y):");
 
-	private GridPane gpContainer = new GridPane();
-	private GridPane paneLeft = new GridPane();
-	private GridPane gpDebug = new GridPane();
+	private final GridPane gpContainer = new GridPane();
+	private final GridPane paneLeft = new GridPane();
+	private final GridPane gpDebug = new GridPane();
 	private static ExecutorService es;
 
-	private static ConcurrentHashMap<String, Player> playerList = new ConcurrentHashMap<String, Player>(0);
+	private static final ConcurrentHashMap<String, Player> playerList;
 
-	public static void main(String[] args) {
+    static {
+        playerList = new ConcurrentHashMap<>(0);
+    }
+
+    public static void main(String[] args) {
 		es = Executors.newFixedThreadPool(3);
 
 		Server_Interface worker = new Server_Interface() {
 			@Override
 			public List<Entity> updateServer(double x, double y, String name, boolean face_right)
 					throws RemoteException, InterruptedException, ExecutionException {
-				if (!this.updatePos(x, y, name, face_right))
+				if (!this.updatePos(x, y, name))
 					throw new RemoteException();
-				return this.getBalls(x, y, 33, 19, name);
+				return this.getBalls(x, y, name);
 
 			}
 
@@ -145,33 +137,24 @@ public class Server extends Application {
 						.removeIf(node -> node instanceof Pane && name.equals(node.getId())));
 			}
 
-			private List<Entity> getBalls(double x, double y, int width, int height, String name)
+			private List<Entity> getBalls(double x, double y, String name)
 					throws RemoteException, InterruptedException, ExecutionException {
 
-				FutureTask<List<Entity>> t = new FutureTask<>(new Callable<List<Entity>>() {
-
-					@Override
-					public List<Entity> call() throws Exception {
-
-						List<Entity> entities = new ArrayList<>();
-						entities = ballPane.getChildren().filtered(ent -> {
-							double w_h = width * 0.5, h_h = height * 0.5, y2 = 720 - y;
-							double lX = ent.getLayoutX(), lY = ent.getLayoutY();
-							boolean named = (ent.getId() == null) ? false : ent.getId().equals(name);
-							return !named && (lX >= x - w_h && lX <= x + w_h && lY >= y2 - h_h && lY <= y2 + h_h);
-						}).stream().map(ent -> toEntity(ent)).collect(Collectors.toList());
-						return entities;
-					}
-
-					private Entity toEntity(Node ent) {
-						return (ent instanceof Circle)
-								? new Entity(ent.getLayoutX(), ent.getLayoutY(), ent.getBoundsInParent().getHeight(),
-										Type.BALL, ent.getScaleX() > 0)
-								: new Entity(ent.getLayoutX(), ent.getLayoutY(), ent.getBoundsInParent().getHeight(),
-										Type.EXP, ent.getScaleX() > 0, ent.getId());
-					}
-
-				});
+				FutureTask<List<Entity>> t = new FutureTask<>(() -> {
+                    Function<Node,Entity> toEntity = ent->(ent instanceof Circle)
+                            ? new Entity(ent.getLayoutX(), ent.getLayoutY(),
+                            Type.BALL)
+                            : new Entity(ent.getLayoutX(), ent.getLayoutY(),
+                            Type.EXP,  ent.getId());
+                    List<Entity> entities;
+                    entities = ballPane.getChildren().filtered(ent -> {
+                        double w_h = 16.5, h_h = 9.5, y2 = 720 - y;
+                        double lX = ent.getLayoutX(), lY = ent.getLayoutY();
+                        boolean named = ent.getId() != null && ent.getId().equals(name);
+                        return !named && (lX >= x - w_h && lX <= x + w_h && lY >= y2 - h_h && lY <= y2 + h_h);
+                    }).stream().map(toEntity).collect(Collectors.toList());
+                    return entities;
+                });
 				es.submit(() -> Platform.runLater(t));
 				return t.get();
 
@@ -186,37 +169,31 @@ public class Server extends Application {
 					return false;
 				}
 
-				FutureTask<Boolean> t = new FutureTask<>(new Callable<Boolean>() {
+				FutureTask<Boolean> t = new FutureTask<>(() -> {
+                    ObservableList<Node> children = ballPane.getChildren();
+                    if (playerList.containsKey(name)
+                            || children.stream().anyMatch(node -> name.equals(node.getId()))) {
+                        return false;
+                    }
+                    System.out.println(name + " is JOINING\n");
+                    Pane paneExp = new Pane();
 
-					@Override
-					public Boolean call() throws Exception {
-						ObservableList<Node> children = ballPane.getChildren();
-						if (playerList.contains(name)
-								|| children.stream().anyMatch(node -> name.equals(node.getId()))) {
-							return false;
-						}
-						System.out.println(name + " is JOINING\n");
-						Pane paneExp = new Pane();
+                    paneExp.setLayoutX(x);
+                    paneExp.setLayoutY(720 - y);
+                    paneExp.setStyle("-fx-border-color: blue;" + // Border color
+                            "-fx-border-width: 1px;" // Border width
+                    );
+                    paneExp.setId(name);
+                    paneExp.setMaxSize(4.99, 4.99);
+                    paneExp.setScaleX(20);
+                    paneExp.setScaleY(20);
 
-						paneExp.setLayoutX(x);
-						paneExp.setLayoutY(720 - y);
-						paneExp.setStyle("-fx-border-color: blue;" + // Border color
-								"-fx-border-width: 1px;" // Border width
-						);
-						paneExp.setId(name);
-						paneExp.setMaxSize(4.99, 4.99);
-						paneExp.setScaleX(20);
-						paneExp.setScaleY(20);
-						boolean success = children.add(paneExp);
-						if (!success)
-							return false;
-						int i = children.size() - 1;
-						if (paneExp != children.get(i))
-							i = children.indexOf(paneExp);
+                    int i = children.size() - 1;
+                    if (paneExp != children.get(i))
+                        i = children.indexOf(paneExp);
 
-						return playerList.putIfAbsent(name, new Player(i, System.nanoTime(), paneExp)) == null;
-					}
-				});
+                    return playerList.putIfAbsent(name, new Player(i, System.nanoTime(), paneExp)) == null;
+                });
 
 				Platform.runLater(t);
 				try {
@@ -228,41 +205,37 @@ public class Server extends Application {
 
 			}
 
-			public boolean updatePos(double x, double y, String name, boolean face_right)
+			public boolean updatePos(double x, double y, String name)
 					throws InterruptedException, ExecutionException {
 				//
 				if (name == null) {
 					return false;
 				}
 
-				FutureTask<Boolean> task = new FutureTask<>(new Callable<Boolean>() {
+				FutureTask<Boolean> task = new FutureTask<>(() -> {
+                    List<Node> players = ballPane.getChildren();
+                    if (players.isEmpty())
+                        return false;
+                    Player player = playerList.get(name);
+                    if (player == null) {
+                        ballPane.getChildren().removeIf(node -> node instanceof Pane && name.equals(node.getId()));
+                        return false;
+                    }
 
-					@Override
-					public Boolean call() throws Exception {
-						List<Node> players = ballPane.getChildren();
-						if (players.isEmpty())
-							return false;
-						Player player = playerList.get(name);
-						if (player == null) {
-							ballPane.getChildren().removeIf(node -> node instanceof Pane && name.equals(node.getId()));
-							return false;
-						}
+                    Node child = players.get(player.index);
+                    if (player.getNode() != child) {
+                        ballPane.getChildren().removeIf(node -> node instanceof Pane && name.equals(node.getId()));
+                        return false;
+                    }
+                    if (child.getLayoutX() != x && child.getLayoutY() != y) {
+                        child.setLayoutX(x);
+                        child.setLayoutY(720 - y);
+                        player.setTime(System.nanoTime());
+                    }
+                    System.out.print("NAME: " + name + " XY:" + x + " " + y + '\n');
 
-						Node child = players.get(player.getIndex());
-						if (player.getNode() != child) {
-							ballPane.getChildren().removeIf(node -> node instanceof Pane && name.equals(node.getId()));
-							return false;
-						}
-						if (child.getLayoutX() != x && child.getLayoutY() != y) {
-							child.setLayoutX(x);
-							child.setLayoutY(720 - y);
-							player.setTime(System.nanoTime());
-						}
-						System.out.print("NAME: " + name + " XY:" + x + " " + y + '\n');
-
-						return true;
-					}
-				});
+                    return true;
+                });
 				Platform.runLater(task);
 				return task.get();
 			}
@@ -411,7 +384,7 @@ public class Server extends Application {
 				int n = Integer.parseInt(inputCount.getText());
 
 				if (n > 0) {
-					addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle, ballPane);
+					addParticlesByDistance(n, startX, startY, endX, endY, velocity, angle);
 				}
 			} catch (NumberFormatException e) {
 				notif.setText("Invalid input\n");
@@ -429,7 +402,7 @@ public class Server extends Application {
 				final int n = Integer.parseInt(inputCount.getText());
 
 				if (n > 0) {
-					addParticlesByAngle(n, startX, startY, startAngle, endAngle, velocity, ballPane);
+					addParticlesByAngle(n, startX, startY, startAngle, endAngle, velocity);
 				}
 
 			} catch (NumberFormatException e) {
@@ -448,7 +421,7 @@ public class Server extends Application {
 				final int n = Integer.parseInt(inputCount.getText());
 
 				if (n > 0) {
-					addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle, ballPane);
+					addParticlesByVelocity(n, startX, startY, startVelocity, endVelocity, angle);
 				}
 			} catch (NumberFormatException e) {
 				notif.setText("Invalid input\n");
@@ -460,9 +433,9 @@ public class Server extends Application {
 		AnimationTimer ticer = new AnimationTimer() {
 			@Override
 			public void handle(long now) {
-				if(now % 10_000_000_000l <=0 )
+				if(now % 10_000_000_000L <=0 )
 					es.execute(() -> playerList.forEach((k, v) -> {
-						if (now - v.getTime() > 30_000_000_000l)
+						if (now - v.getTime() > 30_000_000_000L)
 							playerList.remove(k);
 					}));
 
@@ -482,12 +455,10 @@ public class Server extends Application {
 
 		};
 		ticer.start();
-		Timeline timeline = new Timeline(new KeyFrame(Duration.millis(16.66667), new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent t) {
-				ballPane.getChildren().filtered(node -> (node instanceof Circle))
-						.forEach(circle -> mov_ball((Circle) circle));
-			}
-		}));
+		Timeline timeline = new Timeline(new KeyFrame(Duration.millis(16.66667), t -> ballPane.getChildren()
+				.filtered(node -> node instanceof Circle)
+				.stream().map(c->(Circle) c)
+                .forEach(this::mov_ball)));
 		timeline.setCycleCount(Animation.INDEFINITE);
 		timeline.play();
 	}
@@ -566,9 +537,9 @@ public class Server extends Application {
 
 	}
 
-	private void drawBalls(List<Circle> circles, Pane ballPane) {
+	private void drawBalls(List<Circle> circles) {
 		if (!circles.isEmpty()) {
-			ballPane.getChildren().addAll(circles);
+			Server.ballPane.getChildren().addAll(circles);
 		}
 	}
 
@@ -596,29 +567,25 @@ public class Server extends Application {
 	}
 
 	private void addParticlesByDistance(int n, double startX, double startY, double endX, double endY, double velocity,
-			double angle, Pane ballPane) {
+			double angle) {
 		try {
-			ArrayList<Circle> balls = es.submit(new Callable<ArrayList<Circle>>() {
+			ArrayList<Circle> balls = es.submit(() -> {
+                final double dx = (n > 1) ? (endX - startX) / (n - 1) : 0,
+                        dy = (n > 1) ? (endY - startY) / (n - 1) : 0;
+                double x = startX;
+                double y = startY;
+                ArrayList<Circle> balls1 = new ArrayList<>();
+                for (int i = 0; i < n; i++) {
+                    double xin = x, yin = y;
 
-				@Override
-				public ArrayList<Circle> call() throws Exception {
-					final double dx = (n > 1) ? (endX - startX) / (n - 1) : 0,
-							dy = (n > 1) ? (endY - startY) / (n - 1) : 0;
-					double x = startX;
-					double y = startY;
-					ArrayList<Circle> balls = new ArrayList<>();
-					for (int i = 0; i < n; i++) {
-						double xin = x, yin = y;
+                    balls1.add(draw(xin, yin, Math.toRadians(angle), velocity));
+                    x += dx;
+                    y += dy;
+                }
+                return balls1;
+            }).get();
 
-						balls.add(draw(xin, yin, Math.toRadians(angle), velocity));
-						x += dx;
-						y += dy;
-					}
-					return balls;
-				}
-			}).get();
-
-			drawBalls(balls, ballPane);
+			drawBalls(balls);
 		} catch (InterruptedException | ExecutionException e) {
 
 			e.printStackTrace();
@@ -626,27 +593,24 @@ public class Server extends Application {
 
 	}
 
-	private void addParticlesByAngle(int n, double startX, double startY, double startAngle, double endAngle,
-			double velocity, Pane paneBall) {
+	@SuppressWarnings("CallToPrintStackTrace")
+    private void addParticlesByAngle(int n, double startX, double startY, double startAngle, double endAngle,
+                                     double velocity) {
 		try {
-			ArrayList<Circle> balls = es.submit(new Callable<ArrayList<Circle>>() {
+			ArrayList<Circle> balls = es.submit(() -> {
 
-				@Override
-				public ArrayList<Circle> call() throws Exception {
+                final double angleDiff = (n > 1) ? (endAngle - startAngle) / (n - 1) : 0;
+                double angle = startAngle;
+                ArrayList<Circle> balls1 = new ArrayList<>();
+                for (int i = 0; i < n; i++) {
+                    balls1.add(draw(startX, startY, Math.toRadians(angle), velocity));
+                    angle += angleDiff;
 
-					final double angleDiff = (n > 1) ? (endAngle - startAngle) / (n - 1) : 0;
-					double angle = startAngle;
-					ArrayList<Circle> balls = new ArrayList<>();
-					for (int i = 0; i < n; i++) {
-						balls.add(draw(startX, startY, Math.toRadians(angle), velocity));
-						angle += angleDiff;
+                }
+                return balls1;
+            }).get();
 
-					}
-					return balls;
-				}
-			}).get();
-
-			drawBalls(balls, ballPane);
+			drawBalls(balls);
 		} catch (InterruptedException | ExecutionException e) {
 
 			e.printStackTrace();
@@ -655,29 +619,25 @@ public class Server extends Application {
 	}
 
 	private void addParticlesByVelocity(int n, double startX, double startY, double startVelocity, double endVelocity,
-			double angle, Pane ballPane) {
+			double angle) {
 		try {
-			ArrayList<Circle> balls = es.submit(new Callable<ArrayList<Circle>>() {
+			ArrayList<Circle> balls = es.submit(() -> {
 
-				@Override
-				public ArrayList<Circle> call() throws Exception {
+                final double velocityDiff = (n > 1) ? (endVelocity - startVelocity) / (n - 1) : 0;
+                ArrayList<Circle> balls1 = new ArrayList<>();
+                double v = startVelocity;
+                for (int i = 0; i < n; i++) {
+                    double velocity = v;
 
-					final double velocityDiff = (n > 1) ? (endVelocity - startVelocity) / (n - 1) : 0;
-					ArrayList<Circle> balls = new ArrayList<>();
-					double v = startVelocity;
-					for (int i = 0; i < n; i++) {
-						double velocity = v;
+                    balls1.add(draw(startX, startY, Math.toRadians(angle), velocity));
 
-						balls.add(draw(startX, startY, Math.toRadians(angle), velocity));
+                    v += velocityDiff;
 
-						v += velocityDiff;
+                }
+                return balls1;
+            }).get();
 
-					}
-					return balls;
-				}
-			}).get();
-
-			drawBalls(balls, ballPane);
+			drawBalls(balls);
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}

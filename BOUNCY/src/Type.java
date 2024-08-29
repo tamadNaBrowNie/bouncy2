@@ -1,5 +1,5 @@
 
-public enum Type {
+enum Type {
 	BALL,EXP
 
 }
